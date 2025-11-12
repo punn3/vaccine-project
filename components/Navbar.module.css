@@ -1,0 +1,12 @@
+.NavComponents{
+    background-color: #608BC1;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    color: #ffff;
+    padding: 30px;
+    a{
+        color: white;
+        padding: 0 20px;
+    }
+}
