@@ -13,11 +13,11 @@ import styles from "./BasicInfo.module.css";
 function BasicInfo() {
   return (
     <div className={styles.accordionWrapper}>
-      <Accordion defaultActiveKey="0" className="my-5">
+      <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
         <Accordion.Item eventKey="0">
           <Accordion.Header>ข้อมูลพื้นฐาน</Accordion.Header>
           <Accordion.Body>
-            <Row>
+            <Row className="row-gap-4">
               <Col md={6}>
                 <Form>
                   <Form.Label>อายุ *</Form.Label>
@@ -39,8 +39,6 @@ function BasicInfo() {
                   </select>
                 </Form>
               </Col>
-            </Row>
-            <Row className="mt-4">
               <Col md={6}>
                 <Form className={styles.pregnantbox}>
                   <label className="mb-2">การตั้งครรภ์ *</label>
@@ -49,9 +47,13 @@ function BasicInfo() {
                     name="pregnant"
                     className={styles.pregnantselect}
                   >
-                    <option>ไม่ตั้งครรภ์</option>
-                    <option value="">ตั้งครรภ์</option>
-                    <option value="">ให้นมบุตร</option>
+                    <option value="non-prenant">ไม่ตั้งครรภ์</option>
+                    <option value="lactating">ให้นมบุตร</option>
+                    <optgroup label="ตั้งครรภ์">
+                      <option value="weeks_12_14">12-14 สัปดาห์</option>
+                      <option value="weeks_14_27">14-27 สัปดาห์</option>
+                      <option value="weeks_27_36">27-36 สัปดาห์</option>
+                    </optgroup>
                   </select>
                 </Form>
               </Col>
@@ -70,48 +72,174 @@ function BasicInfo() {
                   ))}
                 </Form>
               </Col>
+
             </Row>
           </Accordion.Body>
         </Accordion.Item>
         <Accordion.Item eventKey="1">
           <Accordion.Header>การเดินทาง</Accordion.Header>
           <Accordion.Body>
-            <Row>
-              <Col md={6}>
-              <Form>
-                  {["radio"].map((type) => (
-                    <div key={`inline-${type}`} className={styles.travel}>
+            <Form>
+              {["radio"].map((type) => (
+                <div key={`inline-${type}`}>
+                  <Row>
+                    <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
                       <Form.Check
-                      inline
-                        label="บุคลากรทางการแพทย์"
+                        inline
+                        label="มีความประสงค์จะเดินทาง"
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
                       />
+                      <select>
+                        <option>เลือกวัคซีนที่ต้องการ</option>
+                        <option value="typhoid">วัคซีนไทฟอยด์</option>
+                        <option value="cholera">วัคซีนอหิวาตกโรค</option>
+                        <option value="Rabies">วัคซีนพิษสุนัขบ้า</option>
+                        <option value="Hepatitis A">
+                          วัคซีนไวรัสตับอักเสบเอ
+                        </option>
+                        <option value="Meningococcal">
+                          วัคซีนไข้กาฬหลังแอ่น
+                        </option>
+                        <option value="tick-borne-encephalitis">
+                          วัคซีนไขสมองอักเสบจากเห็บ
+                        </option>
+                      </select>
+                    </Col>
+                    <Col md={6}>
                       <Form.Check
-                      inline
-                        label="บุคลากรทางการแพทย์"
+                        inline
+                        label="ไม่มี"
                         name="group1"
                         type={type}
                         id={`inline-${type}-2`}
+                        defaultChecked
                       />
-                    </div>
-                  ))}
-                </Form>
-                </Col>
-            </Row>
+                    </Col>
+                  </Row>
+                </div>
+              ))}
+            </Form>
           </Accordion.Body>
         </Accordion.Item>
         <Accordion.Item eventKey="2">
           <Accordion.Header>โรคประจำตัว</Accordion.Header>
           <Accordion.Body>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
-            eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
-            ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut
-            aliquip ex ea commodo consequat. Duis aute irure dolor in
-            reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla
-            pariatur. Excepteur sint occaecat cupidatat non proident, sunt in
-            culpa qui officia deserunt mollit anim id est laborum.
+            <Row className="row-gap-4">
+              <Col md={6} >
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Heart disease, diabetes or chronic lung disease"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Chronic kidney disease"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                      <select>
+                        <option value="state1">ระยะที่ 1</option>
+                        <option value="state2">ระยะที่ 2</option>
+                        <option value="state3">ระยะที่ 3</option>
+                        <option value="state4">ระยะที่ 4</option>
+                        <option value="state5">ระยะที่ 5</option>
+                      </select>
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Chronic liver disease"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Asplenia"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="CD4 < 200"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Immunocom promised"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="Post-tramised"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
+            </Row>
           </Accordion.Body>
         </Accordion.Item>
         <Accordion.Item eventKey="3">
@@ -139,9 +267,6 @@ function BasicInfo() {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
-      <Button variant="primary" type="submit">
-        Submit
-      </Button>
     </div>
   );
 }
