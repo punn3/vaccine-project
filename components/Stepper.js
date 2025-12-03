@@ -1,32 +1,40 @@
 "use client";
 import React, { useState } from "react";
-import styles from './Stepper.module.css';
+import styles from '../styles/Stepper.module.css';
 import { Container } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
+import CheckInfomation from "./CheckInfo";
 
 const MyStepperForm = () => {
     const [currentStep, setCurrentStep] = useState(0);
+    // const [formData, setFormData] = useState({});  //ถ้าต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
 
+    // 1. ผูก Component เข้ากับ steps ตรงนี้
     const steps = [
         {
             icon: "📄",
             label: "กรอกข้อมูล",
             description: "กรอกข้อมูลพื้นฐาน",
+            content: <BasicInfo /> // <--- ใส่ Component ตรงนี้
+            // content: <BasicInfo data={formData} setData={setFormData} />  //ต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
         },
         {
             icon: "📋",
             label: "ตรวจสอบข้อมูล",
-            description: "ตรวจสอบความถูกต้อง",
+            description: "กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนการดำเนินต่อ",
+            content: <CheckInfomation></CheckInfomation> // <--- ตัวอย่าง
         },
         {
             icon: "💉",
             label: "ผลวิเคราะห์วัคซีน",
-            description: "รับผลการตรวจ",
+            description: "ผลการวิเคราะห์วัคซีน",
+            content: <div>หน้าผลลัพธ์ (ใส่ Component ที่นี่)</div>
         },
         {
             icon: "ℹ️",
             label: "รายละเอียดวัคซีนที่เลือก",
-            description: "ข้อมูลวัคซีน",
+            description: "รายละเอียดวัคซีนที่เลือก",
+            content: <div>หน้าดีเทลวัคซีน (ใส่ Component ที่นี่)</div>
         },
     ];
 
@@ -41,63 +49,60 @@ const MyStepperForm = () => {
                             style={{ width: `${(currentStep / (steps.length - 1)) * 100}%` }}
                         />
                     </div>
-                    {/* Steps */}
+                    {/* Steps Navigation */}
                     {steps.map((step, index) => (
                         <div key={index} className={styles.step_item}>
-                            {/* Circle Icon */}
                             <div
-                                className={`${styles.step_circle} ${index <= currentStep ? "active" : "inactive"
-                                    }`}
+                                className={`${styles.step_circle} ${index <= currentStep ? styles.active : styles.inactive}`}
                                 onClick={() => setCurrentStep(index)}
                             >
                                 {step.icon}
                             </div>
-
-                            {/* Label */}
-                            <div
-                                className={`${styles.step_label} ${index <= currentStep ? "active" : "inactive"
-                                    }`}
-                            >
+                            <div className={`${styles.step_label} ${index <= currentStep ? styles.active : styles.inactive}`}>
                                 {step.label}
                             </div>
                         </div>
                     ))}
                 </div>
+            </div>
+
+            {/* Content Area */}
+            <div>
+                {/* <div className={styles.content_title}>{steps[currentStep].label}</div> */}
+                <div className={styles.content_description }>
+                    {steps[currentStep].description}
+                </div>
+                
+                {/* 2. เรียกใช้ content จาก array ตาม step ปัจจุบัน */}
+                <div className="mt-4"> 
+                    {steps[currentStep].content}
+                </div>
 
             </div>
-                {/* Content Area */}
-                {/* <div className={styles.content_card}>
-                </div> */}
-                <div>
-                    <div className={styles.content_title}>{steps[currentStep].label}</div>
-                    <div className={styles.content_description}>
-                        {steps[currentStep].description}
-                    </div>
-                    <BasicInfo></BasicInfo>
-                </div>
-                {/* Navigation Buttons */}
-                <div className={styles.nav_buttons}>
-                    <button
-                        className={`btn ${styles.btn_outline}`}
-                        onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
-                        disabled={currentStep === 0}
-                    >
-                        ← ย้อนกลับ
-                    </button>
-                    <div className={styles.step_counter}>
-                        ขั้นตอนที่ {currentStep + 1} จาก {steps.length}
-                    </div>
 
-                    <button
-                        className={`btn ${styles.btn_primary}`}
-                        onClick={() =>
-                            setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
-                        }
-                        disabled={currentStep === steps.length - 1}
-                    >
-                        {currentStep === steps.length - 1 ? "เริ่มใหม่" : "ถัดไป →"}
-                    </button>
+            {/* Navigation Buttons */}
+            <div className={styles.nav_buttons}>
+                <button
+                    className={`btn ${styles.btn_outline}`}
+                    onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                    disabled={currentStep === 0}
+                >
+                    ย้อนกลับ
+                </button>
+                <div className={styles.step_counter}>
+                    ขั้นตอนที่ {currentStep + 1} จาก {steps.length}
                 </div>
+
+                <button
+                    className={`btn ${styles.btn_primary}`}
+                    onClick={() =>
+                        setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
+                    }
+                    // ถ้าเป็นหน้าสุดท้าย อาจจะเปลี่ยนเป็นปุ่ม Submit หรือ Reset
+                >
+                    {currentStep === steps.length - 1 ? "เสร็จสิ้น" : "ถัดไป "}
+                </button>
+            </div>
         </Container>
     );
 };

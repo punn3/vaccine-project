@@ -1,7 +1,8 @@
 "use client";
 
 import { Container, Nav, Navbar } from "react-bootstrap";
-import styles from "./Navbar.module.css";
+import Link from "next/link";
+import styles from "../styles/Navbar.module.css";
 
 function NavbarBox() {
     return (
@@ -10,9 +11,9 @@ function NavbarBox() {
                 <h1>Navvv</h1>
             </Navbar.Brand>
             <Nav className={styles.navitem}>
-                <a href="#home">Home</a>
-                <a href="#features">Features</a>
-                <a href="#pricing">Pricing</a>
+                <Nav.Link as={Link} href="/#stepper">กรอกข้อมูล</Nav.Link>
+                <Nav.Link as={Link} href="/vaccines">รายการวัคซีน</Nav.Link>
+                <Nav.Link as={Link} href="/admin">แอดมิน</Nav.Link>
             </Nav>
         </div>
     );

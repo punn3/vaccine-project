@@ -8,12 +8,13 @@ import {
   InputGroup,
   FloatingLabel,
 } from "react-bootstrap";
-import styles from "./BasicInfo.module.css";
+import styles from "../styles/BasicInfo.module.css";
 
 function BasicInfo() {
   return (
     <div className={styles.accordionWrapper}>
       <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
+        {/* ข้อมูลพื้นฐาน  */}
         <Accordion.Item eventKey="0">
           <Accordion.Header>ข้อมูลพื้นฐาน</Accordion.Header>
           <Accordion.Body>
@@ -72,10 +73,10 @@ function BasicInfo() {
                   ))}
                 </Form>
               </Col>
-
             </Row>
           </Accordion.Body>
         </Accordion.Item>
+        {/* การเดินทาง */}
         <Accordion.Item eventKey="1">
           <Accordion.Header>การเดินทาง</Accordion.Header>
           <Accordion.Body>
@@ -123,11 +124,12 @@ function BasicInfo() {
             </Form>
           </Accordion.Body>
         </Accordion.Item>
+        {/* โรคประจำตัว */}
         <Accordion.Item eventKey="2">
           <Accordion.Header>โรคประจำตัว</Accordion.Header>
           <Accordion.Body>
             <Row className="row-gap-4">
-              <Col md={6} >
+              <Col md={6}>
                 <Form>
                   {["checkbox"].map((type) => (
                     <div key={`inline-${type}`}>
@@ -239,11 +241,27 @@ function BasicInfo() {
                   ))}
                 </Form>
               </Col>
+              <Col md={6} className="align-content-center">
+                <Form>
+                  {["checkbox"].map((type) => (
+                    <div key={`inline-${type}`}>
+                      <Form.Check
+                        inline
+                        label="ไม่มี"
+                        name="group1"
+                        type={type}
+                        id={`inline-${type}-1`}
+                      />
+                    </div>
+                  ))}
+                </Form>
+              </Col>
             </Row>
           </Accordion.Body>
         </Accordion.Item>
+        {/* การรับวัคซีน */}
         <Accordion.Item eventKey="3">
-          <Accordion.Header>การฉีดวัคซีน</Accordion.Header>
+          <Accordion.Header>การรับวัคซีน</Accordion.Header>
           <Accordion.Body>
             Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do
             eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim
@@ -254,6 +272,7 @@ function BasicInfo() {
             culpa qui officia deserunt mollit anim id est laborum.
           </Accordion.Body>
         </Accordion.Item>
+        {/* ประวัติการแพ้ */}
         <Accordion.Item eventKey="4">
           <Accordion.Header>ประวัติการแพ้อาหาร ยา และวัคซีน</Accordion.Header>
           <Accordion.Body>
