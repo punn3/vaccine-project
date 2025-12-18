@@ -9,8 +9,57 @@ import {
   FloatingLabel,
 } from "react-bootstrap";
 import styles from "../styles/BasicInfo.module.css";
+import { useState, useEffect } from "react";
 
 function BasicInfo() {
+  const [formData, setFormData] = useState({
+    basic: {
+      age: "",
+      gender: "",
+      pregnant: "",
+      medical: "",
+    },
+    travel: {
+      traval_selected: "",
+      traval_selected_none: "",
+    },
+    disease: {
+      heart_disease: "",
+      chronic_kidney: "",
+      chronic_liver: "",
+      asplenia: "",
+      cd4: "",
+      immunocon: "",
+      post_tramised: "",
+      disease_selected_none: "",
+    },
+  });
+
+  //โหลดข้อมูล
+  useEffect(() => {
+    const savedData = localStorage.getItem("vaccineFormData");
+    if (savedData) {
+      setFormData(JSON.parse(savedData));
+    }
+  }, []);
+
+  //เช็คข้อมูลการเปลี่ยนแปลง
+  useEffect(() => {
+    localStorage.setItem("vaccineFormData", JSON.stringify(formData));
+  }, [formData]);
+
+  const handleChange = (section, e) => {
+    const { name, value, type, checked } = e.target;
+
+    setFormData((prev) => ({
+      ...prev,
+      [section]: {
+        ...prev[section],
+        [name]: type === "checkbox" ? (checked ? value : "") : value,
+      },
+    }));
+  };
+
   return (
     <div className={styles.accordionWrapper}>
       <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
@@ -22,7 +71,13 @@ function BasicInfo() {
               <Col md={6}>
                 <Form>
                   <Form.Label>อายุ *</Form.Label>
-                  <Form.Control placeholder="ปี" />
+                  <Form.Control
+                    name="age"
+                    type="number"
+                    placeholder="ปี"
+                    value={formData.basic.age}
+                    onChange={(e) => handleChange("basic", e)}
+                  />
                 </Form>
               </Col>
               <Col md={6}>
@@ -32,11 +87,13 @@ function BasicInfo() {
                     id="gender"
                     name="gender"
                     className={styles.genderselect}
+                    value={formData.basic.gender}
+                    onChange={(e) => handleChange("basic", e)}
                   >
                     <option>เลือกเพศ</option>
                     <option value="male">ชาย</option>
                     <option value="female">หญิง</option>
-                    <option value="">ไม่ระบุ</option>
+                    <option value="non">ไม่ระบุ</option>
                   </select>
                 </Form>
               </Col>
@@ -46,7 +103,9 @@ function BasicInfo() {
                   <select
                     id="pregnant"
                     name="pregnant"
+                    value={formData.basic.pregnant}
                     className={styles.pregnantselect}
+                    onChange={(e) => handleChange("basic", e)}
                   >
                     <option value="non-prenant">ไม่ตั้งครรภ์</option>
                     <option value="lactating">ให้นมบุตร</option>
@@ -60,17 +119,15 @@ function BasicInfo() {
               </Col>
               <Col md={6} className="align-content-center">
                 <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="บุคลากรทางการแพทย์"
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
+                  <Form.Check
+                    inline
+                    type="checkbox"
+                    label="บุคลากรทางการแพทย์"
+                    name="medical"
+                    value="เป็น"
+                    checked={formData.basic.medical !== ""}
+                    onChange={(e) => handleChange("basic", e)}
+                  />
                 </Form>
               </Col>
             </Row>
@@ -88,6 +145,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="มีความประสงค์จะเดินทาง"
+                        value={formData.travel.traval_selected}
+                        onChange={(e) => handleChange("travel", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -112,6 +171,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="ไม่มี"
+                        value={formData.travel.traval_selected_none}
+                        onChange={(e) => handleChange("travel", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-2`}
@@ -136,6 +197,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Heart disease, diabetes or chronic lung disease"
+                        value={formData.disease.heart_disease}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -151,6 +214,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Chronic kidney disease"
+                        value={formData.disease.chronic_kidney}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -173,6 +238,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Chronic liver disease"
+                        value={formData.disease.chronic_liver}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -188,6 +255,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Asplenia"
+                        value={formData.disease.asplenia}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -203,6 +272,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="CD4 < 200"
+                        value={formData.disease.cd4}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -218,6 +289,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Immunocom promised"
+                        value={formData.disease.immunocon}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -233,6 +306,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="Post-tramised"
+                        value={formData.disease.post_tramised}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -248,6 +323,8 @@ function BasicInfo() {
                       <Form.Check
                         inline
                         label="ไม่มี"
+                        value={formData.disease.disease_selected_none}
+                        onChange={(e) => handleChange("disease", e)}
                         name="group1"
                         type={type}
                         id={`inline-${type}-1`}
@@ -286,6 +363,8 @@ function BasicInfo() {
           </Accordion.Body>
         </Accordion.Item>
       </Accordion>
+
+      {/* <button onClick={() => console.log(formData)}>click</button> */}
     </div>
   );
 }

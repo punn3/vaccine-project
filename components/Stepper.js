@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import styles from '../styles/Stepper.module.css';
+import styles from "../styles/Stepper.module.css";
 import { Container } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
 import CheckInfomation from "./CheckInfo";
@@ -15,28 +15,40 @@ const MyStepperForm = () => {
             icon: "📄",
             label: "กรอกข้อมูล",
             description: "กรอกข้อมูลพื้นฐาน",
-            content: <BasicInfo /> // <--- ใส่ Component ตรงนี้
+            content: <BasicInfo />, // <--- ใส่ Component ตรงนี้
             // content: <BasicInfo data={formData} setData={setFormData} />  //ต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
         },
         {
             icon: "📋",
             label: "ตรวจสอบข้อมูล",
             description: "กรุณาตรวจสอบความถูกต้องของข้อมูลก่อนการดำเนินต่อ",
-            content: <CheckInfomation></CheckInfomation> // <--- ตัวอย่าง
+            content: <CheckInfomation></CheckInfomation>,
         },
         {
             icon: "💉",
             label: "ผลวิเคราะห์วัคซีน",
             description: "ผลการวิเคราะห์วัคซีน",
-            content: <div>หน้าผลลัพธ์ (ใส่ Component ที่นี่)</div>
+            content: <div>หน้าผลลัพธ์ (ใส่ Component ที่นี่)</div>,
         },
         {
             icon: "ℹ️",
             label: "รายละเอียดวัคซีนที่เลือก",
             description: "รายละเอียดวัคซีนที่เลือก",
-            content: <div>หน้าดีเทลวัคซีน (ใส่ Component ที่นี่)</div>
+            content: <div>หน้าดีเทลวัคซีน (ใส่ Component ที่นี่)</div>,
         },
     ];
+
+    const handleNext = () => {
+        if (currentStep === steps.length - 1) {
+            // ขั้นตอนสุดท้าย (เสร็จสิ้น)
+            console.log("Submitting form...");
+            // localStorage.removeItem("vaccineFormData"); // เลือกเอาว่าจะลบเลยไหม
+            // logic การ redirect หรือส่ง api
+        } else {
+            // ไปหน้าถัดไป
+            setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+        }
+    };
 
     return (
         <Container>
@@ -53,12 +65,16 @@ const MyStepperForm = () => {
                     {steps.map((step, index) => (
                         <div key={index} className={styles.step_item}>
                             <div
-                                className={`${styles.step_circle} ${index <= currentStep ? styles.active : styles.inactive}`}
+                                className={`${styles.step_circle} ${index <= currentStep ? styles.active : styles.inactive
+                                    }`}
                                 onClick={() => setCurrentStep(index)}
                             >
                                 {step.icon}
                             </div>
-                            <div className={`${styles.step_label} ${index <= currentStep ? styles.active : styles.inactive}`}>
+                            <div
+                                className={`${styles.step_label} ${index <= currentStep ? styles.active : styles.inactive
+                                    }`}
+                            >
                                 {step.label}
                             </div>
                         </div>
@@ -69,15 +85,12 @@ const MyStepperForm = () => {
             {/* Content Area */}
             <div>
                 {/* <div className={styles.content_title}>{steps[currentStep].label}</div> */}
-                <div className={styles.content_description }>
+                <div className={styles.content_description}>
                     {steps[currentStep].description}
                 </div>
-                
-                {/* 2. เรียกใช้ content จาก array ตาม step ปัจจุบัน */}
-                <div className="mt-4"> 
-                    {steps[currentStep].content}
-                </div>
 
+                {/* 2. เรียกใช้ content จาก array ตาม step ปัจจุบัน */}
+                <div className="mt-4">{steps[currentStep].content}</div>
             </div>
 
             {/* Navigation Buttons */}
@@ -95,11 +108,8 @@ const MyStepperForm = () => {
 
                 <button
                     className={`btn ${styles.btn_primary}`}
-                    onClick={() =>
-                        setCurrentStep(Math.min(steps.length - 1, currentStep + 1))
-                    }
-                    // ถ้าเป็นหน้าสุดท้าย อาจจะเปลี่ยนเป็นปุ่ม Submit หรือ Reset
-                >
+                    onClick={handleNext}>
+    
                     {currentStep === steps.length - 1 ? "เสร็จสิ้น" : "ถัดไป "}
                 </button>
             </div>
