@@ -20,8 +20,8 @@ function BasicInfo() {
       medical: "",
     },
     travel: {
-      traval_selected: "",
-      traval_selected_none: "",
+      travel_status: "",
+      travel_selected: "none",
     },
     disease: {
       heart_disease: "",
@@ -91,9 +91,9 @@ function BasicInfo() {
                     onChange={(e) => handleChange("basic", e)}
                   >
                     <option>เลือกเพศ</option>
-                    <option value="male">ชาย</option>
-                    <option value="female">หญิง</option>
-                    <option value="non">ไม่ระบุ</option>
+                    <option value="ชาย">ชาย</option>
+                    <option value="หญิง">หญิง</option>
+                    <option value="ไม่ระบุ">ไม่ระบุ</option>
                   </select>
                 </Form>
               </Col>
@@ -106,13 +106,15 @@ function BasicInfo() {
                     value={formData.basic.pregnant}
                     className={styles.pregnantselect}
                     onChange={(e) => handleChange("basic", e)}
+                    
                   >
-                    <option value="non-prenant">ไม่ตั้งครรภ์</option>
-                    <option value="lactating">ให้นมบุตร</option>
+                    <option value="">กรุณาระบุข้อมูล</option>
+                    <option value="ไม่ตั้งครรภ์">ไม่ตั้งครรภ์</option>
+                    <option value="ให้นมบุตร">ให้นมบุตร</option>
                     <optgroup label="ตั้งครรภ์">
-                      <option value="weeks_12_14">12-14 สัปดาห์</option>
-                      <option value="weeks_14_27">14-27 สัปดาห์</option>
-                      <option value="weeks_27_36">27-36 สัปดาห์</option>
+                      <option value="12-14 สัปดาห์">12-14 สัปดาห์</option>
+                      <option value="14-27 สัปดาห์">14-27 สัปดาห์</option>
+                      <option value="27-36 สัปดาห์">27-36 สัปดาห์</option>
                     </optgroup>
                   </select>
                 </Form>
@@ -138,50 +140,53 @@ function BasicInfo() {
           <Accordion.Header>การเดินทาง</Accordion.Header>
           <Accordion.Body>
             <Form>
-              {["radio"].map((type) => (
-                <div key={`inline-${type}`}>
-                  <Row>
-                    <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
-                      <Form.Check
-                        inline
-                        label="มีความประสงค์จะเดินทาง"
-                        value={formData.travel.traval_selected}
-                        onChange={(e) => handleChange("travel", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                      <select>
-                        <option>เลือกวัคซีนที่ต้องการ</option>
-                        <option value="typhoid">วัคซีนไทฟอยด์</option>
-                        <option value="cholera">วัคซีนอหิวาตกโรค</option>
-                        <option value="Rabies">วัคซีนพิษสุนัขบ้า</option>
-                        <option value="Hepatitis A">
-                          วัคซีนไวรัสตับอักเสบเอ
-                        </option>
-                        <option value="Meningococcal">
-                          วัคซีนไข้กาฬหลังแอ่น
-                        </option>
-                        <option value="tick-borne-encephalitis">
-                          วัคซีนไขสมองอักเสบจากเห็บ
-                        </option>
-                      </select>
-                    </Col>
-                    <Col md={6}>
-                      <Form.Check
-                        inline
-                        label="ไม่มี"
-                        value={formData.travel.traval_selected_none}
-                        onChange={(e) => handleChange("travel", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-2`}
-                        defaultChecked
-                      />
-                    </Col>
-                  </Row>
-                </div>
-              ))}
+              <Row>
+                <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
+                  <Form.Check
+                    inline
+                    label="มีความประสงค์จะเดินทาง"
+                    value="travel"
+                    name="travel_status"
+                    type="radio"
+                    id="travel-yes"
+                    onChange={(e) => handleChange("travel", e)}
+                    checked={formData.travel.travel_status === "travel"}
+                  />
+                  <select
+                    name="travel_selected"
+                    value={formData.travel.travel_selected}
+                    onChange={(e) => handleChange("travel", e)}
+                    disabled={formData.travel.travel_status !== "travel"}
+                  >
+                    <option>เลือกวัคซีนที่ต้องการ</option>
+                    <option value="วัคซีนไทฟอยด์">วัคซีนไทฟอยด์</option>
+                    <option value="วัคซีนอหิวาตกโรค">วัคซีนอหิวาตกโรค</option>
+                    <option value="วัคซีนพิษสุนัขบ้า">วัคซีนพิษสุนัขบ้า</option>
+                    <option value="วัคซีนไวรัสตับอักเสบเอ">
+                      วัคซีนไวรัสตับอักเสบเอ
+                    </option>
+                    <option value="วัคซีนไข้กาฬหลังแอ่น">
+                      วัคซีนไข้กาฬหลังแอ่น
+                    </option>
+                    <option value="วัคซีนไขสมองอักเสบจากเห็บ">
+                      วัคซีนไขสมองอักเสบจากเห็บ
+                    </option>
+                  </select>
+                </Col>
+                <Col md={6}>
+                  <Form.Check
+                    inline
+                    label="ไม่มี"
+                    value="none"
+                    name="travel_status"
+                    type="radio"
+                    id="travel-no"
+                    checked={formData.travel.travel_status === "none"}
+                    onChange={(e) => handleChange("travel", e)}
+                    
+                  />
+                </Col>
+              </Row>
             </Form>
           </Accordion.Body>
         </Accordion.Item>
@@ -191,44 +196,34 @@ function BasicInfo() {
           <Accordion.Body>
             <Row className="row-gap-4">
               <Col md={6}>
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="Heart disease, diabetes or chronic lung disease"
-                        value={formData.disease.heart_disease}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                  <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Heart disease, diabetes or chronic lung disease"
+                  name="heart_disease" 
+                  value="Heart disease, diabetes or chronic lung disease" 
+                  checked={formData.disease.heart_disease !== ""} 
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
               <Col md={6} className="align-content-center">
                 <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="Chronic kidney disease"
-                        value={formData.disease.chronic_kidney}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                      <select>
-                        <option value="state1">ระยะที่ 1</option>
-                        <option value="state2">ระยะที่ 2</option>
-                        <option value="state3">ระยะที่ 3</option>
-                        <option value="state4">ระยะที่ 4</option>
-                        <option value="state5">ระยะที่ 5</option>
-                      </select>
-                    </div>
-                  ))}
+                  <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Chronic kidney disease"
+                  name="chronic_kidney"
+                  value="Chronic kidney disease"
+                  checked={formData.disease.chronic_kidney !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
+                <select className="form-select mt-1" disabled={formData.disease.chronic_kidney === ""}>
+                  <option value="state1">ระยะที่ 1</option>
+                  <option value="state2">ระยะที่ 2</option>
+                  <option value="state3">ระยะที่ 3</option>
+                  <option value="state4">ระยะที่ 4</option>
+                  <option value="state5">ระยะที่ 5</option>
+                </select>
                 </Form>
               </Col>
               <Col md={6} className="align-content-center">
@@ -249,89 +244,70 @@ function BasicInfo() {
                 </Form>
               </Col>
               <Col md={6} className="align-content-center">
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="Asplenia"
-                        value={formData.disease.asplenia}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Chronic liver disease"
+                  name="chronic_liver"
+                  value="Chronic liver disease"
+                  checked={formData.disease.chronic_liver !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
               <Col md={6} className="align-content-center">
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="CD4 < 200"
-                        value={formData.disease.cd4}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Asplenia"
+                  name="asplenia"
+                  value="Asplenia"
+                  checked={formData.disease.asplenia !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
               <Col md={6} className="align-content-center">
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="Immunocom promised"
-                        value={formData.disease.immunocon}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="CD4 < 200"
+                  name="cd4"
+                  value="CD4 < 200"
+                  checked={formData.disease.cd4 !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
               <Col md={6} className="align-content-center">
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="Post-tramised"
-                        value={formData.disease.post_tramised}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Immunocompromised"
+                  name="immunocon"
+                  value="Immunocompromised"
+                  checked={formData.disease.immunocon !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
               <Col md={6} className="align-content-center">
-                <Form>
-                  {["checkbox"].map((type) => (
-                    <div key={`inline-${type}`}>
-                      <Form.Check
-                        inline
-                        label="ไม่มี"
-                        value={formData.disease.disease_selected_none}
-                        onChange={(e) => handleChange("disease", e)}
-                        name="group1"
-                        type={type}
-                        id={`inline-${type}-1`}
-                      />
-                    </div>
-                  ))}
-                </Form>
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="Post-tramised"
+                  name="post_tramised"
+                  value="Post-tramised"
+                  checked={formData.disease.post_tramised !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
+              </Col>
+              <Col md={6} className="align-content-center">
+                <Form.Check
+                  inline
+                  type="checkbox"
+                  label="ไม่มี"
+                  name="disease_selected_none"
+                  value="ไม่มีโรคประจำตัว"
+                  checked={formData.disease.disease_selected_none !== ""}
+                  onChange={(e) => handleChange("disease", e)}
+                />
               </Col>
             </Row>
           </Accordion.Body>
