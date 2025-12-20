@@ -32,6 +32,7 @@ function BasicInfo() {
       immunocon: "",
       post_tramised: "",
       disease_selected_none: "",
+      disease_selected: "",
     },
   });
 
@@ -161,7 +162,7 @@ function BasicInfo() {
               <Col md={6}>
                 <Form className={styles.genderbox}>
                   <label className="mb-2">เพศสภาพ *</label>
-                  <select
+                  <Form.Select
                     id="gender"
                     name="gender"
                     className={styles.genderselect}
@@ -172,19 +173,19 @@ function BasicInfo() {
                     <option value="ชาย">ชาย</option>
                     <option value="หญิง">หญิง</option>
                     <option value="ไม่ระบุ">ไม่ระบุ</option>
-                  </select>
+                  </Form.Select>
                 </Form>
               </Col>
               <Col md={6}>
                 <Form className={styles.pregnantbox}>
                   <label className="mb-2">การตั้งครรภ์ *</label>
-                  <select
+                  <Form.Select
                     id="pregnant"
                     name="pregnant"
                     value={formData.basic.pregnant}
                     className={styles.pregnantselect}
                     onChange={(e) => handleChange("basic", e)}
-                    
+
                   >
                     <option value="">กรุณาระบุข้อมูล</option>
                     <option value="ไม่ตั้งครรภ์">ไม่ตั้งครรภ์</option>
@@ -194,7 +195,7 @@ function BasicInfo() {
                       <option value="14-27 สัปดาห์">14-27 สัปดาห์</option>
                       <option value="27-36 สัปดาห์">27-36 สัปดาห์</option>
                     </optgroup>
-                  </select>
+                  </Form.Select>
                 </Form>
               </Col>
               <Col md={6} className="align-content-center">
@@ -230,7 +231,7 @@ function BasicInfo() {
                     onChange={(e) => handleChange("travel", e)}
                     checked={formData.travel.travel_status === "travel"}
                   />
-                  <select
+                  <Form.Select
                     name="travel_selected"
                     value={formData.travel.travel_selected}
                     onChange={(e) => handleChange("travel", e)}
@@ -249,7 +250,7 @@ function BasicInfo() {
                     <option value="วัคซีนไขสมองอักเสบจากเห็บ">
                       วัคซีนไขสมองอักเสบจากเห็บ
                     </option>
-                  </select>
+                  </Form.Select>
                 </Col>
                 <Col md={6}>
                   <Form.Check
@@ -261,7 +262,7 @@ function BasicInfo() {
                     id="travel-no"
                     checked={formData.travel.travel_status === "none"}
                     onChange={(e) => handleChange("travel", e)}
-                    
+
                   />
                 </Col>
               </Row>
@@ -274,34 +275,39 @@ function BasicInfo() {
           <Accordion.Body>
             <Row className="row-gap-4">
               <Col md={6}>
-                  <Form.Check
+                <Form.Check
                   inline
                   type="checkbox"
                   label="Heart disease, diabetes or chronic lung disease"
-                  name="heart_disease" 
-                  value="Heart disease, diabetes or chronic lung disease" 
-                  checked={formData.disease.heart_disease !== ""} 
+                  name="heart_disease"
+                  value="Heart disease, diabetes or chronic lung disease"
+                  checked={formData.disease.heart_disease !== ""}
                   onChange={(e) => handleChange("disease", e)}
                 />
               </Col>
               <Col md={6} className="align-content-center">
                 <Form>
                   <Form.Check
-                  inline
-                  type="checkbox"
-                  label="Chronic kidney disease"
-                  name="chronic_kidney"
-                  value="Chronic kidney disease"
-                  checked={formData.disease.chronic_kidney !== ""}
+                    inline
+                    type="checkbox"
+                    label="Chronic kidney disease"
+                    name="chronic_kidney"
+                    value="Chronic kidney disease"
+                    checked={formData.disease.chronic_kidney !== ""}
+                    onChange={(e) => handleChange("disease", e)}
+                  />
+                  <Form.Select className="form-select mt-1" 
+                  name="disease_selected"
+                  value={formData.disease.disease_selected}
                   onChange={(e) => handleChange("disease", e)}
-                />
-                <select className="form-select mt-1" disabled={formData.disease.chronic_kidney === ""}>
-                  <option value="state1">ระยะที่ 1</option>
-                  <option value="state2">ระยะที่ 2</option>
-                  <option value="state3">ระยะที่ 3</option>
-                  <option value="state4">ระยะที่ 4</option>
-                  <option value="state5">ระยะที่ 5</option>
-                </select>
+                  disabled={formData.disease.chronic_kidney === ""}>
+                    <option value="">ระยะโรคไต</option>
+                    <option value="ระยะที่ 1">ระยะที่ 1</option>
+                    <option value="ระยะที่ 2">ระยะที่ 2</option>
+                    <option value="ระยะที่ 3">ระยะที่ 3</option>
+                    <option value="ระยะที่ 4">ระยะที่ 4</option>
+                    <option value="ระยะที่ 5">ระยะที่ 5</option>
+                  </Form.Select>
                 </Form>
               </Col>
               <Col md={6} className="align-content-center">
