@@ -5,6 +5,7 @@ import styles from "../styles/CheckInfo.module.css";
 
 function CheckInfomation() {
     const [data, setData] = useState(null);
+    const [selectedVaccines, setSelectedVaccines] = useState([]);
 
     useEffect(() => {
         // ดึงข้อมูลจาก LocalStorage

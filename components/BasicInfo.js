@@ -34,6 +34,10 @@ function BasicInfo() {
       disease_selected_none: "",
       disease_selected: "",
     },
+    // vaccines: {
+    //   selected: [],
+    //   received: [{ vaccine: "", date: "" }]
+    // }
   });
 
   const [selectedVaccines, setSelectedVaccines] = useState([""]);
@@ -296,18 +300,13 @@ function BasicInfo() {
                     checked={formData.disease.chronic_kidney !== ""}
                     onChange={(e) => handleChange("disease", e)}
                   />
-                  <Form.Select className="form-select mt-1" 
-                  name="disease_selected"
-                  value={formData.disease.disease_selected}
-                  onChange={(e) => handleChange("disease", e)}
-                  disabled={formData.disease.chronic_kidney === ""}>
-                    <option value="">ระยะโรคไต</option>
-                    <option value="ระยะที่ 1">ระยะที่ 1</option>
-                    <option value="ระยะที่ 2">ระยะที่ 2</option>
-                    <option value="ระยะที่ 3">ระยะที่ 3</option>
-                    <option value="ระยะที่ 4">ระยะที่ 4</option>
-                    <option value="ระยะที่ 5">ระยะที่ 5</option>
-                  </Form.Select>
+                  <select className="form-select mt-1" disabled={formData.disease.chronic_kidney === ""}>
+                    <option value="state1">ระยะที่ 1</option>
+                    <option value="state2">ระยะที่ 2</option>
+                    <option value="state3">ระยะที่ 3</option>
+                    <option value="state4">ระยะที่ 4</option>
+                    <option value="state5">ระยะที่ 5</option>
+                  </select>
                 </Form>
               </Col>
               <Col md={6} className="align-content-center">
