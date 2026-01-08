@@ -12,8 +12,8 @@ function NavbarBox() {
             </Navbar.Brand>
             <Nav className={styles.navitem}>
                 <Nav.Link as={Link} href="/#stepper">กรอกข้อมูล</Nav.Link>
-                <Nav.Link as={Link} href="/vaccines">รายการวัคซีน</Nav.Link>
-                <Nav.Link as={Link} href="/admin">แอดมิน</Nav.Link>
+                <Nav.Link as={Link} href="/VaccinesPage">รายการวัคซีน</Nav.Link>
+                <Nav.Link as={Link} href="/AdminPage">แอดมิน</Nav.Link>
             </Nav>
         </div>
     );
