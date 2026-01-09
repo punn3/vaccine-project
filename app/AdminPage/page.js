@@ -2,15 +2,16 @@
 
 import { Container } from "react-bootstrap";
 import NavbarBox from "../../components/Navbar"; // ถอยกลับไป import Navbar มาด้วยถ้าอยากให้มีเมนู
-import Test from "@/components/Test";
+import Admin from "@/components/Admin";
+
 
 export default function AdminPage() {
     return (
         <>
             <NavbarBox></NavbarBox>
             <Container className="mt-5">
-                <h1>Adminnnnnnnnnnnnnn</h1>
-                <Test /> {/* Component Vaccines ของคุณ */}
+                {/* <h1>Adminnnnnnnnnnnnnn</h1> */}
+                <Admin/> {/* Component Vaccines ของคุณ */}
             </Container>
         </>
     );

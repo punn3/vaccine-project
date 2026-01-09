@@ -1,7 +1,7 @@
 import { Form, Button, Container } from "react-bootstrap";
 
 function Vaccines() {
-    // จำลองข้อมูลให้เหมือนในรูปภาพ
+    
     const vaccinesData = [
         {
             id: 1,
@@ -49,12 +49,12 @@ function Vaccines() {
                     placeholder="Search"
                     className="me-2"
                     aria-label="Search"
-                    style={{ maxWidth: "300px" }} // ความกว้างช่องค้นหา
+                    style={{ maxWidth: "500px" }} // ความกว้างช่องค้นหา
                 />
                 <Button variant="outline-success">Search</Button>
             </Form>
 
-            <div className="mt-4 table-striped align-middle shadow-sm rounded">
+            <div className="mt-5 table-striped align-middle shadow-sm rounded">
                 <table className="table ">
                     <thead className="table-light">
                         <tr className="text-center fw-bold">
