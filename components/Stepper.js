@@ -14,7 +14,7 @@ const MyStepperForm = () => {
         {
             icon: "📄",
             label: "กรอกข้อมูล",
-            description: "กรอกข้อมูลพื้นฐาน",
+            description: "",
             content: <BasicInfo />, // <--- ใส่ Component ตรงนี้
             // content: <BasicInfo data={formData} setData={setFormData} />  //ต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
         },
@@ -85,12 +85,12 @@ const MyStepperForm = () => {
             {/* Content Area */}
             <div>
                 {/* <div className={styles.content_title}>{steps[currentStep].label}</div> */}
-                <div className={styles.content_description}>
+                <div style={{marginTop: '80px'}} className={styles.content_description}>
                     {steps[currentStep].description}
                 </div>
 
                 {/* 2. เรียกใช้ content จาก array ตาม step ปัจจุบัน */}
-                <div className="mt-4">{steps[currentStep].content}</div>
+                <div style={{marginTop: '50px'}}>{steps[currentStep].content}</div>
             </div>
 
             {/* Navigation Buttons */}

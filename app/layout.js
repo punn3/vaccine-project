@@ -1,16 +1,18 @@
-import { Geist, Geist_Mono } from "next/font/google";
+import { Bai_Jamjuree, Mali } from "next/font/google";
 import 'bootstrap/dist/css/bootstrap.min.css'; //add
 import "./globals.css";
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
+const baiJamjuree = Bai_Jamjuree({
+  subsets: ['thai', 'latin'],
+  weight: ['200', '300', '400', '500', '600', '700'],
+  variable: '--font-bai-jamjuree',
+})
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
+const mali = Mali({
+  subsets: ['thai', 'latin'],
+  weight: ['200', '300', '400', '500', '600', '700'],
+  variable: '--font-mali',
+})
 
 export const metadata = {
   title: "Create Next App",
@@ -20,7 +22,13 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className={`${geistSans.variable} ${geistMono.variable}`}>
+      <head>
+        <link 
+          rel="stylesheet" 
+          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200&icon_names=home" 
+        />
+      </head>
+      <body className={`${baiJamjuree.variable} ${mali.variable}`}>
         {children}
       </body>
     </html>

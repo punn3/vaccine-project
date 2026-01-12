@@ -5,7 +5,6 @@ import styles from "../styles/CheckInfo.module.css";
 
 function CheckInfomation() {
     const [data, setData] = useState(null);
-    const [selectedVaccines, setSelectedVaccines] = useState([]);
 
     useEffect(() => {
         // ดึงข้อมูลจาก LocalStorage
@@ -58,31 +57,75 @@ function CheckInfomation() {
             <Card>
                 <Card.Header>โรคประจำตัว</Card.Header>
                 <Card.Body>
-                        {selectedDiseases.length > 0 ? (
-                                <ul className="mb-0 row">
-                                    {selectedDiseases
-                                        .filter((d) => d !== data?.disease?.disease_selected)
-                                        .map((disease, index, array) => (
-                                            <li key={index} className="col-md-6">
-                                                {disease}
-                                                {index === array.length - 1
-                                                    ? ` ${data?.disease?.disease_selected || ""}`
-                                                    : ""}
-                                            </li>
-                                        ))}
-                                </ul>
-                        ) : (
-                            <span>ไม่มีโรคประจำตัว</span>
-                        )}
+                    {selectedDiseases.length > 0 ? (
+                        <ul className="mb-0 row">
+                            {selectedDiseases
+                                .filter((d) => d !== data?.disease?.disease_selected)
+                                .map((disease, index, array) => (
+                                    <li key={index} className="col-md-6">
+                                        {disease}
+                                        {index === array.length - 1
+                                            ? ` ${data?.disease?.disease_selected || ""}`
+                                            : ""}
+                                    </li>
+                                ))}
+                        </ul>
+                    ) : (
+                        <span>ไม่มีโรคประจำตัว</span>
+                    )}
                 </Card.Body>
             </Card>
             <Card>
                 <Card.Header>การรับวัคซีน</Card.Header>
-                <Card.Body></Card.Body>
+                <Card.Body>
+                    <Row>
+                        <Col md={6}>
+                            <h6>วัคซีนที่ต้องการฉีด:</h6>
+                            {data.vaccines.want_type === "no" ? (
+                                <p className="text-muted italic">ต้องการคำแนะนำจากแพทย์</p>
+                            ) : (
+                                <ul>
+                                    {data.vaccines.selected.map((v, i) => v && <li key={i}>{v}</li>)}
+                                </ul>
+                            )}
+                        </Col>
+                        <Col md={6}>
+                            <h6>วัคซีนที่เคยได้รับ:</h6>
+                            {data.vaccines.received.some(v => v.vaccine) ? (
+                                <ul>
+                                    {data.vaccines.received.map((item, i) => (
+                                        item.vaccine && <li key={i}>{item.vaccine} (เมื่อวันที่: {item.date || 'ไม่ได้ระบุ'})</li>
+                                    ))}
+                                </ul>
+                            ) : (
+                                <p className="text-muted">ไม่มีประวัติ</p>
+                            )}
+                        </Col>
+                    </Row>
+                </Card.Body>
             </Card>
             <Card>
                 <Card.Header>ประวัติการแพ้อาหาร ยา และวัคซีน</Card.Header>
-                <Card.Body></Card.Body>
+                <Card.Body>
+                    {data.allergy.none ? (
+                        <p>ไม่มีประวัติการแพ้</p>
+                    ) : (<Row>
+                        <Col md={6}>
+                            {data.allergy.food && (
+                                <div className="mb-2">
+                                    <p>แพ้อาหาร:</p> {data.allergy.foodList.length > 0 ? data.allergy.foodList.join(", ") : "ระบุว่าแพ้แต่ไม่ได้เลือกรายการ"}
+                                </div>
+                            )}</Col>
+                            <Col md={6}>
+                            {data.allergy.drugAndVaccine && (
+                                <div>
+                                    <p>แพ้ยา/วัคซีน:</p> {data.allergy.drugAndVaccineList.length > 0 ? data.allergy.drugAndVaccineList.join(", ") : "ระบุว่าแพ้แต่ไม่ได้เลือกรายการ"}
+                                </div>
+                            )}
+                            {!data.allergy.food && !data.allergy.drugAndVaccine && <p>ไม่ได้ระบุข้อมูลการแพ้</p>}</Col>
+                        </Row>
+                    )}
+                </Card.Body>
             </Card>
         </div>
     );

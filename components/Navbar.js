@@ -8,7 +8,7 @@ function NavbarBox() {
     return (
         <div className={styles.NavComponents}>
             <Navbar.Brand>
-                <h1>Navvv</h1>
+                <h1>ระบบให้คำแนะนำวัคซีนที่ปลอดภัย</h1>
             </Navbar.Brand>
             <Nav className={styles.navitem}>
                 <Nav.Link as={Link} href="/#stepper">กรอกข้อมูล</Nav.Link>
