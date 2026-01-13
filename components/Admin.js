@@ -43,6 +43,42 @@ function Admin() {
             dose: "3 เข็ม",
             price: 294,
         },
+        {
+            id: 5,
+            nameTH: "วัคซีนไข้หวัดใหญ่",
+            nameEN: "(Influenza vaccine)",
+            tradeName: "ชื่อการค้า",
+            type: "Inactivated",
+            dose: "1 เข็ม / ปี",
+            price: 257,
+        },
+        {
+            id: 6,
+            nameTH: "วัคซีนตับอักเสบ บี",
+            nameEN: "(Hepatitis B vaccine)",
+            tradeName: "ชื่อการค้า",
+            type: "Inactivated",
+            dose: "3 เข็ม",
+            price: 294,
+        },
+        {
+            id: 7,
+            nameTH: "วัคซีนไข้หวัดใหญ่",
+            nameEN: "(Influenza vaccine)",
+            tradeName: "ชื่อการค้า",
+            type: "Inactivated",
+            dose: "1 เข็ม / ปี",
+            price: 257,
+        },
+        {
+            id: 8,
+            nameTH: "วัคซีนตับอักเสบ บี",
+            nameEN: "(Hepatitis B vaccine)",
+            tradeName: "ชื่อการค้า",
+            type: "Inactivated",
+            dose: "3 เข็ม",
+            price: 294,
+        },
     ];
 
     return (
@@ -72,8 +108,8 @@ function Admin() {
                         </Form>
                     </div>
 
-                    <div className="mt-5 table-striped align-middle shadow-sm rounded">
-                        <table className="table ">
+                    <div className="mt-5  align-middle shadow-sm rounded">
+                        <table className="table table-striped">
                             <thead className="table-light">
                                 <tr className="text-center fw-bold">
                                     <th scope="col" style={{ width: "120px" }}>รูปวัคซีน</th>
