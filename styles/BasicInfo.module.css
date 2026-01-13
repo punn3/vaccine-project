@@ -1,4 +1,5 @@
 .accordionWrapper :global(.accordion-button){
+    padding: 30px 100px;
     background-color: #CBDCEB;
     height: 80px;
 }

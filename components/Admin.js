@@ -9,75 +9,75 @@ function Admin() {
     const vaccinesData = [
         {
             id: 1,
-            nameTH: "วัคซีนไข้หวัดใหญ่",
+            nameTH: "วัคซีนไข้หวัดใหญ่ ชนิดฉีด",
             nameEN: "(Influenza vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
+            tradeName: "Influenza Vaccine(InFlu Vac Tetra) ®",
+            type: "Inactivated Suspension 0.5 ml",
             dose: "1 เข็ม / ปี",
-            price: 257,
+            price: 245,
         },
         {
             id: 2,
             nameTH: "วัคซีนตับอักเสบ บี",
             nameEN: "(Hepatitis B vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
+            tradeName: "Engerix-B 20 mcg INJ®",
+            type: "Inactivated Suspension 1 ml",
             dose: "3 เข็ม",
             price: 294,
         },
         {
             id: 3,
-            nameTH: "วัคซีนไข้หวัดใหญ่",
-            nameEN: "(Influenza vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
-            dose: "1 เข็ม / ปี",
-            price: 257,
+            nameTH: "วัคซีนปากมดลูก 4 สายพันธุ์",
+            nameEN: "(HPV4 Vaccine)",
+            tradeName: "Gardasil Vaccine®",
+            type: "Inactivated Suspension 0.5 ml",
+            dose: "3 เข็ม",
+            price: 2444,
         },
         {
             id: 4,
-            nameTH: "วัคซีนตับอักเสบ บี",
-            nameEN: "(Hepatitis B vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
+            nameTH: "วัคซีนปากมดลูก 9 สายพันธุ์",
+            nameEN: "(HPV9 Vaccine)",
+            tradeName: "Gardasil 9 Vaccine®",
+            type: "Inactivated Suspension 0.5 ml",
             dose: "3 เข็ม",
-            price: 294,
+            price: 5593,
         },
         {
             id: 5,
-            nameTH: "วัคซีนไข้หวัดใหญ่",
-            nameEN: "(Influenza vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
-            dose: "1 เข็ม / ปี",
-            price: 257,
+            nameTH: "วัคซีน คอตีบ บาดทะยัก ไอกรน",
+            nameEN: "(Tdap vaccine)",
+            tradeName: "Bootagen Vaccine INJ 0.5 ml®",
+            type: "Inactivated Suspension 0.5 ml",
+            dose: "1 เข็ม",
+            price: 644,
         },
         {
             id: 6,
-            nameTH: "วัคซีนตับอักเสบ บี",
-            nameEN: "(Hepatitis B vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
-            dose: "3 เข็ม",
-            price: 294,
+            nameTH: "วัคซีนไข้เลือดออก",
+            nameEN: "(Dengue Vaccine)",
+            tradeName: "Qdenga vaccine®",
+            type: "Live vaccine 0.5 ml",
+            dose: "2 เข็ม",
+            price: 1639,
         },
         {
             id: 7,
-            nameTH: "วัคซีนไข้หวัดใหญ่",
-            nameEN: "(Influenza vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
-            dose: "1 เข็ม / ปี",
-            price: 257,
+            nameTH: "วัคซีนป้องกันรวมหัด หัดเยอรมัน คางทูม",
+            nameEN: "(Mumps Measles Rubella vaccine)",
+            tradeName: "MMR (Masu) Vaccine INJ 0.5 ml®",
+            type: "Live vaccine 0.5 ml",
+            dose: "2 เข็ม",
+            price: 235,
         },
         {
             id: 8,
-            nameTH: "วัคซีนตับอักเสบ บี",
-            nameEN: "(Hepatitis B vaccine)",
-            tradeName: "ชื่อการค้า",
-            type: "Inactivated",
-            dose: "3 เข็ม",
-            price: 294,
+            nameTH: "วัคซีนป้องกันงูสวัด",
+            nameEN: "(Recombinant subunit Zoster vaccine)",
+            tradeName: "Shingrix 50 mcg Vaccine®",
+            type: "Inactivated Suspension 0.5 ml",
+            dose: "2 เข็ม",
+            price: 5199,
         },
     ];
 
@@ -108,9 +108,9 @@ function Admin() {
                         </Form>
                     </div>
 
-                    <div className="mt-5  align-middle shadow-sm rounded">
+                    <div className="mt-5 shadow-sm rounded">
                         <table className="table table-striped">
-                            <thead className="table-light">
+                            <thead className="table-light align-middle">
                                 <tr className="text-center fw-bold">
                                     <th scope="col" style={{ width: "120px" }}>รูปวัคซีน</th>
                                     <th scope="col">ชื่อวัคซีน</th>
@@ -121,7 +121,7 @@ function Admin() {
                                     <th scope="col" className="text-center">จัดการ</th>
                                 </tr>
                             </thead>
-                            <tbody>
+                            <tbody className="text-center align-middle">
                                 {vaccinesData.map((item, index) => (
                                     <tr key={item.id} style={{ backgroundColor: index % 2 === 0 ? '#fcfcfc' : 'white' }}>
                                         <td className="py-3">

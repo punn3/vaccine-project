@@ -140,9 +140,12 @@ function BasicInfo() {
       <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
         {/* ข้อมูลพื้นฐาน  */}
         <Accordion.Item eventKey="0" className="mb-5 border rounded">
-          <Accordion.Header><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
-            <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
-          </svg><strong className="ms-3">ข้อมูลพื้นฐาน</strong></Accordion.Header>
+          <Accordion.Header>
+            {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-person-fill" viewBox="0 0 16 16">
+              <path d="M3 14s-1 0-1-1 1-4 6-4 6 3 6 4-1 1-1 1zm5-6a3 3 0 1 0 0-6 3 3 0 0 0 0 6" />
+            </svg> */}
+            <strong>ข้อมูลพื้นฐาน</strong>
+          </Accordion.Header>
           <Accordion.Body>
             <Row className="row-gap-4">
               <Col md={6}>
@@ -214,9 +217,12 @@ function BasicInfo() {
         </Accordion.Item>
         {/* การเดินทาง */}
         <Accordion.Item eventKey="1" className="mb-5 border rounded">
-          <Accordion.Header><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-airplane-fill" viewBox="0 0 16 16">
-            <path d="M6.428 1.151C6.708.591 7.213 0 8 0s1.292.592 1.572 1.151C9.861 1.73 10 2.431 10 3v3.691l5.17 2.585a1.5 1.5 0 0 1 .83 1.342V12a.5.5 0 0 1-.582.493l-5.507-.918-.375 2.253 1.318 1.318A.5.5 0 0 1 10.5 16h-5a.5.5 0 0 1-.354-.854l1.319-1.318-.376-2.253-5.507.918A.5.5 0 0 1 0 12v-1.382a1.5 1.5 0 0 1 .83-1.342L6 6.691V3c0-.568.14-1.271.428-1.849" />
-          </svg><strong className="ms-3">การเดินทาง</strong></Accordion.Header>
+          <Accordion.Header>
+            {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-airplane-fill" viewBox="0 0 16 16">
+              <path d="M6.428 1.151C6.708.591 7.213 0 8 0s1.292.592 1.572 1.151C9.861 1.73 10 2.431 10 3v3.691l5.17 2.585a1.5 1.5 0 0 1 .83 1.342V12a.5.5 0 0 1-.582.493l-5.507-.918-.375 2.253 1.318 1.318A.5.5 0 0 1 10.5 16h-5a.5.5 0 0 1-.354-.854l1.319-1.318-.376-2.253-5.507.918A.5.5 0 0 1 0 12v-1.382a1.5 1.5 0 0 1 .83-1.342L6 6.691V3c0-.568.14-1.271.428-1.849" />
+            </svg> */}
+            <strong>การเดินทาง</strong>
+          </Accordion.Header>
           <Accordion.Body>
             <Form>
               <Row>
@@ -271,9 +277,12 @@ function BasicInfo() {
         </Accordion.Item>
         {/* โรคประจำตัว */}
         <Accordion.Item eventKey="2" className="mb-5 border rounded">
-          <Accordion.Header><svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" className="bi bi-virus2" viewBox="0 0 16 16">
-            <path d="M8 0a1 1 0 0 0-1 1v1.143c0 .557-.407 1.025-.921 1.24-.514.214-1.12.162-1.513-.231l-.809-.809a1 1 0 1 0-1.414 1.414l.809.809c.394.394.445.999.23 1.513C3.169 6.593 2.7 7 2.144 7H1a1 1 0 0 0 0 2h1.143c.557 0 1.025.407 1.24.921.214.514.163 1.12-.231 1.513l-.809.809a1 1 0 0 0 1.414 1.414l.809-.809c.394-.394.999-.445 1.513-.23.514.214.921.682.921 1.24V15a1 1 0 1 0 2 0v-1.143c0-.557.407-1.025.921-1.24.514-.214 1.12-.162 1.513.231l.809.809a1 1 0 0 0 1.414-1.414l-.809-.809c-.393-.394-.445-.999-.23-1.513.214-.514.682-.921 1.24-.921H15a1 1 0 1 0 0-2h-1.143c-.557 0-1.025-.407-1.24-.921-.214-.514-.162-1.12.231-1.513l.809-.809a1 1 0 0 0-1.414-1.414l-.809.809c-.394.393-.999.445-1.513.23-.514-.214-.92-.682-.92-1.24V1a1 1 0 0 0-1-1Zm2 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0M7 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0m1 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2m4-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
-          </svg><strong className="ms-3">โรคประจำตัว</strong></Accordion.Header>
+          <Accordion.Header>
+            {/* <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-virus2" viewBox="0 0 16 16">
+              <path d="M8 0a1 1 0 0 0-1 1v1.143c0 .557-.407 1.025-.921 1.24-.514.214-1.12.162-1.513-.231l-.809-.809a1 1 0 1 0-1.414 1.414l.809.809c.394.394.445.999.23 1.513C3.169 6.593 2.7 7 2.144 7H1a1 1 0 0 0 0 2h1.143c.557 0 1.025.407 1.24.921.214.514.163 1.12-.231 1.513l-.809.809a1 1 0 0 0 1.414 1.414l.809-.809c.394-.394.999-.445 1.513-.23.514.214.921.682.921 1.24V15a1 1 0 1 0 2 0v-1.143c0-.557.407-1.025.921-1.24.514-.214 1.12-.162 1.513.231l.809.809a1 1 0 0 0 1.414-1.414l-.809-.809c-.393-.394-.445-.999-.23-1.513.214-.514.682-.921 1.24-.921H15a1 1 0 1 0 0-2h-1.143c-.557 0-1.025-.407-1.24-.921-.214-.514-.162-1.12.231-1.513l.809-.809a1 1 0 0 0-1.414-1.414l-.809.809c-.394.393-.999.445-1.513.23-.514-.214-.92-.682-.92-1.24V1a1 1 0 0 0-1-1Zm2 5a1 1 0 1 1-2 0 1 1 0 0 1 2 0M7 7a1 1 0 1 1-2 0 1 1 0 0 1 2 0m1 5a1 1 0 1 1 0-2 1 1 0 0 1 0 2m4-4a1 1 0 1 1-2 0 1 1 0 0 1 2 0" />
+            </svg> */}
+            <strong>โรคประจำตัว</strong>
+          </Accordion.Header>
           <Accordion.Body>
             <Row className="row-gap-4">
               <Col md={6}>
@@ -395,14 +404,16 @@ function BasicInfo() {
         </Accordion.Item>
         {/* การรับวัคซีน */}
         <Accordion.Item eventKey="3" className="mb-5 border rounded">
-          <Accordion.Header><strong>การรับวัคซีน</strong></Accordion.Header>
+          <Accordion.Header>
+            <strong>การรับวัคซีน</strong>
+          </Accordion.Header>
           <Accordion.Body>
             <Form>
               {["radio"].map((type) => (
                 <div key={`inline-${type}`}>
                   {/* วัคซีนที่ต้องการฉีด */}
                   <Row className="row-gap-3">
-                    <h5>วัคซีนที่ต้องการฉีด</h5>
+                    <p className="fw-bold">วัคซีนที่ต้องการฉีด</p>
                     <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
                       <Form.Check
                         type="radio"
@@ -421,60 +432,12 @@ function BasicInfo() {
                         onChange={() => handleVaccineTypeChange("no")}
                       />
                     </Col>
-                    {/* {selectedVaccines.map((value, index) => (
-                      <Row key={index} className="row-gap-2 mb-2 align-items-center">
-                        <Col md={6}>
-                          <Form.Select
-                            value={value}
-                            onChange={(e) =>
-                              handleVaccineChange(index, e.target.value)
-                            }
-                          >
-                            <option value="">เลือกวัคซีนที่ต้องการ</option>
-                            <option value="Tetanus">Tetanus, diphtheria, and pertussis</option>
-                            <option value="Influenza">Influenza</option>
-                            <option value="COVID-19">COVID-19</option>
-                            <option value="MMR">Measles, mumps, and rubella</option>
-                            <option value="Varicella">Varicella</option>
-                            <option value="HepA">Hepatitis A virus</option>
-                            <option value="HepB">Hepatitis B virus</option>
-                            <option value="HPV">Human papillomavirus (HPV)</option>
-                            <option value="Pneumococcal">Pneumococcal</option>
-                            <option value="RSV">Respiratory syncytial virus (RSV)</option>
-                            <option value="Zoster-live">Live-attenuated zoster</option>
-                            <option value="Zoster-recombinant">Recombinant zoster</option>
-                            <option value="Dengue">Live-attenuated dengue</option>
-                            <option value="Yellow-fever">Yellow fever</option>
-                            <option value="JE">Japanese encephalitis</option>
-                            <option value="Meningococcal">Meningococcal</option>
-                            <option value="Mpox">Mpox</option>
-                          </Form.Select>
-                        </Col>
-                        <Col md={6} className="d-flex gap-2">
-                          {selectedVaccines.length > 1 && (
-                            <Button
-                              variant="danger"
-                              onClick={() => removeVaccine(index)}
-                            >
-                              −
-                            </Button>
-                          )}
-                        </Col>
-                        <Col md={12}>
-                          {index === selectedVaccines.length - 1 && (
-                            <Button variant="success" onClick={addVaccine}>
-                              +
-                            </Button>
-                          )}
-                        </Col>
-                      </Row>
-                    ))} */}
                     {formData.vaccines.want_type === "yes" && (
                       <div className="border p-3 rounded bg-light mb-4">
-                        <h6>ระบุวัคซีนที่ต้องการ:</h6>
+                        <p>ระบุวัคซีนที่ต้องการ:</p>
                         {formData.vaccines.selected.map((value, index) => (
-                          <Row key={index} className="mb-2 align-items-center">
-                            <Col md={8}>
+                          <Row key={index} className="row-gap-2 mb-2 align-items-center ">
+                            <Col md={6}>
                               <Form.Select
                                 value={value}
                                 onChange={(e) => handleVaccineChange(index, e.target.value)}
@@ -499,18 +462,23 @@ function BasicInfo() {
                                 <option value="Mpox">Mpox</option>
                               </Form.Select>
                             </Col>
-                            <Col md={4} className="d-flex gap-2">
-                              <Button
-                                variant="danger"
-                                onClick={() => removeVaccine(index)}
-                                disabled={formData.vaccines.selected.length === 1}
-                              >
-                                ลบ
-                              </Button>
-                              {index === formData.vaccines.selected.length - 1 && (
-                                <Button variant="success" onClick={addVaccine}>เพิ่ม</Button>
+                            <Col md={2} className="d-flex gap-2">
+                              {formData.vaccines.selected.length > 1 && (
+                                <Button
+                                  variant="danger"
+                                  onClick={() => removeVaccine(index)}
+                                >
+                                  ลบ
+                                </Button>
                               )}
                             </Col>
+                            <Row>
+                              <Col md={12}>
+                                {index === formData.vaccines.selected.length - 1 && (
+                                  <Button variant="success" onClick={addVaccine}>เพิ่ม</Button>
+                                )}
+                              </Col>
+                            </Row>
                           </Row>
                         ))}
                       </div>
@@ -518,9 +486,11 @@ function BasicInfo() {
                   </Row>
                   {/* วัคซีนที่เคยได้รับ */}
                   <Row className="row-gap-3">
-                    <h5 className="mt-4">วัคซีนที่เคยได้รับ</h5>
+                    <p className="mt-2 fw-bold">วัคซีนที่เคยได้รับ</p>
                     <Col md={6}></Col>
-                    <Col md={6}><h5>วันที่ได้รับ</h5></Col>
+                    <Col md={6}>
+                      <p className="m-0">วันที่ได้รับ</p>
+                    </Col>
                     {formData.vaccines.received.map((item, index) => (
                       <Row key={index} className="row-gap-2 align-items-center mb-2">
                         <Col md={6}>
@@ -567,14 +537,14 @@ function BasicInfo() {
                               variant="danger"
                               onClick={() => removeReceivedVaccine(index)}
                             >
-                              −
+                              ลบ
                             </Button>
                           )}
                         </Col>
                         <Col md={12}>
                           {index === formData.vaccines.received.length - 1 && (
                             <Button variant="success" onClick={addReceivedVaccine}>
-                              +
+                              เพิ่ม
                             </Button>
                           )}
                         </Col>
@@ -588,11 +558,11 @@ function BasicInfo() {
         </Accordion.Item>
         {/* ประวัติการแพ้ */}
         <Accordion.Item eventKey="4">
-          <Accordion.Header><strong>ประวัติการแพ้อาหาร ยา และวัคซีน</strong></Accordion.Header>
+          <Accordion.Header>
+            <strong>ประวัติการแพ้อาหาร ยา และวัคซีน</strong>
+          </Accordion.Header>
           <Accordion.Body>
             <Form>
-              <h6 className="mb-3">ประวัติการแพ้อาหาร ยา และวัคซีน</h6>
-
               {/* ตัวเลือกการแพ้ */}
               <Row className="mb-3">
                 <Col md={4}>
@@ -622,8 +592,8 @@ function BasicInfo() {
 
               {/* แพ้อาหาร */}
               {formData.allergy.food && (
-                <div className="border rounded p-3 mb-3">
-                  <Form.Label>อาหารที่แพ้</Form.Label>
+                <div className="border rounded p-3 my-4">
+                  <Form.Label className="fw-bold">อาหารที่แพ้</Form.Label>
                   <Row>
                     {["ไข่", "เจลาติน", "นม", "ยีสต์"].map((item) => (
                       <Col md={4} key={item}>
@@ -640,8 +610,8 @@ function BasicInfo() {
 
               {/* {แพ้ยาและวัคซีน} */}
               {formData.allergy.drugAndVaccine && (
-                <div className="border rounded p-3 mb-3">
-                  <Form.Label>ยาและวัคซีนที่แพ้</Form.Label>
+                <div className="border rounded p-3 my-4">
+                  <Form.Label className="fw-bold">ยาและวัคซีนที่แพ้</Form.Label>
                   <Row>
                     {["ยา1", "ยา2", "ยา3", "ยา4"].map((item) => (
                       <Col md={4} key={item}>
