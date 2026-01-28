@@ -1,10 +1,83 @@
 import { useState, useRef } from "react";
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { CloudArrowUp } from "react-bootstrap-icons";
+import AgeLimitCondition from "./AgeConditionCard";
+import DiseaseCondition from "./DiseaseConditionCard";
 
 function AddVaccine({ onBack }) {
     const [selectedFile, setSelectedFile] = useState(null); // เก็บไฟล์ที่เลือก
     const fileInputRef = useRef(null); // อ้างอิงถึง input file ที่ซ่อนอยู่
+    const [ageConditions, setAgeConditions] = useState([
+        { minAge: "", maxAge: "", dose: "", frequency: "" }
+    ]);
+    const [diseaseConditions, setDiseaseConditions] = useState([
+        { selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "" }
+    ]);
+    const [allergies, setAllergies] = useState({
+        egg: false,
+        milk: false,
+        gelatin: false,
+        yeast: false,
+        drugOption1: false,
+        drugOption2: false,
+        drugOption3: false,
+        drugOption4: false,
+    });
+
+    // *****อายุ****
+    // ฟังก์ชันเพิ่มเงื่อนไขใหม่
+    const addCondition = () => {
+        setAgeConditions([...ageConditions, { minAge: "", maxAge: "", dose: "", frequency: "" }]);
+    };
+
+    // ฟังก์ชันลบเงื่อนไข
+    const removeCondition = (index) => {
+        const newConditions = ageConditions.filter((_, i) => i !== index);
+        setAgeConditions(newConditions);
+    };
+
+    // ฟังก์ชันอัปเดตข้อมูลในแต่ละช่อง
+    const handleConditionChange = (index, field, value) => {
+        const newConditions = [...ageConditions];
+        newConditions[index][field] = value;
+        setAgeConditions(newConditions);
+    };
+
+    // *****โรคประจำตัว****
+    // 2. ฟังก์ชันเพิ่มเงื่อนไขโรคใหม่
+    const addDiseaseCondition = () => {
+        setDiseaseConditions([
+            ...diseaseConditions,
+            { selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "" }
+        ]);
+    };
+
+    // 3. ฟังก์ชันลบเงื่อนไขโรค (ใช้ filter เหมือนเดิม)
+    const removeDiseaseCondition = (index) => {
+        const newConditions = diseaseConditions.filter((_, i) => i !== index);
+        setDiseaseConditions(newConditions);
+    };
+
+    // 4. ฟังก์ชันอัปเดตข้อมูลในแต่ละช่องของการ์ดโรค
+    const handleDiseaseChange = (index, field, value) => {
+        const newConditions = [...diseaseConditions];
+        newConditions[index][field] = value;
+
+        // Logic เพิ่มเติม: ถ้าเปลี่ยนโรคจาก 'โรคไต' เป็นอย่างอื่น ให้ล้างค่าระยะโรคไตทิ้ง
+        if (field === 'selectedDisease' && value !== 'Chronic kidney disease') {
+            newConditions[index]['kidneyStage'] = "";
+        }
+
+        setDiseaseConditions(newConditions);
+    };
+
+    // การแพ้ ฟังก์ชันจัดการการคลิก
+    const handleAllergyChange = (field) => {
+        setAllergies({
+            ...allergies,
+            [field]: !allergies[field] // สลับค่า true/false
+        });
+    };
 
     // เมื่อมีการเลือกไฟล์
     const handleFileChange = (event) => {
@@ -53,49 +126,199 @@ function AddVaccine({ onBack }) {
                     </Row>
                     <Row className="mb-3">
                         <Col md={6}>
-                            <Form.Label>ชนิดวัคซีน</Form.Label>
-                            <Form.Control type="text" />
+                            <Form>
+                                <label className="mb-2">ชนิดวัคซีน</label>
+                                <Form.Select>
+                                    <option>เลือกตำแหน่งที่ฉีด</option>
+                                    <option value="Inactivated">Inactivated</option>
+                                    <option value="Live">Live attenuated</option>
+                                </Form.Select>
+                            </Form>
                         </Col>
                         <Col md={6}>
                             <Form.Label>วัคซีนป้องกัน</Form.Label>
                             <Form.Control type="text" />
                         </Col>
                     </Row>
-                    <Row>
+                    <Row className="mb-3">
                         <Col md={6}>
                             <Form.Label>ราคา (บาท/เข็ม)</Form.Label>
                             <Form.Control type="text" />
                         </Col>
                     </Row>
-                </Card.Body>
-            </Card>
-
-            {/* Section 2: การบริหารวัคซีน */}
-            <Card className="mb-4 shadow-sm border-0">
-                <Card.Header className="py-3" style={headerStyle}>
-                    การบริหารวัคซีน
-                </Card.Header>
-                <Card.Body className="p-4">
                     <Row className="mb-3">
+                        <Col md={12}>
+                            <p className="">การบริหารวัคซีน</p>
+                        </Col>
+                    </Row>
+                    <Row>
                         <Col md={6}>
                             <Form.Label>ขนาด (ml)</Form.Label>
                             <Form.Control type="text" />
                         </Col>
                         <Col md={6}>
-                            <Form.Label>จำนวนโดส (โดส)</Form.Label>
-                            <Form.Control type="text" />
-                        </Col>
-                    </Row>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Label>ตำแหน่งที่ฉีด</Form.Label>
-                            <Form.Control type="text" />
+                            <Form>
+                                <label className="mb-2">ตำแหน่งที่ฉีด</label>
+                                <Form.Select>
+                                    <option>เลือกตำแหน่งที่ฉีด</option>
+                                    <option value="Instramuscular">ฉีดเข้ากล้ามเนื้อ (Instramuscular)</option>
+                                    <option value="Subcutaneous">ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous)</option>
+                                </Form.Select>
+                            </Form>
                         </Col>
                     </Row>
                 </Card.Body>
             </Card>
 
-            {/* Section 3: ผลข้างเคียง */}
+            {/* Section 2: การจำกัดอายุ */}
+            <Card className="mb-4 shadow-sm border-0">
+                <Card.Header className="py-3" style={headerStyle}>
+                    การจำกัดอายุ
+                </Card.Header>
+                <Card.Body className="p-4">
+                    {ageConditions.map((item, index) => (
+                        <AgeLimitCondition
+                            key={index}
+                            index={index}
+                            data={item}
+                            onChange={handleConditionChange}
+                            onRemove={removeCondition}
+                        />
+                    ))}
+                    <Button
+                        variant="primary"
+                        onClick={addCondition}
+                        style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    >
+                        + เพิ่มเงื่อนไขอายุ
+                    </Button>
+                </Card.Body>
+            </Card>
+
+            {/* Section 3: การจำกัดโรคประจำตัว */}
+            <Card className="mb-4 shadow-sm border-0">
+                <Card.Header className="py-3" style={headerStyle}>
+                    การจำกัดโรคประจำตัว
+                </Card.Header>
+                <Card.Body className="p-4">
+                    {diseaseConditions.map((item, index) => (
+                        <DiseaseCondition
+                            key={`disease-${index}`} // ใช้ key ที่ไม่ซ้ำกับเงื่อนไขอายุ
+                            index={index}
+                            data={item}
+                            onChange={handleDiseaseChange}
+                            onRemove={removeDiseaseCondition}
+                        />
+                    ))}
+
+                    {/* ปุ่มสำหรับกดเพิ่มเงื่อนไขใหม่ */}
+                    <Button
+                        variant="primary"
+                        onClick={addDiseaseCondition}
+                        className="mt-2"
+                        style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    >
+                        + เพิ่มเงื่อนไขโรคประจำตัว
+                    </Button>
+                </Card.Body>
+            </Card>
+
+            {/* Section 4: การแพ้อาหาร ยา และวัคซีน */}
+            <Card className="mb-4 shadow-sm border-0">
+                <Card.Header className="py-3" style={headerStyle}>การแพ้อาหาร ยา และวัคซีน</Card.Header>
+                <Card.Body className="p-4">
+                    <p className="fw-bold">การแพ้อาหาร</p>
+                    <Row className="mb-4">
+                        {/* ตัวอย่างการวางช่องติ๊กแบบ 4 คอลัมน์ */}
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ไข่ไก่"
+                                    checked={allergies.egg}
+                                    onChange={() => handleAllergyChange('egg')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="นมวัว"
+                                    checked={allergies.milk}
+                                    onChange={() => handleAllergyChange('milk')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="เจลาติน"
+                                    checked={allergies.gelatin}
+                                    onChange={() => handleAllergyChange('gelatin')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ยีสต์"
+                                    checked={allergies.yeast}
+                                    onChange={() => handleAllergyChange('yeast')}
+                                />
+                            </div>
+                        </Col>
+                    </Row>
+
+                    <p className="fw-bold">การแพ้ยาและวัคซีน</p>
+                    <Row>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ตัวเลือก 1"
+                                    checked={allergies.drugOption1}
+                                    onChange={() => handleAllergyChange('drugOption1')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ตัวเลือก 2"
+                                    checked={allergies.drugOption2}
+                                    onChange={() => handleAllergyChange('drugOption2')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ตัวเลือก 3"
+                                    checked={allergies.drugOption3}
+                                    onChange={() => handleAllergyChange('drugOption3')}
+                                />
+                            </div>
+                        </Col>
+                        <Col md={3} className="mb-2">
+                            <div className="border rounded p-2 d-flex align-items-center">
+                                <Form.Check
+                                    type="checkbox"
+                                    label="ตัวเลือก 4"
+                                    checked={allergies.drugOption4}
+                                    onChange={() => handleAllergyChange('drugOption4')}
+                                />
+                            </div>
+                        </Col>
+                    </Row>
+                </Card.Body>
+            </Card>
+
+            {/* Section 5: ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง
@@ -105,7 +328,7 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 4: เพิ่มรูปภาพ */}
+            {/* Section 6: เพิ่มรูปภาพ */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     เพิ่มรูปภาพ
