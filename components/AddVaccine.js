@@ -5,154 +5,402 @@ import AgeLimitCondition from "./AgeConditionCard";
 import DiseaseCondition from "./DiseaseConditionCard";
 
 function AddVaccine({ onBack }) {
-    // 1. State สำหรับเก็บค่าที่พิมพ์ (จำเป็นต้องมี)
-    const [formData, setFormData] = useState({
-        name_th: "", trade_name: "", vaccine_type: "", name_en: "", price: "", dosage_ml: "", admin_route: ""
-    });
+  // 1. State สำหรับข้อมูลหลัก
+  const [formData, setFormData] = useState({
+    name_th: "",
+    trade_name: "",
+    vaccine_type: "",
+    name_en: "",
+    price: "",
+    dosage_ml: "",
+    admin_route: "",
+    side_effects: "", // เพิ่มสำหรับ textarea
+  });
 
-    // 2. ฟังก์ชันอัปเดตค่าเมื่อพิมพ์
-    const handleChange = (e, field) => {
-        setFormData({ ...formData, [field]: e.target.value });
+  const [selectedFile, setSelectedFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  // State สำหรับเงื่อนไขต่างๆ
+  const [ageConditions, setAgeConditions] = useState([
+    { minAge: "", maxAge: "", dose: "", frequency: "" },
+  ]);
+  const [diseaseConditions, setDiseaseConditions] = useState([
+    {
+      selectedDisease: "",
+      kidneyStage: "",
+      dose: "",
+      frequency: "",
+      recommendation: "",
+    },
+  ]);
+  const [allergies, setAllergies] = useState({
+    egg: false,
+    milk: false,
+    gelatin: false,
+    yeast: false,
+    drugOption1: false,
+    drugOption2: false,
+    drugOption3: false,
+    drugOption4: false,
+  });
+
+  // --- Functions ---
+  const handleChange = (e, field) => {
+    setFormData({ ...formData, [field]: e.target.value });
+  };
+
+  const handleSave = async () => {
+    if (!formData.name_th) {
+      alert("กรุณากรอกชื่อวัคซีน");
+      return;
+    }
+
+    // รวมข้อมูลทั้งหมดเข้าด้วยกันก่อนส่ง
+    const payload = {
+      id: Math.floor(Math.random() * 100000),
+      ...formData,
+      age_conditions: ageConditions,
+      disease_conditions: diseaseConditions,
+      allergies: allergies,
+      image_url: selectedFile ? `/img/${selectedFile.name}` : null,
     };
 
-    // 3. ฟังก์ชันบันทึก
-    const handleSave = async () => {
-        if (!formData.name_th) { alert("กรุณากรอกชื่อวัคซีน"); return; }
-        
-        const payload = {
-            id: Math.floor(Math.random() * 100000),
-            ...formData,
-            image_url: selectedFile ? `/img/${selectedFile.name}` : null
-        };
+    try {
+      const res = await fetch("/api/vaccines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (res.ok) {
+        alert("✅ เพิ่มวัคซีนสำเร็จ!");
+        onBack();
+      }
+    } catch (err) {
+      alert("Error connecting to server");
+    }
+  };
 
-        try {
-            const res = await fetch('/api/vaccines', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload)
-            });
-            if (res.ok) {
-                alert("✅ เพิ่มวัคซีนสำเร็จ!");
-                onBack();
-            }
-        } catch (err) { alert("Error connecting to server"); }
-    };
+  // Condition Handlers
+  const addCondition = () =>
+    setAgeConditions([
+      ...ageConditions,
+      { minAge: "", maxAge: "", dose: "", frequency: "" },
+    ]);
+  const removeCondition = (i) =>
+    setAgeConditions(ageConditions.filter((_, idx) => idx !== i));
+  const handleConditionChange = (i, f, v) => {
+    const n = [...ageConditions];
+    n[i][f] = v;
+    setAgeConditions(n);
+  };
 
-    // (ส่วน State เดิมของคุณ)
-    const [selectedFile, setSelectedFile] = useState(null);
-    const fileInputRef = useRef(null);
-    const [ageConditions, setAgeConditions] = useState([{ minAge: "", maxAge: "", dose: "", frequency: "" }]);
-    const [diseaseConditions, setDiseaseConditions] = useState([{ selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "" }]);
-    const [allergies, setAllergies] = useState({ egg: false, milk: false, gelatin: false, yeast: false, drugOption1: false, drugOption2: false, drugOption3: false, drugOption4: false });
+  const addDiseaseCondition = () =>
+    setDiseaseConditions([
+      ...diseaseConditions,
+      {
+        selectedDisease: "",
+        kidneyStage: "",
+        dose: "",
+        frequency: "",
+        recommendation: "",
+      },
+    ]);
+  const removeDiseaseCondition = (i) =>
+    setDiseaseConditions(diseaseConditions.filter((_, idx) => idx !== i));
+  const handleDiseaseChange = (i, f, v) => {
+    const n = [...diseaseConditions];
+    n[i][f] = v;
+    setDiseaseConditions(n);
+  };
 
-    // (ฟังก์ชันเดิมของคุณ - ย่อไว้เพื่อความกระชับ)
-    const addCondition = () => setAgeConditions([...ageConditions, { minAge: "", maxAge: "", dose: "", frequency: "" }]);
-    const removeCondition = (i) => setAgeConditions(ageConditions.filter((_, idx) => idx !== i));
-    const handleConditionChange = (i, f, v) => { const n = [...ageConditions]; n[i][f] = v; setAgeConditions(n); };
-    const addDiseaseCondition = () => setDiseaseConditions([...diseaseConditions, { selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "" }]);
-    const removeDiseaseCondition = (i) => setDiseaseConditions(diseaseConditions.filter((_, idx) => idx !== i));
-    const handleDiseaseChange = (i, f, v) => { const n = [...diseaseConditions]; n[i][f] = v; setDiseaseConditions(n); };
-    const handleAllergyChange = (f) => setAllergies({ ...allergies, [f]: !allergies[f] });
-    const handleFileChange = (e) => { if(e.target.files[0]) setSelectedFile(e.target.files[0]); };
-    const handleUploadClick = () => fileInputRef.current.click();
-    const handleRemoveFile = (e) => { e.stopPropagation(); setSelectedFile(null); fileInputRef.current.value = ""; };
-    const headerStyle = { backgroundColor: "#CBDCEB", fontWeight: "bold", borderBottom: "none" };
+  const handleAllergyChange = (f) =>
+    setAllergies({ ...allergies, [f]: !allergies[f] });
+  const handleFileChange = (e) => {
+    if (e.target.files[0]) setSelectedFile(e.target.files[0]);
+  };
+  const handleUploadClick = () => fileInputRef.current.click();
+  const handleRemoveFile = (e) => {
+    e.stopPropagation();
+    setSelectedFile(null);
+    fileInputRef.current.value = "";
+  };
 
-    return (
-        <Container className="mt-5 pb-5" style={{ maxWidth: "900px" }}>
-            <h3 className="text-center mb-4 fw-bold">เพิ่มวัคซีนใหม่</h3>
+  const headerStyle = {
+    backgroundColor: "#CBDCEB",
+    fontWeight: "bold",
+    borderBottom: "none",
+  };
 
-            {/* Section 1: ข้อมูลวัคซีน (ผมเติม value/onChange ให้แล้ว) */}
-            <Card className="mb-4 shadow-sm border-0">
-                <Card.Header className="py-3" style={headerStyle}>ข้อมูลวัคซีน</Card.Header>
-                <Card.Body className="p-4">
-                    <Row className="mb-3">
-                        <Col md={6}>
-                            <Form.Label>ชื่อวัคซีน</Form.Label>
-                            {/* เติม value และ onChange */}
-                            <Form.Control type="text" value={formData.name_th} onChange={(e) => handleChange(e, 'name_th')} />
-                        </Col>
-                        <Col md={6}>
-                            <Form.Label>ชื่อการค้า</Form.Label>
-                            <Form.Control type="text" value={formData.trade_name} onChange={(e) => handleChange(e, 'trade_name')} />
-                        </Col>
-                    </Row>
-                    <Row className="mb-3">
-                        <Col md={6}>
-                            <Form>
-                                <label className="mb-2">ชนิดวัคซีน</label>
-                                <Form.Select value={formData.vaccine_type} onChange={(e) => handleChange(e, 'vaccine_type')}>
-                                    <option>เลือกชนิดวัคซีน</option>
-                                    <option value="Inactivated">Inactivated</option>
-                                    <option value="Live">Live attenuated</option>
-                                </Form.Select>
-                            </Form>
-                        </Col>
-                        <Col md={6}>
-                            <Form.Label>วัคซีนป้องกัน</Form.Label>
-                            <Form.Control type="text" value={formData.name_en} onChange={(e) => handleChange(e, 'name_en')} />
-                        </Col>
-                    </Row>
-                    <Row className="mb-3">
-                        <Col md={6}>
-                            <Form.Label>ราคา (บาท/เข็ม)</Form.Label>
-                            <Form.Control type="number" value={formData.price} onChange={(e) => handleChange(e, 'price')} />
-                        </Col>
-                    </Row>
-                    <Row className="mb-3"><Col md={12}><p className="">การบริหารวัคซีน</p></Col></Row>
-                    <Row>
-                        <Col md={6}>
-                            <Form.Label>ขนาด (ml)</Form.Label>
-                            <Form.Control type="text" value={formData.dosage_ml} onChange={(e) => handleChange(e, 'dosage_ml')} />
-                        </Col>
-                        <Col md={6}>
-                            <Form>
-                                <label className="mb-2">ตำแหน่งที่ฉีด</label>
-                                <Form.Select value={formData.admin_route} onChange={(e) => handleChange(e, 'admin_route')}>
-                                    <option>เลือกตำแหน่งที่ฉีด</option>
-                                    <option value="Instramuscular">ฉีดเข้ากล้ามเนื้อ (Instramuscular)</option>
-                                    <option value="Subcutaneous">ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous)</option>
-                                </Form.Select>
-                            </Form>
-                        </Col>
-                    </Row>
-                </Card.Body>
-            </Card>
+  return (
+    <Container className="mt-5 pb-5" style={{ maxWidth: "900px" }}>
+      <h3 className="text-center mb-4 fw-bold">เพิ่มวัคซีนใหม่</h3>
 
-            {/* ส่วนอื่นคงเดิม 100% */}
-            <Card className="mb-4 shadow-sm border-0">
-                <Card.Header className="py-3" style={headerStyle}>การจำกัดอายุ</Card.Header>
-                <Card.Body className="p-4">
-                    {ageConditions.map((item, index) => (
-                        <AgeLimitCondition key={index} index={index} data={item} onChange={handleConditionChange} onRemove={removeCondition} />
-                    ))}
-                    <Button variant="primary" onClick={addCondition} style={{ backgroundColor: "#4a7fc1", border: "none" }}>+ เพิ่มเงื่อนไขอายุ</Button>
-                </Card.Body>
-            </Card>
+      {/* Section 1: ข้อมูลวัคซีน */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          ข้อมูลวัคซีน
+        </Card.Header>
+        <Card.Body className="p-4">
+          <Row className="mb-3">
+            <Col md={6}>
+              <Form.Label>ชื่อวัคซีน</Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.name_th}
+                onChange={(e) => handleChange(e, "name_th")}
+              />
+            </Col>
+            <Col md={6}>
+              <Form.Label>ชื่อการค้า</Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.trade_name}
+                onChange={(e) => handleChange(e, "trade_name")}
+              />
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col md={6}>
+              <Form.Label>ชนิดวัคซีน</Form.Label>
+              <Form.Select
+                value={formData.vaccine_type}
+                onChange={(e) => handleChange(e, "vaccine_type")}
+              >
+                <option value="">เลือกชนิดวัคซีน</option>
+                <option value="Inactivated">Inactivated</option>
+                <option value="Live">Live attenuated</option>
+              </Form.Select>
+            </Col>
+            <Col md={6}>
+              <Form.Label>วัคซีนป้องกัน</Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.name_en}
+                onChange={(e) => handleChange(e, "name_en")}
+              />
+            </Col>
+          </Row>
+          <Row className="mb-3">
+            <Col md={6}>
+              <Form.Label>ราคา (บาท/เข็ม)</Form.Label>
+              <Form.Control
+                type="number"
+                value={formData.price}
+                onChange={(e) => handleChange(e, "price")}
+              />
+            </Col>
+          </Row>
+          <hr />
+          <p className="fw-bold">การบริหารวัคซีน</p>
+          <Row>
+            <Col md={6}>
+              <Form.Label>ขนาด (ml)</Form.Label>
+              <Form.Control
+                type="text"
+                value={formData.dosage_ml}
+                onChange={(e) => handleChange(e, "dosage_ml")}
+              />
+            </Col>
+            <Col md={6}>
+              <Form.Label>ตำแหน่งที่ฉีด</Form.Label>
+              <Form.Select
+                value={formData.admin_route}
+                onChange={(e) => handleChange(e, "admin_route")}
+              >
+                <option value="">เลือกตำแหน่งที่ฉีด</option>
+                <option value="Instramuscular">ฉีดเข้ากล้ามเนื้อ (IM)</option>
+                <option value="Subcutaneous">ฉีดเข้าชั้นใต้ผิวหนัง (SC)</option>
+              </Form.Select>
+            </Col>
+          </Row>
+        </Card.Body>
+      </Card>
 
-            {/* (ข้ามส่วนโรคและแพ้ไปแสดงว่าเหมือนเดิม เพื่อประหยัดพื้นที่ แต่คุณใช้โค้ดเดิมได้เลย) */}
-            <Card className="mb-4 shadow-sm border-0"><Card.Header className="py-3" style={headerStyle}>การจำกัดโรคประจำตัว</Card.Header><Card.Body className="p-4">{diseaseConditions.map((item, index) => (<DiseaseCondition key={`disease-${index}`} index={index} data={item} onChange={handleDiseaseChange} onRemove={removeDiseaseCondition} />))}<Button variant="primary" onClick={addDiseaseCondition} className="mt-2" style={{ backgroundColor: "#4a7fc1", border: "none" }}>+ เพิ่มเงื่อนไขโรคประจำตัว</Button></Card.Body></Card>
-            <Card className="mb-4 shadow-sm border-0"><Card.Header className="py-3" style={headerStyle}>การแพ้อาหาร ยา และวัคซีน</Card.Header><Card.Body className="p-4"><p className="fw-bold">การแพ้อาหาร</p><Row className="mb-4"><Col md={3} className="mb-2"><div className="border rounded p-2 d-flex align-items-center"><Form.Check type="checkbox" label="ไข่ไก่" checked={allergies.egg} onChange={() => handleAllergyChange('egg')} /></div></Col><Col md={3} className="mb-2"><div className="border rounded p-2 d-flex align-items-center"><Form.Check type="checkbox" label="นมวัว" checked={allergies.milk} onChange={() => handleAllergyChange('milk')} /></div></Col><Col md={3} className="mb-2"><div className="border rounded p-2 d-flex align-items-center"><Form.Check type="checkbox" label="เจลาติน" checked={allergies.gelatin} onChange={() => handleAllergyChange('gelatin')} /></div></Col><Col md={3} className="mb-2"><div className="border rounded p-2 d-flex align-items-center"><Form.Check type="checkbox" label="ยีสต์" checked={allergies.yeast} onChange={() => handleAllergyChange('yeast')} /></div></Col></Row></Card.Body></Card>
-            <Card className="mb-4 shadow-sm border-0"><Card.Header className="py-3" style={headerStyle}>ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง</Card.Header><Card.Body className="p-4"><Form.Control as="textarea" rows={5} /></Card.Body></Card>
+      {/* Section 2: การจำกัดอายุ */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          การจำกัดอายุ
+        </Card.Header>
+        <Card.Body className="p-4">
+          {ageConditions.map((item, index) => (
+            <><AgeLimitCondition
+              key={index}
+              index={index}
+              data={item}
+              onChange={handleConditionChange}
+              onRemove={removeCondition} /><Form.Control
+                as="textarea"
+                rows={5}
+                value={formData.side_effects}
+                onChange={(e) => handleChange(e, "side_effects")}
+                placeholder="ระบุรายละเอียดเพิ่มเติม..." /></>
+          ))}
+          <Button
+            variant="primary"
+            onClick={addCondition}
+            className="mt-3"
+            style={{ backgroundColor: "#4a7fc1", border: "none" }}
+          >
+            + เพิ่มเงื่อนไขอายุ
+          </Button>
+        </Card.Body>
+      </Card>
 
-            <Card className="mb-4 shadow-sm border-0">
-                <Card.Header className="py-3" style={headerStyle}>เพิ่มรูปภาพ</Card.Header>
-                <Card.Body className="p-4">
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/jpeg, image/png" />
-                    <div className="d-flex flex-column justify-content-center align-items-center rounded" onClick={handleUploadClick} style={{ border: "2px dashed #dee2e6", height: "200px", cursor: "pointer", backgroundColor: selectedFile ? "#f8f9fa" : "#fff" }}>
-                        {selectedFile ? <div className="text-center"><CloudArrowUp size={40} className="text-success mb-2" /><h5 className="text-dark fw-bold">{selectedFile.name}</h5><Button variant="outline-danger" size="sm" className="mt-3" onClick={handleRemoveFile}>ลบรูปภาพ</Button></div> : <><CloudArrowUp size={40} className="text-primary mb-2" /><div className="text-muted fw-bold">Drag & drop files or <span className="text-primary">Browse</span></div></>}
-                    </div>
-                </Card.Body>
-            </Card>
+      {/* Section 3: โรคประจำตัว */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          การจำกัดโรคประจำตัว
+        </Card.Header>
+        <Card.Body className="p-4">
+          {diseaseConditions.map((item, index) => (
+            <><DiseaseCondition
+              key={`disease-${index}`}
+              index={index}
+              data={item}
+              onChange={handleDiseaseChange}
+              onRemove={removeDiseaseCondition} /><Form.Control
+                as="textarea"
+                rows={5}
+                value={formData.side_effects}
+                onChange={(e) => handleChange(e, "side_effects")}
+                placeholder="ระบุรายละเอียดเพิ่มเติม..." /></>
+          ))}
+          <Button
+            variant="primary"
+            onClick={addDiseaseCondition}
+            className="mt-3"
+            style={{ backgroundColor: "#4a7fc1", border: "none" }}
+          >
+            + เพิ่มเงื่อนไขโรคประจำตัว
+          </Button>
+        </Card.Body>
+      </Card>
 
-            <div className="d-flex justify-content-end">
-                {/* เปลี่ยน onClick ให้เรียก handleSave */}
-                <Button variant="primary" className="px-5 py-2" style={{ backgroundColor: "#4a7fc1", border: "none" }} onClick={handleSave}>
-                    เสร็จสิ้น
+      {/* Section 4: แพ้อาหาร/ยา (แก้ไข Syntax Error ตรงนี้) */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          การแพ้อาหาร ยา และวัคซีน
+        </Card.Header>
+        <Card.Body className="p-4">
+          <p className="fw-bold">การแพ้อาหาร</p>
+          <Row className="mb-4">
+            {["egg", "milk", "gelatin", "yeast"].map((item) => (
+              <Col md={3} key={item} className="mb-2">
+                <div className="border rounded p-2">
+                  <Form.Check
+                    type="checkbox"
+                    label={
+                      item === "egg"
+                        ? "ไข่ไก่"
+                        : item === "milk"
+                          ? "นมวัว"
+                          : item === "gelatin"
+                            ? "เจลาติน"
+                            : "ยีสต์"
+                    }
+                    checked={allergies[item]}
+                    onChange={() => handleAllergyChange(item)}
+                  />
+                </div>
+              </Col>
+            ))}
+          </Row>
+          <p className="fw-bold">การแพ้ยาและวัคซีน</p>
+          <Row>
+            {[1, 2, 3, 4].map((num) => (
+              <Col md={3} key={num} className="mb-2">
+                <div className="border rounded p-2">
+                  <Form.Check
+                    type="checkbox"
+                    label={`ตัวเลือก ${num}`}
+                    checked={allergies[`drugOption${num}`]}
+                    onChange={() => handleAllergyChange(`drugOption${num}`)}
+                  />
+                </div>
+              </Col>
+            ))}
+          </Row>
+        </Card.Body>
+      </Card>
+
+      {/* Section 5: Side Effects */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง
+        </Card.Header>
+        <Card.Body className="p-4">
+          <Form.Control
+            as="textarea"
+            rows={5}
+            value={formData.side_effects}
+            onChange={(e) => handleChange(e, "side_effects")}
+            placeholder="ระบุรายละเอียดผลข้างเคียงหรือข้อควรระวัง..."
+          />
+        </Card.Body>
+      </Card>
+
+      {/* Section 6: Image Upload */}
+      <Card className="mb-4 shadow-sm border-0">
+        <Card.Header className="py-3" style={headerStyle}>
+          เพิ่มรูปภาพ
+        </Card.Header>
+        <Card.Body className="p-4">
+          <input
+            type="file"
+            ref={fileInputRef}
+            onChange={handleFileChange}
+            style={{ display: "none" }}
+            accept="image/*"
+          />
+          <div
+            className="d-flex flex-column justify-content-center align-items-center rounded"
+            onClick={handleUploadClick}
+            style={{
+              border: "2px dashed #dee2e6",
+              height: "200px",
+              cursor: "pointer",
+              backgroundColor: selectedFile ? "#f8f9fa" : "#fff",
+            }}
+          >
+            {selectedFile ? (
+              <div className="text-center">
+                <CloudArrowUp size={40} className="text-success mb-2" />
+                <h5 className="fw-bold">{selectedFile.name}</h5>
+                <Button
+                  variant="outline-danger"
+                  size="sm"
+                  onClick={handleRemoveFile}
+                >
+                  ลบรูปภาพ
                 </Button>
-            </div>
-        </Container>
-    );
+              </div>
+            ) : (
+              <>
+                <CloudArrowUp size={40} className="text-primary mb-2" />
+                <div className="text-muted fw-bold">
+                  คลิกเพื่อเลือกรูปภาพวัคซีน
+                </div>
+              </>
+            )}
+          </div>
+        </Card.Body>
+      </Card>
+
+      <div className="d-flex justify-content-end">
+        <Button variant="secondary" className="me-2 px-4" onClick={onBack}>
+          ยกเลิก
+        </Button>
+        <Button
+          variant="primary"
+          className="px-5"
+          style={{ backgroundColor: "#4a7fc1", border: "none" }}
+          onClick={handleSave}
+        >
+          บันทึกข้อมูล
+        </Button>
+      </div>
+    </Container>
+  );
 }
 
 export default AddVaccine;

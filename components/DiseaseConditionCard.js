@@ -74,11 +74,12 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>
-            <option value="everyYear">0,1,6</option>
-            <option value="everyYear">0,1,2,6</option>
-            <option value="everyYear">0,3</option>
+            <option value="one-time">ครั้งเดียว</option>
+            <option value="0,1,6">0,1,6</option>
+            <option value="0,1,2,6">0,1,2,6</option>
+            <option value="0,3">0,3</option>
             <option value="everyYear">ทุกปี</option>
-            <option value="everyYear">ทุก 10 ปี</option>
+            <option value="every 10 year">ทุก 10 ปี</option>
           </Form.Select>
         </Col>
       </Row>

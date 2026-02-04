@@ -65,7 +65,7 @@ function Admin() {
                                     <th scope="col">ชื่อวัคซีน</th>
                                     <th scope="col">ชื่อการค้า</th>
                                     <th scope="col">ชนิดวัคซีน</th>
-                                    <th scope="col">ขนาด/วิธีใช้</th>
+                                    {/* <th scope="col">ขนาด/วิธีใช้</th> */}
                                     <th scope="col">ราคา</th>
                                     <th scope="col" className="text-center">
                                         จัดการ
@@ -120,10 +120,10 @@ function Admin() {
                                             </td>
                                             <td className="text-dark">{item.trade_name}</td>
                                             <td className="text-dark">{item.vaccine_type}</td>
-                                            <td className="text-dark small">
+                                            {/* <td className="text-dark small">
                                                 {item.administration ||
                                                     (item.dosage_ml ? item.dosage_ml + " ml" : "-")}
-                                            </td>
+                                            </td> */}
                                             <td className="text-success fw-bold">
                                                 {item.price ? `฿ ${item.price.toLocaleString()}` : "-"}
                                             </td>
