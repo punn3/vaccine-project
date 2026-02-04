@@ -53,36 +53,61 @@ function AddVaccine({ onBack }) {
         setFormData({ ...formData, [field]: e.target.value });
     };
 
-    const handleSave = async () => {
-        if (!formData.name_th) {
-            alert("กรุณากรอกชื่อวัคซีน");
-            return;
-        }
+    // 3. ฟังก์ชันบันทึก (ฉบับอัปเกรด)
+  const handleSave = async () => {
+    if (!formData.name_th) {
+      alert("กรุณากรอกชื่อวัคซีน");
+      return;
+    }
 
-        // รวมข้อมูลทั้งหมดเข้าด้วยกันก่อนส่ง
-        const payload = {
-            id: Math.floor(Math.random() * 100000),
-            ...formData,
-            age_conditions: ageConditions,
-            disease_conditions: diseaseConditions,
-            allergies: allergies,
-            image_url: selectedFile ? `/img/${selectedFile.name}` : null,
-        };
+    try {
+      let finalImageUrl = null; // เริ่มต้นเป็น null
 
-        try {
-            const res = await fetch("/api/vaccines", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify(payload),
-            });
-            if (res.ok) {
-                alert("✅ เพิ่มวัคซีนสำเร็จ!");
-                onBack();
-            }
-        } catch (err) {
-            alert("Error connecting to server");
-        }
-    };
+      // --- ส่วนที่เพิ่ม: ถ้ามีการเลือกไฟล์ ให้ทำการอัปโหลดก่อน ---
+      if (selectedFile) {
+        const uploadData = new FormData();
+        uploadData.append("file", selectedFile);
+
+        const uploadRes = await fetch("/api/upload", {
+          method: "POST",
+          body: uploadData,
+        });
+
+        if (!uploadRes.ok) throw new Error("Upload failed");
+
+        const uploadJson = await uploadRes.json();
+        finalImageUrl = uploadJson.imageUrl; // ได้ path เช่น /img/123456_pic.png
+      }
+
+      // เตรียมข้อมูลส่งเข้า Database
+      const payload = {
+        id: Math.floor(Math.random() * 100000), // ใส่ไว้กันเหนียวตามโค้ดเดิม
+        ...formData,
+        age_conditions: ageConditions,
+        disease_conditions: diseaseConditions,
+        allergies: allergies,
+        image_url: finalImageUrl, // ✅ ใช้ Path ที่ได้จากการอัปโหลดจริง
+      };
+
+      // ส่งข้อมูลทั้งหมดไปบันทึก
+      const res = await fetch("/api/vaccines", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+
+      if (res.ok) {
+        alert("✅ เพิ่มวัคซีนและอัปโหลดรูปสำเร็จ!");
+        onBack();
+      } else {
+        alert("❌ บันทึกข้อมูลไม่สำเร็จ");
+      }
+
+    } catch (err) {
+      console.error(err);
+      alert("เกิดข้อผิดพลาด: " + err.message);
+    }
+  };
 
     // Condition Handlers
     const addCondition = () =>
