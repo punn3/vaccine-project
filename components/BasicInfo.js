@@ -52,7 +52,8 @@ function BasicInfo() {
   useEffect(() => {
     const savedData = localStorage.getItem("vaccineFormData");
     if (savedData) {
-      setFormData(JSON.parse(savedData));
+      // setFormData(JSON.parse(savedData));
+      const parsed = JSON.parse(savedData);
     }
   }, []);
 
