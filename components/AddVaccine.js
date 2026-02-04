@@ -22,7 +22,7 @@ function AddVaccine({ onBack }) {
 
   // State สำหรับเงื่อนไขต่างๆ
   const [ageConditions, setAgeConditions] = useState([
-    { minAge: "", maxAge: "", dose: "", frequency: "" },
+    { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
   ]);
   const [diseaseConditions, setDiseaseConditions] = useState([
     {
@@ -31,6 +31,7 @@ function AddVaccine({ onBack }) {
       dose: "",
       frequency: "",
       recommendation: "",
+      detail: "",
     },
   ]);
   const [allergies, setAllergies] = useState({
@@ -223,17 +224,31 @@ function AddVaccine({ onBack }) {
         </Card.Header>
         <Card.Body className="p-4">
           {ageConditions.map((item, index) => (
-            <><AgeLimitCondition
-              key={index}
-              index={index}
-              data={item}
-              onChange={handleConditionChange}
-              onRemove={removeCondition} /><Form.Control
-                as="textarea"
-                rows={5}
-                value={formData.side_effects}
-                onChange={(e) => handleChange(e, "side_effects")}
-                placeholder="ระบุรายละเอียดเพิ่มเติม..." /></>
+            <div
+              key={`age-group-${index}`}
+              className="mb-4 p-3 border rounded bg-light"
+            >
+              <AgeLimitCondition
+                index={index}
+                data={item}
+                onChange={handleConditionChange}
+                onRemove={removeCondition}
+              />
+              <Form.Group className="mt-2">
+                <Form.Label className="small fw-bold">
+                  รายละเอียดเพิ่มเติมสำหรับช่วงอายุนี้
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  placeholder="เช่น เฉพาะผู้ที่มีความเสี่ยงสูง..."
+                  value={item.detail}
+                  onChange={(e) =>
+                    handleConditionChange(index, "detail", e.target.value)
+                  }
+                />
+              </Form.Group>
+            </div>
           ))}
           <Button
             variant="primary"
@@ -253,17 +268,31 @@ function AddVaccine({ onBack }) {
         </Card.Header>
         <Card.Body className="p-4">
           {diseaseConditions.map((item, index) => (
-            <><DiseaseCondition
-              key={`disease-${index}`}
-              index={index}
-              data={item}
-              onChange={handleDiseaseChange}
-              onRemove={removeDiseaseCondition} /><Form.Control
-                as="textarea"
-                rows={5}
-                value={formData.side_effects}
-                onChange={(e) => handleChange(e, "side_effects")}
-                placeholder="ระบุรายละเอียดเพิ่มเติม..." /></>
+            <div
+              key={`disease-group-${index}`}
+              className="mb-4 p-3 border rounded bg-light"
+            >
+              <DiseaseCondition
+                index={index}
+                data={item}
+                onChange={handleDiseaseChange}
+                onRemove={removeDiseaseCondition}
+              />
+              <Form.Group className="mt-2">
+                <Form.Label className="small fw-bold">
+                  คำแนะนำเพิ่มเติมสำหรับกลุ่มโรคนี้
+                </Form.Label>
+                <Form.Control
+                  as="textarea"
+                  rows={2}
+                  placeholder="ระบุคำแนะนำทางการแพทย์เพิ่มเติม..."
+                  value={item.detail}
+                  onChange={(e) =>
+                    handleDiseaseChange(index, "detail", e.target.value)
+                  }
+                />
+              </Form.Group>
+            </div>
           ))}
           <Button
             variant="primary"
