@@ -83,11 +83,12 @@ function Admin() {
                         <table className="table table-hover mb-0">
                             <thead className="table-light align-middle">
                                 <tr className="text-center fw-bold">
-                                    <th style={{ width: "120px" }}>รูปวัคซีน</th>
+                                    <th style={{ width: "180px" }}>รูปวัคซีน</th>
                                     <th>ชื่อวัคซีน</th>
                                     <th>ชื่อการค้า</th>
                                     <th>ชนิด</th>
                                     <th>ราคา</th>
+                                    <th>สถานะการให้บริการ</th>
                                     <th>จัดการ</th>
                                 </tr>
                             </thead>
@@ -107,8 +108,8 @@ function Admin() {
                                                         src={item.image_url}
                                                         alt=""
                                                         style={{
-                                                            width: "60px",
-                                                            height: "45px",
+                                                            width: "120px",
+                                                            height: "90px",
                                                             objectFit: "cover",
                                                             borderRadius: "4px",
                                                         }}
@@ -116,8 +117,8 @@ function Admin() {
                                                 ) : (
                                                     <div
                                                         style={{
-                                                            width: "60px",
-                                                            height: "45px",
+                                                            width: "120px",
+                                                            height: "90px",
                                                             backgroundColor: "#dee2e6",
                                                             borderRadius: "4px",
                                                             margin: "0 auto",
@@ -125,34 +126,37 @@ function Admin() {
                                                     ></div>
                                                 )}
                                             </td>
-                                            <td className="text-center">
+                                            <td className="text-start">
                                                 <div className="fw-bold">{item.name_th}</div>
                                                 <small className="text-muted">{item.name_en}</small>
                                             </td>
-                                            <td>{item.trade_name}</td>
-                                            <td>{item.vaccine_type}</td>
+                                            <td className="text-start">{item.trade_name}</td>
+                                            <td className="text-start">{item.vaccine_type}</td>
                                             <td className="text-success fw-bold">
                                                 ฿{Number(item.price).toLocaleString()}
                                             </td>
+                                            <td className={item.is_available ? "text-success fw-bold" : "text-muted fw-bold"}>
+                                                {item.is_available ? "มีจำหน่าย" : "ไม่มีจำหน่าย"}
+                                            </td>
                                             <td className="text-center">
                                                 <div className="d-flex justify-content-center border-start ps-2">
-                                                <Button
-                                                    variant="link"
-                                                    className="p-1"
-                                                    onClick={() => handleEditClick(item)}
-                                                >
-                                                    <PencilSquare
-                                                        size={18}
-                                                        style={{ color: "#6f42c1" }}
-                                                    />
-                                                </Button>
-                                                <Button
-                                                    variant="link"
-                                                    className="p-1"
-                                                    onClick={() => handleDelete(item.id)}
-                                                >
-                                                    <Trash size={18} className="text-danger" />
-                                                </Button>
+                                                    <Button
+                                                        variant="link"
+                                                        className="p-1"
+                                                        onClick={() => handleEditClick(item)}
+                                                    >
+                                                        <PencilSquare
+                                                            size={18}
+                                                            style={{ color: "#6f42c1" }}
+                                                        />
+                                                    </Button>
+                                                    <Button
+                                                        variant="link"
+                                                        className="p-1"
+                                                        onClick={() => handleDelete(item.id)}
+                                                    >
+                                                        <Trash size={18} className="text-danger" />
+                                                    </Button>
                                                 </div>
                                             </td>
                                         </tr>
