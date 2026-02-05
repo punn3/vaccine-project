@@ -1,71 +1,54 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useRef, useEffect } from "react"; // เพิ่ม useEffect
 import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { CloudArrowUp } from "react-bootstrap-icons";
 import AgeLimitCondition from "./AgeConditionCard";
 import DiseaseCondition from "./DiseaseConditionCard";
 
-function AddVaccine({ onBack }) {
-    // 1. State สำหรับข้อมูลหลัก
+// รับ prop 'data' เพิ่มเข้ามาเพื่อนำข้อมูลเดิมมาตั้งค่า state
+function EditVaccine({ onBack, data }) {
+    // 1. State สำหรับข้อมูลหลัก (ดึงค่าจาก data มาเป็นค่าเริ่มต้น)
     const [formData, setFormData] = useState({
-        name_th: "",
-        trade_name: "",
-        vaccine_type: "",
-        name_en: "",
-        price: "",
-        dosage_ml: "",
-        admin_route: "",
-        side_effects: "",
-        is_available: true,
+        name_th: data?.name_th || "",
+        trade_name: data?.trade_name || "",
+        vaccine_type: data?.vaccine_type || "",
+        name_en: data?.name_en || "",
+        price: data?.price || "",
+        dosage_ml: data?.dosage_ml || "",
+        admin_route: data?.admin_route || "",
+        side_effects: data?.side_effects || "",
+        is_available: data?.is_available !== undefined ? data.is_available : true,
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null); // แก้ไข: ลบ data?.image_url ออก
+    const [previewImage, setPreviewImage] = useState(data?.image_url || null); // State สำหรับโชว์รูป
     const fileInputRef = useRef(null);
 
-    // 2. จัดการรูปภาพ Preview เมื่อไฟล์เปลี่ยน
-    useEffect(() => {
-        if (!selectedFile) {
-            setPreviewImage(null);
-            return;
+    // State สำหรับเงื่อนไขต่างๆ (ดึงค่าจาก data)
+    const [ageConditions, setAgeConditions] = useState(
+        data?.age_conditions?.length > 0 ? data.age_conditions : [{ minAge: "", maxAge: "", dose: "", frequency: "", detail: "" }]
+    );
+    const [diseaseConditions, setDiseaseConditions] = useState(
+        data?.disease_conditions?.length > 0 ? data.disease_conditions : [{ selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "", detail: "" }]
+    );
+    const [allergies, setAllergies] = useState(
+        data?.allergies || {
+            egg: false,
+            milk: false,
+            gelatin: false,
+            yeast: false,
+            drugOption1: false,
+            drugOption2: false,
+            drugOption3: false,
+            drugOption4: false,
         }
-
-        const objectUrl = URL.createObjectURL(selectedFile);
-        setPreviewImage(objectUrl);
-
-        // Cleanup function เพื่อคืนหน่วยความจำ
-        return () => URL.revokeObjectURL(objectUrl);
-    }, [selectedFile]);
-
-    // State สำหรับเงื่อนไขต่างๆ
-    const [ageConditions, setAgeConditions] = useState([
-        { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
-    ]);
-    const [diseaseConditions, setDiseaseConditions] = useState([
-        {
-            selectedDisease: "",
-            kidneyStage: "",
-            dose: "",
-            frequency: "",
-            recommendation: "",
-            detail: "",
-        },
-    ]);
-    const [allergies, setAllergies] = useState({
-        egg: false,
-        milk: false,
-        gelatin: false,
-        yeast: false,
-        drugOption1: false,
-        drugOption2: false,
-        drugOption3: false,
-        drugOption4: false,
-    });
+    );
 
     // --- Functions ---
     const handleChange = (e, field) => {
         setFormData({ ...formData, [field]: e.target.value });
     };
 
+    // 3. ฟังก์ชันบันทึก (ฉบับแก้ไข)
     const handleSave = async () => {
         if (!formData.name_th) {
             alert("กรุณากรอกชื่อวัคซีน");
@@ -73,9 +56,9 @@ function AddVaccine({ onBack }) {
         }
 
         try {
-            let finalImageUrl = null;
+            let finalImageUrl = data?.image_url; // เริ่มต้นใช้รูปเดิมจาก DB
 
-            // อัปโหลดรูปภาพก่อน (ถ้ามี)
+            // --- ส่วนอัปโหลดไฟล์ใหม่ (ถ้ามีการเลือกไฟล์ใหม่) ---
             if (selectedFile) {
                 const uploadData = new FormData();
                 uploadData.append("file", selectedFile);
@@ -91,9 +74,8 @@ function AddVaccine({ onBack }) {
                 finalImageUrl = uploadJson.imageUrl;
             }
 
-            // เตรียม Payload
+            // เตรียมข้อมูลส่งเข้า Database โดยใช้ ID เดิม
             const payload = {
-                id: Math.floor(Math.random() * 100000),
                 ...formData,
                 age_conditions: ageConditions,
                 disease_conditions: diseaseConditions,
@@ -101,14 +83,15 @@ function AddVaccine({ onBack }) {
                 image_url: finalImageUrl,
             };
 
-            const res = await fetch("/api/vaccines", {
-                method: "POST",
+            // ส่งข้อมูลไปแก้ไข (ใช้ PUT และส่ง ID ไปใน URL)
+            const res = await fetch(`/api/vaccines/${data.id}`, {
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
             if (res.ok) {
-                alert("✅ เพิ่มวัคซีนสำเร็จ!");
+                alert("✅ แก้ไขข้อมูลวัคซีนสำเร็จ!");
                 onBack();
             } else {
                 alert("❌ บันทึกข้อมูลไม่สำเร็จ");
@@ -119,13 +102,14 @@ function AddVaccine({ onBack }) {
         }
     };
 
-    // Handlers สำหรับ Dynamic Fields
+    // Condition Handlers
     const addCondition = () =>
-        setAgeConditions([...ageConditions, { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" }]);
-    
+        setAgeConditions([
+            ...ageConditions,
+            { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
+        ]);
     const removeCondition = (i) =>
         setAgeConditions(ageConditions.filter((_, idx) => idx !== i));
-    
     const handleConditionChange = (i, f, v) => {
         const n = [...ageConditions];
         n[i][f] = v;
@@ -133,11 +117,19 @@ function AddVaccine({ onBack }) {
     };
 
     const addDiseaseCondition = () =>
-        setDiseaseConditions([...diseaseConditions, { selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "", detail: "" }]);
-    
+        setDiseaseConditions([
+            ...diseaseConditions,
+            {
+                selectedDisease: "",
+                kidneyStage: "",
+                dose: "",
+                frequency: "",
+                recommendation: "",
+                detail: "",
+            },
+        ]);
     const removeDiseaseCondition = (i) =>
         setDiseaseConditions(diseaseConditions.filter((_, idx) => idx !== i));
-    
     const handleDiseaseChange = (i, f, v) => {
         const n = [...diseaseConditions];
         n[i][f] = v;
@@ -148,15 +140,18 @@ function AddVaccine({ onBack }) {
         setAllergies({ ...allergies, [f]: !allergies[f] });
 
     const handleFileChange = (e) => {
-        if (e.target.files && e.target.files[0]) {
-            setSelectedFile(e.target.files[0]);
+        if (e.target.files[0]) {
+            const file = e.target.files[0];
+            setSelectedFile(file);
+            setPreviewImage(URL.createObjectURL(file)); // สร้าง Preview สำหรับรูปใหม่
         }
     };
-
+    const handleUploadClick = () => fileInputRef.current.click();
     const handleRemoveFile = (e) => {
         e.stopPropagation();
         setSelectedFile(null);
-        if (fileInputRef.current) fileInputRef.current.value = "";
+        setPreviewImage(null); // เคลียร์ preview
+        fileInputRef.current.value = "";
     };
 
     const headerStyle = {
@@ -167,9 +162,9 @@ function AddVaccine({ onBack }) {
 
     return (
         <Container className="mt-5 pb-5" style={{ maxWidth: "900px" }}>
-            <h3 className="text-center mb-4 fw-bold">เพิ่มวัคซีนใหม่</h3>
+            <h3 className="text-center mb-4 fw-bold">แก้ไขข้อมูลวัคซีน</h3>
 
-             {/* Section 1: ข้อมูลวัคซีน */}
+            {/* Section 1: ข้อมูลวัคซีน */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     ข้อมูลวัคซีน
@@ -226,12 +221,14 @@ function AddVaccine({ onBack }) {
                         <Col md={6}>
                             <Form.Label>สถานะการให้บริการ</Form.Label>
                             <Form.Check
-                            className="mt-2"
+                                className="mt-2"
                                 type="switch"
                                 id="is_available"
                                 label={formData.is_available ? "มีจำหน่าย" : "ไม่มีจำหน่าย"}
                                 checked={formData.is_available}
-                                onChange={(e) => setFormData({ ...formData, is_available: e.target.checked })}
+                                onChange={(e) =>
+                                    setFormData({ ...formData, is_available: e.target.checked })
+                                }
                             />
                         </Col>
                     </Row>
@@ -349,7 +346,7 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 4: แพ้อาหาร/ยา (แก้ไข Syntax Error ตรงนี้) */}
+            {/* Section 4: แพ้อาหาร/ยา */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     การแพ้อาหาร ยา และวัคซีน
@@ -412,26 +409,52 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 6: Image Upload */}
+            {/* Section 6: Image Upload (รองรับการ Preview รูปเดิม) */}
             <Card className="mb-4 shadow-sm border-0">
-                <Card.Header className="py-3" style={headerStyle}>รูปภาพวัคซีน</Card.Header>
+                <Card.Header className="py-3" style={headerStyle}>
+                    รูปภาพวัคซีน
+                </Card.Header>
                 <Card.Body className="p-4">
-                    <input type="file" ref={fileInputRef} onChange={handleFileChange} style={{ display: "none" }} accept="image/*" />
+                    <input
+                        type="file"
+                        ref={fileInputRef}
+                        onChange={handleFileChange}
+                        style={{ display: "none" }}
+                        accept="image/*"
+                    />
                     <div
                         className="d-flex flex-column justify-content-center align-items-center rounded"
-                        onClick={() => fileInputRef.current.click()}
-                        style={{ border: "2px dashed #dee2e6", height: "250px", cursor: "pointer", backgroundColor: previewImage ? "#f8f9fa" : "#fff" }}
+                        onClick={handleUploadClick}
+                        style={{
+                            border: "2px dashed #dee2e6",
+                            height: "250px",
+                            cursor: "pointer",
+                            backgroundColor: previewImage ? "#f8f9fa" : "#fff",
+                        }}
                     >
                         {previewImage ? (
                             <div className="text-center">
-                                <img src={previewImage} alt="Preview" style={{ maxHeight: "150px", marginBottom: "15px", borderRadius: "8px" }} />
-                                <h6 className="fw-bold">{selectedFile?.name || "รูปภาพที่เลือก"}</h6>
-                                <Button variant="outline-danger" size="sm" onClick={handleRemoveFile}>ลบรูปภาพ</Button>
+                                <img 
+                                    src={previewImage} 
+                                    alt="Preview" 
+                                    style={{ maxHeight: "150px", marginBottom: "15px", borderRadius: "8px" }} 
+                                />
+                                <h6 className="fw-bold">{selectedFile ? selectedFile.name : "รูปภาพปัจจุบัน"}</h6>
+                                <Button
+                                    variant="outline-danger"
+                                    size="sm"
+                                    className="mt-2"
+                                    onClick={handleRemoveFile}
+                                >
+                                    ลบรูปภาพ
+                                </Button>
                             </div>
                         ) : (
                             <>
                                 <CloudArrowUp size={40} className="text-primary mb-2" />
-                                <div className="text-muted fw-bold">คลิกเพื่อเลือกรูปภาพวัคซีน</div>
+                                <div className="text-muted fw-bold">
+                                    คลิกเพื่อเปลี่ยนรูปภาพวัคซีน
+                                </div>
                             </>
                         )}
                     </div>
@@ -439,11 +462,20 @@ function AddVaccine({ onBack }) {
             </Card>
 
             <div className="d-flex justify-content-end">
-                <Button variant="secondary" className="me-2 px-4" onClick={onBack}>ยกเลิก</Button>
-                <Button variant="primary" className="px-5" onClick={handleSave} style={{ backgroundColor: "#4a7fc1", border: "none" }}>บันทึกข้อมูล</Button>
+                <Button variant="secondary" className="me-2 px-4" onClick={onBack}>
+                    ยกเลิก
+                </Button>
+                <Button
+                    variant="primary"
+                    className="px-5"
+                    style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    onClick={handleSave}
+                >
+                    บันทึกข้อมูล
+                </Button>
             </div>
         </Container>
     );
 }
 
-export default AddVaccine;
+export default EditVaccine;
