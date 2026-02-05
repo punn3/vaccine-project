@@ -48,6 +48,24 @@ function BasicInfo() {
     }
   });
 
+  // 1. สร้าง State สำหรับเก็บรายชื่อวัคซีนจาก Database
+  const [vaccineList, setVaccineList] = useState([]);
+
+  // 2. ดึงข้อมูลวัคซีนจาก API เมื่อหน้าเว็บโหลด
+  useEffect(() => {
+    const fetchVaccines = async () => {
+      try {
+        const res = await fetch('/api/vaccines');
+        if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
+        const data = await res.json();
+        setVaccineList(data); // เก็บข้อมูลลง State
+      } catch (err) {
+        console.error("Error fetching vaccines:", err);
+      }
+    };
+    fetchVaccines();
+  }, []);
+
   //โหลดข้อมูล
   useEffect(() => {
     const savedData = localStorage.getItem("vaccineFormData");
@@ -404,7 +422,7 @@ function BasicInfo() {
               {["radio"].map((type) => (
                 <div key={`inline-${type}`}>
                   {/* วัคซีนที่ต้องการฉีด */}
-                  <Row className="row-gap-3">
+                  <Row className="row-gap-2">
                     <p className="fw-bold">วัคซีนที่ต้องการฉีด</p>
                     <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
                       <Form.Check
@@ -425,7 +443,7 @@ function BasicInfo() {
                       />
                     </Col>
                     {formData.vaccines.want_type === "yes" && (
-                      <div className="border p-3 rounded bg-light mb-4">
+                      <div className="border p-3 rounded bg-light">
                         <p>ระบุวัคซีนที่ต้องการ:</p>
                         {formData.vaccines.selected.map((value, index) => (
                           <Row key={index} className="row-gap-2 mb-2 align-items-center ">
@@ -435,23 +453,12 @@ function BasicInfo() {
                                 onChange={(e) => handleVaccineChange(index, e.target.value)}
                               >
                                 <option value="">เลือกวัคซีนที่ต้องการ</option>
-                                <option value="Tetanus">Tetanus, diphtheria, and pertussis</option>
-                                <option value="Influenza">Influenza</option>
-                                <option value="COVID-19">COVID-19</option>
-                                <option value="MMR">Measles, mumps, and rubella</option>
-                                <option value="Varicella">Varicella</option>
-                                <option value="HepA">Hepatitis A virus</option>
-                                <option value="HepB">Hepatitis B virus</option>
-                                <option value="HPV">Human papillomavirus (HPV)</option>
-                                <option value="Pneumococcal">Pneumococcal</option>
-                                <option value="RSV">Respiratory syncytial virus (RSV)</option>
-                                <option value="Zoster-live">Live-attenuated zoster</option>
-                                <option value="Zoster-recombinant">Recombinant zoster</option>
-                                <option value="Dengue">Live-attenuated dengue</option>
-                                <option value="Yellow-fever">Yellow fever</option>
-                                <option value="JE">Japanese encephalitis</option>
-                                <option value="Meningococcal">Meningococcal</option>
-                                <option value="Mpox">Mpox</option>
+                                {/* 3. วนลูปแสดงรายชื่อวัคซีนจาก Database */}
+                                {vaccineList.map((v) => (
+                                  <option key={v.id} value={v.name_en}>
+                                    {v.name_en}
+                                  </option>
+                                ))}
                               </Form.Select>
                             </Col>
                             <Col md={2} className="d-flex gap-2">
@@ -477,8 +484,8 @@ function BasicInfo() {
                     )}
                   </Row>
                   {/* วัคซีนที่เคยได้รับ */}
-                  <Row className="row-gap-3 mt-5">
-                    <p className="mt-2 fw-bold">วัคซีนที่เคยได้รับ</p>
+                  <Row className="row-gap-2 mt-4">
+                    <p className="fw-bold">วัคซีนที่เคยได้รับ</p>
                     <Col md={6}></Col>
                     <Col md={6}>
                       <p className="m-0">วันที่ได้รับ</p>
@@ -493,23 +500,12 @@ function BasicInfo() {
                             }
                           >
                             <option value="">เลือกวัคซีน</option>
-                            <option value="Tetanus">Tetanus, diphtheria, and pertussis</option>
-                            <option value="Influenza">Influenza</option>
-                            <option value="COVID-19">COVID-19</option>
-                            <option value="MMR">Measles, mumps, and rubella</option>
-                            <option value="Varicella">Varicella</option>
-                            <option value="HepA">Hepatitis A virus</option>
-                            <option value="HepB">Hepatitis B virus</option>
-                            <option value="HPV">Human papillomavirus (HPV)</option>
-                            <option value="Pneumococcal">Pneumococcal</option>
-                            <option value="RSV">Respiratory syncytial virus (RSV)</option>
-                            <option value="Zoster-live">Live-attenuated zoster</option>
-                            <option value="Zoster-recombinant">Recombinant zoster</option>
-                            <option value="Dengue">Live-attenuated dengue</option>
-                            <option value="Yellow-fever">Yellow fever</option>
-                            <option value="JE">Japanese encephalitis</option>
-                            <option value="Meningococcal">Meningococcal</option>
-                            <option value="Mpox">Mpox</option>
+                            {/* วนลูปแสดงรายชื่อวัคซีนจาก Database */}
+                            {vaccineList.map((v) => (
+                              <option key={v.id} value={v.name_en}>
+                                {v.name_en}
+                              </option>
+                            ))}
                           </Form.Select>
                         </Col>
 
@@ -517,6 +513,7 @@ function BasicInfo() {
                           <Form.Control
                             type="date"
                             value={item.date}
+                            onClick={(e) => e.target.showPicker()}
                             onChange={(e) =>
                               handleReceivedChange(index, "date", e.target.value)
                             }
