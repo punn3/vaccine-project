@@ -1,7 +1,8 @@
+import React from 'react';
 import { Row, Col, Form } from "react-bootstrap";
 
 function DiseaseCondition({ index, data, onChange, onRemove }) {
-  // รายการโรค (ดึงมาจากรูปภาพที่คุณส่งมา)
+  // รายการโรคทั้งหมด
   const diseaseList = [
     "Heart disease, diabetes or chronic lung disease",
     "Chronic liver disease",
@@ -15,44 +16,76 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
     "Traveler"
   ];
 
+  // ดึงค่าโรคที่เลือกมา (ถ้ายังไม่มีค่า ให้เป็น Array ว่าง [] เสมอ เพื่อกัน Error)
+  const selectedDiseases = data.selectedDiseases || [];
+
+  // ฟังก์ชันจัดการการติ๊กเลือก (เพิ่ม/ลบ ออกจาก Array)
+  const handleCheckboxChange = (diseaseName) => {
+    let newSelected;
+    
+    if (selectedDiseases.includes(diseaseName)) {
+      // ถ้ามีอยู่แล้ว -> เอาออก (Uncheck)
+      newSelected = selectedDiseases.filter((d) => d !== diseaseName);
+    } else {
+      // ถ้ายังไม่มี -> เพิ่มเข้าไป (Check)
+      newSelected = [...selectedDiseases, diseaseName];
+    }
+
+    // ส่งค่ากลับไปบันทึก
+    onChange(index, 'selectedDiseases', newSelected);
+  };
+
   return (
     <div className="p-4 mb-4 rounded border bg-white shadow-sm">
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h6 className="fw-bold">เงื่อนไขที่ {index + 1}</h6>
         {index > 0 && (
-          <button className="btn btn-sm btn-outline-danger" onClick={() => onRemove(index)}>ลบ</button>
+          <button 
+            className="btn btn-sm btn-outline-danger" 
+            onClick={() => onRemove(index)}
+          >
+            ลบ
+          </button>
         )}
       </div>
 
       <Row className="mb-3">
-        {diseaseList.map((disease) => (
-          <Col md={6} key={disease} className="mb-2">
-            <Form.Check
-              type="radio"
-              // name ต้องไม่ซ้ำกันในแต่ละการ์ด (index) เพื่อให้แยกกลุ่มการเลือก
-              name={`disease-group-${index}`} 
-              label={disease}
-              id={`disease-${index}-${disease}`}
-              checked={data.selectedDisease === disease}
-              onChange={() => onChange(index, 'selectedDisease', disease)}
-            />
-            
-            {/* Logic พิเศษ: ถ้าเลือกโรคไต ให้โชว์ Dropdown ระยะโรคไต */}
-            {disease === "Chronic kidney disease" && data.selectedDisease === disease && (
-              <Form.Select 
-                className="mt-2 ms-4" 
-                style={{ width: '80%' }}
-                value={data.kidneyStage}
-                onChange={(e) => onChange(index, 'kidneyStage', e.target.value)}
-              >
-                <option value="">ระบุระยะโรคไต</option>
-                <option value="1">ระยะที่ 1</option>
-                <option value="2">ระยะที่ 2</option>
-                <option value="3">ระยะที่ 3</option>
-              </Form.Select>
-            )}
-          </Col>
-        ))}
+        {diseaseList.map((disease) => {
+          // ตรวจสอบสถานะการเลือก (จะได้ true/false เสมอ ไม่ใช่ undefined)
+          const isChecked = selectedDiseases.includes(disease);
+
+          return (
+            <Col md={6} key={disease} className="mb-2">
+              <Form.Check
+                inline
+                type="checkbox"
+                id={`disease-${index}-${disease}`}
+                label={disease}
+                // ใช้ค่า Boolean ที่คำนวณไว้ กัน Error "uncontrolled input"
+                checked={isChecked}
+                onChange={() => handleCheckboxChange(disease)}
+              />
+              
+              {/* Logic พิเศษ: ถ้าเลือกโรคไต ให้โชว์ Dropdown ระยะโรคไต */}
+              {disease === "Chronic kidney disease" && isChecked && (
+                <div className="mt-2 ms-4" style={{ width: '80%' }}>
+                    <Form.Select 
+                      size="sm"
+                      value={data.kidneyStage || ""} // กัน Error ด้วย || ""
+                      onChange={(e) => onChange(index, 'kidneyStage', e.target.value)}
+                    >
+                      <option value="">ระบุระยะโรคไต</option>
+                      <option value="1">ระยะที่ 1</option>
+                      <option value="2">ระยะที่ 2</option>
+                      <option value="3">ระยะที่ 3</option>
+                      <option value="4">ระยะที่ 4</option>
+                      <option value="5">ระยะที่ 5</option>
+                    </Form.Select>
+                </div>
+              )}
+            </Col>
+          );
+        })}
       </Row>
 
       <hr />
@@ -63,14 +96,14 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
           <Form.Label>จำนวนโดส</Form.Label>
           <Form.Control 
             type="number" 
-            value={data.dose}
+            value={data.dose || ""} // กัน Error ด้วย || ""
             onChange={(e) => onChange(index, 'dose', e.target.value)}
           />
         </Col>
         <Col md={6}>
           <Form.Label>ความถี่ในการฉีด</Form.Label>
           <Form.Select 
-            value={data.frequency}
+            value={data.frequency || ""} // กัน Error ด้วย || ""
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>
