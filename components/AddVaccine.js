@@ -181,7 +181,6 @@ function AddVaccine({ onBack }) {
     return (
         <Container className="mt-5 pb-5" style={{ maxWidth: "900px" }}>
             <h3 className="text-center mb-4 fw-bold">เพิ่มวัคซีนใหม่</h3>
-
             {/* Section 1: ข้อมูลวัคซีน */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
@@ -190,13 +189,23 @@ function AddVaccine({ onBack }) {
                 <Card.Body className="p-4">
                     <Row className="mb-3">
                         <Col md={6}>
-                            <Form.Label>ชื่อวัคซีน</Form.Label>
+                            <Form.Label>ชื่อวัคซีน (ไทย)</Form.Label>
                             <Form.Control
                                 type="text"
                                 value={formData.name_th}
                                 onChange={(e) => handleChange(e, "name_th")}
                             />
                         </Col>
+                        <Col md={6}>
+                            <Form.Label>ชื่อวัคซีน (อังกฤษ)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.name_en}
+                                onChange={(e) => handleChange(e, "name_en")}
+                            />
+                        </Col>
+                    </Row>
+                    <Row className="mb-3">
                         <Col md={6}>
                             <Form.Label>ชื่อการค้า</Form.Label>
                             <Form.Control
@@ -205,6 +214,14 @@ function AddVaccine({ onBack }) {
                                 onChange={(e) => handleChange(e, "trade_name")}
                             />
                         </Col>
+                        {/* <Col md={6}>
+                            <Form.Label>ชื่อการค้า</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.trade_name}
+                                onChange={(e) => handleChange(e, "trade_name")}
+                            />
+                        </Col> */}
                     </Row>
                     <Row className="mb-3">
                         <Col md={6}>
@@ -219,16 +236,6 @@ function AddVaccine({ onBack }) {
                             </Form.Select>
                         </Col>
                         <Col md={6}>
-                            <Form.Label>วัคซีนป้องกัน</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.name_en}
-                                onChange={(e) => handleChange(e, "name_en")}
-                            />
-                        </Col>
-                    </Row>
-                    <Row className="mb-3">
-                        <Col md={6}>
                             <Form.Label>ราคา (บาท/เข็ม)</Form.Label>
                             <Form.Control
                                 type="number"
@@ -236,6 +243,8 @@ function AddVaccine({ onBack }) {
                                 onChange={(e) => handleChange(e, "price")}
                             />
                         </Col>
+                    </Row>
+                    <Row>
                         <Col md={6}>
                             <Form.Label>สถานะการให้บริการ</Form.Label>
                             <Form.Check

@@ -253,6 +253,16 @@ function EditVaccine({ onBack, data }) {
                             />
                         </Col>
                         <Col md={6}>
+                            <Form.Label>ชื่อวัคซีน (อังกฤษ)</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.name_en}
+                                onChange={(e) => handleChange(e, "name_en")}
+                            />
+                        </Col>
+                    </Row>
+                    <Row className="mb-3">
+                        <Col md={6}>
                             <Form.Label>ชื่อการค้า</Form.Label>
                             <Form.Control
                                 type="text"
@@ -260,6 +270,14 @@ function EditVaccine({ onBack, data }) {
                                 onChange={(e) => handleChange(e, "trade_name")}
                             />
                         </Col>
+                        {/* <Col md={6}>
+                            <Form.Label>ชื่อการค้า</Form.Label>
+                            <Form.Control
+                                type="text"
+                                value={formData.trade_name}
+                                onChange={(e) => handleChange(e, "trade_name")}
+                            />
+                        </Col> */}
                     </Row>
                     <Row className="mb-3">
                         <Col md={6}>
@@ -275,16 +293,6 @@ function EditVaccine({ onBack, data }) {
                             </Form.Select>
                         </Col>
                         <Col md={6}>
-                            <Form.Label>วัคซีนป้องกัน</Form.Label>
-                            <Form.Control
-                                type="text"
-                                value={formData.name_en}
-                                onChange={(e) => handleChange(e, "name_en")}
-                            />
-                        </Col>
-                    </Row>
-                    <Row className="mb-3">
-                        <Col md={6}>
                             <Form.Label>ราคา (บาท/เข็ม)</Form.Label>
                             <Form.Control
                                 type="number"
@@ -292,6 +300,8 @@ function EditVaccine({ onBack, data }) {
                                 onChange={(e) => handleChange(e, "price")}
                             />
                         </Col>
+                    </Row>
+                    <Row>
                         <Col md={6}>
                             <Form.Label>สถานะการให้บริการ</Form.Label>
                             <Form.Check
