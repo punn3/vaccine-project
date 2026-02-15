@@ -4,6 +4,7 @@ import styles from "../styles/Stepper.module.css";
 import { Container } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
 import CheckInfomation from "./CheckInfo";
+import AnalysisResult from "./Analyze";
 
 const MyStepperForm = () => {
     const [currentStep, setCurrentStep] = useState(0);
@@ -28,7 +29,7 @@ const MyStepperForm = () => {
             icon: "💉",
             label: "ผลวิเคราะห์วัคซีน",
             description: "ผลการวิเคราะห์วัคซีน",
-            content: <div>หน้าผลลัพธ์ (ใส่ Component ที่นี่)</div>,
+            content: <AnalysisResult></AnalysisResult>,
         },
         {
             icon: "ℹ️",

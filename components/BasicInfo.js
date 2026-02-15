@@ -232,7 +232,7 @@ function BasicInfo() {
           </Accordion.Body>
         </Accordion.Item>
         {/* การเดินทาง */}
-        <Accordion.Item eventKey="1" className="mb-5 border rounded">
+        {/* <Accordion.Item eventKey="1" className="mb-5 border rounded">
           <Accordion.Header>
             <strong>การเดินทาง</strong>
           </Accordion.Header>
@@ -287,7 +287,7 @@ function BasicInfo() {
               </Row>
             </Form>
           </Accordion.Body>
-        </Accordion.Item>
+        </Accordion.Item> */}
         {/* โรคประจำตัว */}
         <Accordion.Item eventKey="2" className="mb-5 border rounded">
           <Accordion.Header>
