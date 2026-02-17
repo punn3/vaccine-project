@@ -21,7 +21,7 @@ export default function AnalysisResult() {
         switch (status) {
             case 'Reccomended':  // (อิงตามตัวสะกดใน Database ของคุณ)
             case 'Recommended':
-                return { backgroundColor: '#1a7742', color: '#c4f2d3', border: '1px solid #1a7742' };
+                return { backgroundColor: '#1a7742', color: '#ffffff', border: '1px solid #1a7742' };
             case 'Consider':
                 return { backgroundColor: '#ffe5a0', color: '#68501c', border: '1px solid #ffe5a0' };
             case 'Risk-base':

@@ -109,17 +109,17 @@ export async function POST(request) {
                                             `⏳ อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`,
                                         );
                                     } else {
-                                        reasons.push(`✅ อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้`);
+                                        reasons.push(` อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้`);
                                     }
                                 } else {
                                     // ถ้าวัคซีนไม่ได้ระบุช่วงสัปดาห์ (แปลว่าคนท้องฉีดตอนไหนก็ได้)
                                     reasons.push(
-                                        `✅ อายุครรภ์เหมาะสม (สามารถรับวัคซีนได้ในทุกช่วงของการตั้งครรภ์)`,
+                                        ` อายุครรภ์เหมาะสม (สามารถรับวัคซีนได้ในทุกช่วงของการตั้งครรภ์)`,
                                     );
                                 }
                             } else {
                                 // สำหรับโรคประจำตัวอื่นๆ
-                                reasons.push(`✅ เข้าเกณฑ์แนะนำสำหรับภาวะ: ${condition}`);
+                                reasons.push(` เข้าเกณฑ์แนะนำสำหรับภาวะ: ${condition}`);
                             }
                         }
                     }
@@ -131,7 +131,7 @@ export async function POST(request) {
                 isAllowed = true;
                 if (!matchStatus) matchStatus = ageRule.status;
                 requiredDoses = ageRule.dose_count || requiredDoses;
-                reasons.push(`✅ อยู่ในช่วงอายุที่แนะนำให้ฉีด`);
+                reasons.push(`อยู่ในช่วงอายุที่แนะนำให้ฉีด`);
             }
 
             // ถ้าเช็คอายุและโรคแล้วไม่เข้าเกณฑ์เลย

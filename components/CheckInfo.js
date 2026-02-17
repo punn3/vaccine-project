@@ -41,20 +41,6 @@ function CheckInfomation() {
                 </Card.Body>
             </Card>
             <Card>
-                <Card.Header>การเดินทาง</Card.Header>
-                <Card.Body>
-                    <Col md={6}>ความประสงค์จะเดินทาง</Col>
-                    <Col md={6}>
-                        วัคซีนที่ต้องการฉีด :{" "}
-                        {data.travel.travel_status === "travel" ? (
-                            <span>{data.travel.travel_selected}</span>
-                        ) : (
-                            <span style={{ margin: "0 10px" }}> - </span>
-                        )}
-                    </Col>
-                </Card.Body>
-            </Card>
-            <Card>
                 <Card.Header>โรคประจำตัว</Card.Header>
                 <Card.Body>
                     {selectedDiseases.length > 0 ? (
