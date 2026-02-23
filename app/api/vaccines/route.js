@@ -22,8 +22,8 @@ export async function POST(request) {
         // 1. บันทึกข้อมูลหลักลงตาราง vaccines
         const sql = `
             INSERT INTO vaccines 
-            (id, trade_name, name_th, name_en, vaccine_type, price, is_available, administration, admin_route, image_url, allergies, side_effects) 
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+            (id, trade_name, name_th, name_en, indication, vaccine_type, price, is_available, administration, admin_route, image_url, allergies, side_effects) 
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
         `;
 
         await db.query(sql, [
@@ -31,6 +31,7 @@ export async function POST(request) {
             body.trade_name,
             body.name_th,
             body.name_en,
+            body.indication,
             body.vaccine_type,
             body.price,
             body.is_available ? 1 : 0,

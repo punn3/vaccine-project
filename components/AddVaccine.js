@@ -8,14 +8,15 @@ function AddVaccine({ onBack }) {
     // 1. State สำหรับข้อมูลหลัก
     const [formData, setFormData] = useState({
         name_th: "",
-        trade_name: "",
-        vaccine_type: "",
         name_en: "",
+        trade_name: "",
+        indication: "",
+        vaccine_type: "",
         price: "",
+        is_available: true,
         dosage_ml: "",
         admin_route: "",
         side_effects: "",
-        is_available: true,
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
@@ -55,10 +56,9 @@ function AddVaccine({ onBack }) {
         milk: false,
         gelatin: false,
         yeast: false,
-        drugOption1: false,
-        drugOption2: false,
-        drugOption3: false,
-        drugOption4: false,
+        neomycin: false,
+        streptomycin: false,
+        polymyxinB: false,
     });
 
     // --- Functions ---
@@ -214,14 +214,14 @@ function AddVaccine({ onBack }) {
                                 onChange={(e) => handleChange(e, "trade_name")}
                             />
                         </Col>
-                        {/* <Col md={6}>
-                            <Form.Label>ชื่อการค้า</Form.Label>
+                        <Col md={6}>
+                            <Form.Label>ข้อบ่งใช้</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={formData.trade_name}
-                                onChange={(e) => handleChange(e, "trade_name")}
+                                value={formData.indication}
+                                onChange={(e) => handleChange(e, "indication")}
                             />
-                        </Col> */}
+                        </Col>
                     </Row>
                     <Row className="mb-3">
                         <Col md={6}>
@@ -232,7 +232,7 @@ function AddVaccine({ onBack }) {
                             >
                                 <option value="">เลือกชนิดวัคซีน</option>
                                 <option value="Inactivated">Inactivated</option>
-                                <option value="Live">Live attenuated</option>
+                                <option value="Live">Live Attenuated</option>
                             </Form.Select>
                         </Col>
                         <Col md={6}>
@@ -404,14 +404,14 @@ function AddVaccine({ onBack }) {
                     </Row>
                     <p className="fw-bold">การแพ้ยาและวัคซีน</p>
                     <Row>
-                        {[1, 2, 3, 4].map((num) => (
-                            <Col md={3} key={num} className="mb-2">
+                        {["Neomycin", "Steptomycin", "Polymycin B"].map((drug) => (
+                            <Col md={3} key={drug} className="mb-2">
                                 <div className="border rounded p-2">
                                     <Form.Check
                                         type="checkbox"
-                                        label={`ตัวเลือก ${num}`}
-                                        checked={allergies[`drugOption${num}`]}
-                                        onChange={() => handleAllergyChange(`drugOption${num}`)}
+                                        label={drug}
+                                        checked={allergies[drug]}
+                                        onChange={() => handleAllergyChange(drug)}
                                     />
                                 </div>
                             </Col>

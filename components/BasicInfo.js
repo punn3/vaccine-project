@@ -5,8 +5,6 @@ import {
   Form,
   Col,
   Row,
-  InputGroup,
-  FloatingLabel,
 } from "react-bootstrap";
 import styles from "../styles/BasicInfo.module.css";
 import { useState, useEffect } from "react";
@@ -231,63 +229,6 @@ function BasicInfo() {
             </Row>
           </Accordion.Body>
         </Accordion.Item>
-        {/* การเดินทาง */}
-        {/* <Accordion.Item eventKey="1" className="mb-5 border rounded">
-          <Accordion.Header>
-            <strong>การเดินทาง</strong>
-          </Accordion.Header>
-          <Accordion.Body>
-            <Form>
-              <Row>
-                <Col md={6} className={`row-gap-3 ${styles.travelchoice}`}>
-                  <Form.Check
-                    inline
-                    label="มีความประสงค์จะเดินทาง"
-                    value="travel"
-                    name="travel_status"
-                    type="radio"
-                    id="travel-yes"
-                    onChange={(e) => handleChange("travel", e)}
-                    checked={formData.travel.travel_status === "travel"}
-                  />
-                  <Form.Select
-                    name="travel_selected"
-                    value={formData.travel.travel_selected}
-                    onChange={(e) => handleChange("travel", e)}
-                    disabled={formData.travel.travel_status !== "travel"}
-                  >
-                    <option>เลือกวัคซีนที่ต้องการ</option>
-                    <option value="วัคซีนไทฟอยด์">วัคซีนไทฟอยด์</option>
-                    <option value="วัคซีนอหิวาตกโรค">วัคซีนอหิวาตกโรค</option>
-                    <option value="วัคซีนพิษสุนัขบ้า">วัคซีนพิษสุนัขบ้า</option>
-                    <option value="วัคซีนไวรัสตับอักเสบเอ">
-                      วัคซีนไวรัสตับอักเสบเอ
-                    </option>
-                    <option value="วัคซีนไข้กาฬหลังแอ่น">
-                      วัคซีนไข้กาฬหลังแอ่น
-                    </option>
-                    <option value="วัคซีนไขสมองอักเสบจากเห็บ">
-                      วัคซีนไขสมองอักเสบจากเห็บ
-                    </option>
-                  </Form.Select>
-                </Col>
-                <Col md={6}>
-                  <Form.Check
-                    inline
-                    label="ไม่มี"
-                    value="none"
-                    name="travel_status"
-                    type="radio"
-                    id="travel-no"
-                    checked={formData.travel.travel_status === "none"}
-                    onChange={(e) => handleChange("travel", e)}
-
-                  />
-                </Col>
-              </Row>
-            </Form>
-          </Accordion.Body>
-        </Accordion.Item> */}
         {/* โรคประจำตัว */}
         <Accordion.Item eventKey="2" className="mb-5 border rounded">
           <Accordion.Header>
@@ -602,7 +543,7 @@ function BasicInfo() {
                 <div className="border rounded p-3 my-4">
                   <Form.Label className="fw-bold">ยาและวัคซีนที่แพ้</Form.Label>
                   <Row>
-                    {["ยา1", "ยา2", "ยา3", "ยา4"].map((item) => (
+                    {["Neomycin", "Steptomycin", "Polymyxin B"].map((item) => (
                       <Col md={4} key={item}>
                         <Form.Check
                           label={item}

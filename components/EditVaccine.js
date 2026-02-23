@@ -8,9 +8,10 @@ function EditVaccine({ onBack, data }) {
     // 1. State หลัก
     const [formData, setFormData] = useState({
         name_th: "",
-        trade_name: "",
-        vaccine_type: "",
         name_en: "",
+        trade_name: "",
+        indication: "",
+        vaccine_type: "",
         price: "",
         dosage_ml: "",
         admin_route: "",
@@ -41,10 +42,9 @@ function EditVaccine({ onBack, data }) {
         milk: false,
         gelatin: false,
         yeast: false,
-        drugOption1: false,
-        drugOption2: false,
-        drugOption3: false,
-        drugOption4: false,
+        neomycin: false,
+        streptomycin: false,
+        polymyxinB: false,
     });
 
     // ✅ เพิ่ม useEffect เพื่อดึงข้อมูลจาก props 'data' มาใส่ใน Form เมื่อโหลดหน้าเสร็จ
@@ -55,9 +55,10 @@ function EditVaccine({ onBack, data }) {
             // 1. Map ข้อมูลพื้นฐาน
             setFormData({
                 name_th: data.name_th || "",
-                trade_name: data.trade_name || "",
-                vaccine_type: data.vaccine_type || "",
                 name_en: data.name_en || "",
+                trade_name: data.trade_name || "",
+                indication: data.indication || "",
+                vaccine_type: data.vaccine_type || "",
                 price: data.price || "",
                 // เช็ค 2 ค่า เผื่อ API ส่งมาเป็น administration หรือ dosage_ml
                 dosage_ml: data.dosage_ml || data.administration || "",
@@ -270,14 +271,14 @@ function EditVaccine({ onBack, data }) {
                                 onChange={(e) => handleChange(e, "trade_name")}
                             />
                         </Col>
-                        {/* <Col md={6}>
-                            <Form.Label>ชื่อการค้า</Form.Label>
+                        <Col md={6}>
+                            <Form.Label>ข้อบ่งใช้</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={formData.trade_name}
-                                onChange={(e) => handleChange(e, "trade_name")}
+                                value={formData.indication}
+                                onChange={(e) => handleChange(e, "indication")}
                             />
-                        </Col> */}
+                        </Col>
                     </Row>
                     <Row className="mb-3">
                         <Col md={6}>
@@ -459,18 +460,22 @@ function EditVaccine({ onBack, data }) {
                     </Row>
                     <p className="fw-bold">การแพ้ยาและวัคซีน</p>
                     <Row>
-                        {[1, 2, 3, 4].map((num) => (
-                            <Col md={3} key={num} className="mb-2">
-                                <div className="border rounded p-2">
-                                    <Form.Check
-                                        type="checkbox"
-                                        label={`ตัวเลือก ${num}`}
-                                        checked={allergies[`drugOption${num}`]}
-                                        onChange={() => handleAllergyChange(`drugOption${num}`)}
-                                    />
-                                </div>
-                            </Col>
-                        ))}
+                        {[
+                            { key: "neomycin", label: "Neomycin" },
+                            { key: "streptomycin", label: "Streptomycin" },
+                            { key: "polymyxinB", label: "Polymyxin B" }].map((item) => (
+                                <Col md={3} key={item.key}>
+                                    <div className="border rounded p-2">
+                                        <Form.Check
+                                            type="checkbox"
+                                            id={`check-${item.key}`}
+                                            label={item.label}
+                                            checked={allergies[item.key] || false}
+                                            onChange={() => handleAllergyChange(item.key)}
+                                        />
+                                    </div>
+                                </Col>
+                            ))}
                     </Row>
                 </Card.Body>
             </Card>

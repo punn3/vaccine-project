@@ -74,7 +74,7 @@ export async function PUT(request, { params }) {
         // A. อัปเดตข้อมูลตารางแม่ (vaccines)
         const sql = `
             UPDATE vaccines SET 
-            trade_name=?, name_th=?, name_en=?, vaccine_type=?, price=?, 
+            trade_name=?, name_th=?, name_en=?, indication=?, vaccine_type=?, price=?, 
             is_available=?, administration=?, admin_route=?, image_url=?, 
             allergies=?, side_effects=?
             WHERE id = ?
@@ -83,6 +83,7 @@ export async function PUT(request, { params }) {
             body.trade_name,
             body.name_th,
             body.name_en,
+            body.indication,
             body.vaccine_type,
             body.price,
             body.is_available ? 1 : 0,
