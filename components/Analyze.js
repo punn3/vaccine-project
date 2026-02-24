@@ -62,11 +62,13 @@ export default function AnalysisResult() {
                 // จัดการการตั้งครรภ์ และ ดึงอายุครรภ์ออกมาเป็นตัวเลข
                 let is_pregnant = false;
                 let gestational_weeks = null;
-                if (rawData.basic.pregnant && rawData.basic.pregnant !== "ไม่ตั้งครรภ์") {
+                
+                if (rawData.basic.pregnant === "ตั้งครรภ์") {
                     is_pregnant = true;
-                    // แปลง "14-27 สัปดาห์" ให้ดึงเลขตัวหน้ามาใช้ (เช่น 14)
-                    const match = rawData.basic.pregnant.match(/(\d+)/);
-                    if (match) gestational_weeks = parseInt(match[0]);
+                    // ดึงตัวเลขจากช่องที่เราเพิ่งสร้างมาใช้ได้เลย!
+                    if (rawData.basic.gestational_weeks) {
+                        gestational_weeks = parseInt(rawData.basic.gestational_weeks);
+                    }
                 }
 
                 // แปลงข้อมูลการแพ้อาหารให้อยู่ในรูปแบบ Object (และปรับชื่อให้ตรง DB)
@@ -96,6 +98,13 @@ export default function AnalysisResult() {
                         }));
                 }
 
+                let wantedVaccines = [];
+                // เช็คว่าผู้ใช้เลือกว่า "มีความต้องการวัคซีนเฉพาะเจาะจง" หรือไม่
+                if (rawData.vaccines && rawData.vaccines.want_type === "yes" && rawData.vaccines.selected) {
+                    // กรองเอาเฉพาะวัคซีนที่ถูกเลือก (ตัดค่าว่างทิ้ง)
+                    wantedVaccines = rawData.vaccines.selected.filter(v => v !== "");
+                }
+
                 // 📦 แพ็คข้อมูลเตรียมส่งให้ API
                 const payload = {
                     age: parseInt(rawData.basic.age) || 0,
@@ -104,10 +113,12 @@ export default function AnalysisResult() {
                     is_med_personnel: rawData.basic.medical === "เป็น",
                     diseases: selectedDiseases,
                     allergies: allergiesObj,
-                    history: history
+                    history: history,
+                    wanted_vaccines: wantedVaccines // 🆕 2. ส่ง Array รายชื่อวัคซีนแนบไปให้ API ด้วย
                 };
 
                 console.log("ข้อมูลที่แปลงแล้ว เตรียมส่งเข้า API:", payload);
+                // (ส่ง fetch API ต่อไปตามปกติ)
 
                 // ======================================================
                 // 3. ยิงข้อมูลไปหา API วิเคราะห์ความปลอดภัย

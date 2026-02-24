@@ -18,6 +18,17 @@ export async function POST(request) {
             "SELECT * FROM vaccine_rules_condition",
         );
 
+        // 🔥 🆕 ส่วนที่เพิ่มเข้ามา: กรองวัคซีนตามที่ผู้ใช้ต้องการ
+        let vaccinesToAnalyze = vaccines; // ค่าเริ่มต้น: วิเคราะห์วัคซีนทั้งหมดที่มี
+
+        // เช็คว่าผู้ใช้มีการส่งรายชื่อวัคซีนที่ต้องการมาด้วยไหม และต้องไม่เป็น Array ว่าง
+        if (user.wanted_vaccines && user.wanted_vaccines.length > 0) {
+            // กรองเอาเฉพาะวัคซีนที่มีชื่อภาษาอังกฤษ (name_en) ตรงกับที่ผู้ใช้เลือกมา
+            vaccinesToAnalyze = vaccines.filter(vac => 
+                user.wanted_vaccines.includes(vac.name_en)
+            );
+        }
+
         let allowedVaccines = [];
         let notAllowedVaccines = [];
 
@@ -32,7 +43,8 @@ export async function POST(request) {
         }
 
         // 3. เริ่มวิเคราะห์ทีละวัคซีน
-        for (const vac of vaccines) {
+        // 🔥 🆕 สำคัญ: เปลี่ยนจาก for (const vac of vaccines) เป็นตัวแปร vaccinesToAnalyze ที่กรองแล้ว
+        for (const vac of vaccinesToAnalyze) {
             let isAllowed = false;
             let isBlocked = false;
             let reasons = [];

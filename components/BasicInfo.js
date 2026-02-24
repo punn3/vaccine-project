@@ -15,6 +15,7 @@ function BasicInfo() {
       age: "",
       gender: "",
       pregnant: "",
+      gestational_weeks: "", // 🆕 เพิ่ม State สำหรับเก็บอายุครรภ์เป็นตัวเลข
       medical: "",
     },
     travel: {
@@ -68,8 +69,7 @@ function BasicInfo() {
   useEffect(() => {
     const savedData = localStorage.getItem("vaccineFormData");
     if (savedData) {
-      // setFormData(JSON.parse(savedData));
-      const parsed = JSON.parse(savedData);
+      setFormData(JSON.parse(savedData));
     }
   }, []);
 
@@ -161,7 +161,7 @@ function BasicInfo() {
             <strong>ข้อมูลพื้นฐาน</strong>
           </Accordion.Header>
           <Accordion.Body>
-            <Row className="row-gap-4">
+            <Row className="row-gap-4 align-items-end">
               <Col md={6}>
                 <Form>
                   <Form.Label>อายุ *</Form.Label>
@@ -191,6 +191,8 @@ function BasicInfo() {
                   </Form.Select>
                 </Form>
               </Col>
+
+              {/* ✅ แก้ไขใหม่: Dropdown การตั้งครรภ์ */}
               <Col md={6}>
                 <Form className={styles.pregnantbox}>
                   <label className="mb-2">การตั้งครรภ์ *</label>
@@ -199,20 +201,43 @@ function BasicInfo() {
                     name="pregnant"
                     value={formData.basic.pregnant}
                     className={styles.pregnantselect}
-                    onChange={(e) => handleChange("basic", e)}
-
+                    onChange={(e) => {
+                      handleChange("basic", e);
+                      // ถ้าเปลี่ยนใจ ไม่เลือก "ตั้งครรภ์" แล้ว ให้เคลียร์ช่องตัวเลขสัปดาห์ทิ้งด้วย
+                      if (e.target.value !== "ตั้งครรภ์") {
+                        setFormData((prev) => ({
+                          ...prev,
+                          basic: { ...prev.basic, gestational_weeks: "" }
+                        }));
+                      }
+                    }}
                   >
                     <option value="">กรุณาระบุข้อมูล</option>
                     <option value="ไม่ตั้งครรภ์">ไม่ตั้งครรภ์</option>
                     <option value="ให้นมบุตร">ให้นมบุตร</option>
-                    <optgroup label="ตั้งครรภ์">
-                      <option value="12-14 สัปดาห์">12-14 สัปดาห์</option>
-                      <option value="14-27 สัปดาห์">14-27 สัปดาห์</option>
-                      <option value="27-36 สัปดาห์">27-36 สัปดาห์</option>
-                    </optgroup>
+                    <option value="ตั้งครรภ์">ตั้งครรภ์</option>
                   </Form.Select>
                 </Form>
               </Col>
+
+              {/* ✅ แก้ไขใหม่: ซ่อน/แสดง ช่องกรอกอายุครรภ์ (แสดงก็ต่อเมื่อเลือก "ตั้งครรภ์") */}
+              {formData.basic.pregnant === "ตั้งครรภ์" && (
+                <Col md={6}>
+                  <Form>
+                    <label className="mb-2">อายุครรภ์ (สัปดาห์) *</label>
+                    <Form.Control
+                      type="number"
+                      name="gestational_weeks"
+                      min="1"
+                      max="45"
+                      placeholder="เช่น 14, 25, 30"
+                      value={formData.basic.gestational_weeks || ""}
+                      onChange={(e) => handleChange("basic", e)}
+                    />
+                  </Form>
+                </Col>
+              )}
+
               <Col md={6} className="align-content-center">
                 <Form>
                   <Form.Check
@@ -229,6 +254,7 @@ function BasicInfo() {
             </Row>
           </Accordion.Body>
         </Accordion.Item>
+
         {/* โรคประจำตัว */}
         <Accordion.Item eventKey="2" className="mb-5 border rounded">
           <Accordion.Header>
@@ -288,17 +314,6 @@ function BasicInfo() {
                 <Form.Check
                   inline
                   type="checkbox"
-                  label="Chronic liver disease"
-                  name="chronic_liver"
-                  value="Chronic liver disease"
-                  checked={formData.disease.chronic_liver !== ""}
-                  onChange={(e) => handleChange("disease", e)}
-                />
-              </Col>
-              <Col md={6} className="align-content-center">
-                <Form.Check
-                  inline
-                  type="checkbox"
                   label="Asplenia"
                   name="asplenia"
                   value="Asplenia"
@@ -353,6 +368,7 @@ function BasicInfo() {
             </Row>
           </Accordion.Body>
         </Accordion.Item>
+
         {/* การรับวัคซีน */}
         <Accordion.Item eventKey="3" className="mb-5 border rounded">
           <Accordion.Header>
@@ -486,6 +502,7 @@ function BasicInfo() {
             </Form>
           </Accordion.Body>
         </Accordion.Item>
+
         {/* ประวัติการแพ้ */}
         <Accordion.Item eventKey="4">
           <Accordion.Header>
