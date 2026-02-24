@@ -172,6 +172,35 @@ function AddVaccine({ onBack }) {
         if (fileInputRef.current) fileInputRef.current.value = "";
     };
 
+    const handleClear = () => {
+        // เพิ่มการแจ้งเตือนยืนยันก่อนเคลียร์ ป้องกันการเผลอกดโดน
+        if (window.confirm("คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมดที่กรอกไว้?")) {
+            setFormData({
+                name_th: "",
+                name_en: "",
+                trade_name: "",
+                indication: "",
+                vaccine_type: "",
+                price: "",
+                is_available: true,
+                dosage_ml: "",
+                admin_route: "",
+                side_effects: "",
+            });
+            setSelectedFile(null);
+            setPreviewImage(null);
+            if (fileInputRef.current) fileInputRef.current.value = "";
+            setAgeConditions([{ minAge: "", maxAge: "", dose: "", frequency: "", detail: "" }]);
+            setDiseaseConditions([{
+                selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "", detail: ""
+            }]);
+            setAllergies({
+                egg: false, milk: false, gelatin: false, yeast: false,
+                neomycin: false, streptomycin: false, polymyxinB: false,
+            });
+        }
+    };
+
     const headerStyle = {
         backgroundColor: "#CBDCEB",
         fontWeight: "bold",
@@ -493,18 +522,35 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            <div className="d-flex justify-content-end">
+            <div className="d-flex justify-content-between">
                 <Button variant="secondary" className="me-2 px-4" onClick={onBack}>
                     ยกเลิก
                 </Button>
-                <Button
-                    variant="primary"
-                    className="px-5"
-                    onClick={handleSave}
-                    style={{ backgroundColor: "#4a7fc1", border: "none" }}
-                >
-                    บันทึกข้อมูล
-                </Button>
+                <div className="d-flex gap-3">
+                    {/* ปุ่มเคลียร์ข้อมูลที่แก้ไขแล้ว */}
+                    <Button 
+                        onClick={handleClear}
+                        className="px-4"
+                        style={{ 
+                            backgroundColor: "#ffffff", // พื้นหลังสีขาว
+                            color: "#4a7fc1",           // ตัวอักษรสีฟ้า
+                            borderColor: "#4a7fc1",     // กรอบสีฟ้า
+                            borderWidth: "1px",
+                            borderStyle: "solid"
+                        }}
+                    >
+                        เคลียร์ข้อมูล
+                    </Button>
+                    
+                    <Button
+                        variant="primary"
+                        className="px-5"
+                        onClick={handleSave}
+                        style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    >
+                        บันทึกข้อมูล
+                    </Button>
+                </div>
             </div>
         </Container>
     );

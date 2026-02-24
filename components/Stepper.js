@@ -1,14 +1,14 @@
+/* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useState } from "react";
 import styles from "../styles/Stepper.module.css";
-import { Container } from "react-bootstrap";
+import { Container, Alert } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
 import CheckInfomation from "./CheckInfo";
 import AnalysisResult from "./Analyze";
 
 const MyStepperForm = () => {
     const [currentStep, setCurrentStep] = useState(0);
-    // const [formData, setFormData] = useState({});  //ถ้าต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
 
     // 1. ผูก Component เข้ากับ steps ตรงนี้
     const steps = [
@@ -16,8 +16,7 @@ const MyStepperForm = () => {
             icon: "📄",
             label: "กรอกข้อมูล",
             description: "",
-            content: <BasicInfo />, // <--- ใส่ Component ตรงนี้
-            // content: <BasicInfo data={formData} setData={setFormData} />  //ต้องการส่งข้อมูล (เช่น state ของฟอร์ม) ข้ามไปมาระหว่าง BasicInfo กับหน้าอื่นๆ
+            content: <BasicInfo />, 
         },
         {
             icon: "📋",
@@ -39,15 +38,67 @@ const MyStepperForm = () => {
         },
     ];
 
+    // ✅ ฟังก์ชันตรวจความเรียบร้อยของข้อมูล (Validation) สำหรับ Step 0 (BasicInfo)
+    const validateBasicInfo = () => {
+        const savedData = localStorage.getItem("vaccineFormData");
+        if (!savedData) return false;
+
+        const formData = JSON.parse(savedData);
+        const { basic, disease, vaccines, allergy } = formData;
+
+        // เช็คข้อมูลพื้นฐาน
+        if (!basic.age || !basic.gender || !basic.pregnant) return false;
+        if (basic.pregnant === "ตั้งครรภ์" && !basic.gestational_weeks) return false;
+
+        // เช็คโรคประจำตัว (ต้องเลือกอย่างน้อย 1 อย่าง หรือ ไม่มี)
+        const hasDisease = Object.values(disease).some(val => val !== "");
+        if (!hasDisease) return false;
+
+        // เช็คการรับวัคซีน (ถ้าเลือก 'มี' ต้องระบุชื่อ)
+        if (vaccines.want_type === "yes") {
+            const hasEmptyVaccine = vaccines.selected.some(v => v === "");
+            if (hasEmptyVaccine) return false;
+        }
+
+        // เช็คประวัติการแพ้
+        const hasAllergyType = allergy.none || allergy.food || allergy.drugAndVaccine;
+        if (!hasAllergyType) return false;
+        if (allergy.food && allergy.foodList.length === 0) return false;
+        if (allergy.drugAndVaccine && allergy.drugAndVaccineList.length === 0) return false;
+
+        return true; // ผ่านทุกด่าน!
+    };
+
     const handleNext = () => {
+        // ⛔️ ถ้ากำลังอยู่หน้าแรก ให้ตรวจข้อมูลก่อนปล่อยผ่าน
+        if (currentStep === 0) {
+            const isValid = validateBasicInfo();
+            if (!isValid) {
+                alert("กรุณากรอกข้อมูลในฟอร์มที่มีเครื่องหมาย * ให้ครบถ้วนก่อนดำเนินการต่อ");
+                return; // หยุดทำงาน ไม่ให้เปลี่ยนหน้า
+            }
+        }
+
         if (currentStep === steps.length - 1) {
-            // ขั้นตอนสุดท้าย (เสร็จสิ้น)
             console.log("Submitting form...");
-            // localStorage.removeItem("vaccineFormData"); // เลือกเอาว่าจะลบเลยไหม
-            // logic การ redirect หรือส่ง api
+            // localStorage.removeItem("vaccineFormData");
         } else {
-            // ไปหน้าถัดไป
             setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
+        }
+    };
+
+    // ⛔️ ป้องกันการกดกระโดดข้ามหน้าผ่านปุ่มวงกลมด้านบน (Stepper Navigation)
+    const handleStepClick = (index) => {
+        if (currentStep === 0 && index > 0) {
+            const isValid = validateBasicInfo();
+            if (!isValid) {
+                alert("กรุณากรอกข้อมูลให้ครบถ้วนก่อนข้ามไปยังขั้นตอนถัดไป");
+                return;
+            }
+        }
+        // อนุญาตให้คลิกย้อนกลับไปหน้าเก่าได้เสมอ
+        if (index <= currentStep || validateBasicInfo()) {
+            setCurrentStep(index);
         }
     };
 
@@ -68,7 +119,8 @@ const MyStepperForm = () => {
                             <div
                                 className={`${styles.step_circle} ${index <= currentStep ? styles.active : styles.inactive
                                     }`}
-                                onClick={() => setCurrentStep(index)}
+                                onClick={() => handleStepClick(index)} // เปลี่ยนมาใช้ฟังก์ชันที่ดักจับ Validation
+                                style={{ cursor: "pointer" }}
                             >
                                 {step.icon}
                             </div>
@@ -85,13 +137,12 @@ const MyStepperForm = () => {
 
             {/* Content Area */}
             <div>
-                {/* <div className={styles.content_title}>{steps[currentStep].label}</div> */}
-                <div style={{marginTop: '80px'}} className={styles.content_description}>
+                <div style={{ marginTop: '80px' }} className={styles.content_description}>
                     {steps[currentStep].description}
                 </div>
 
                 {/* 2. เรียกใช้ content จาก array ตาม step ปัจจุบัน */}
-                <div style={{marginTop: '50px'}}>{steps[currentStep].content}</div>
+                <div style={{ marginTop: '50px' }}>{steps[currentStep].content}</div>
             </div>
 
             {/* Navigation Buttons */}
@@ -110,7 +161,7 @@ const MyStepperForm = () => {
                 <button
                     className={`btn ${styles.btn_primary}`}
                     onClick={handleNext}>
-    
+
                     {currentStep === steps.length - 1 ? "เสร็จสิ้น" : "ถัดไป "}
                 </button>
             </div>
