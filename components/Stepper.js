@@ -6,6 +6,7 @@ import { Container, Alert } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
 import CheckInfomation from "./CheckInfo";
 import AnalysisResult from "./Analyze";
+import VaccineDetails from "./VaccineDetails";
 
 const MyStepperForm = () => {
     const [currentStep, setCurrentStep] = useState(0);
@@ -34,7 +35,7 @@ const MyStepperForm = () => {
             icon: "ℹ️",
             label: "รายละเอียดวัคซีนที่เลือก",
             description: "รายละเอียดวัคซีนที่เลือก",
-            content: <div>หน้าดีเทลวัคซีน (ใส่ Component ที่นี่)</div>,
+            content: <VaccineDetails></VaccineDetails>,
         },
     ];
 

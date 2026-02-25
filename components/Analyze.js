@@ -1,12 +1,12 @@
 "use client";
 import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation'; // สำหรับ Next.js App Router
-import { Container, Card, Row, Col, Form, Button, Collapse, Badge } from 'react-bootstrap';
+import { Container, Card, Row, Col, Form, Collapse, Badge } from 'react-bootstrap';
 import { CheckCircleFill, XCircleFill, ChevronDown, ChevronUp, InfoCircle } from 'react-bootstrap-icons';
 
 const STATUS_PRIORITY = {
     'Risk-base': 1,
-    'Recommended': 2,
+    'Reccomended': 2,
     'Consider': 3,
     'Share-decision': 4,
     'Cautious': 5,
@@ -26,10 +26,8 @@ export default function AnalysisResult() {
 
     // ฟังก์ชันกำหนดสี Badge ตามสถานะ
     const getStatusBadgeStyle = (status) => {
-        // ใช้ Switch case เช็คข้อความสถานะ
         switch (status) {
-            case 'Reccomended':  // (อิงตามตัวสะกดใน Database ของคุณ)
-            case 'Recommended':
+            case 'Reccomended':
                 return { backgroundColor: '#1a7742', color: '#ffffff', border: '1px solid #1a7742' };
             case 'Consider':
                 return { backgroundColor: '#ffe5a0', color: '#68501c', border: '1px solid #ffe5a0' };
@@ -42,7 +40,7 @@ export default function AnalysisResult() {
             case 'No specific':
                 return { backgroundColor: '#e9e9e9', color: '#333333', border: '1px solid #e9e9e9' };
             default:
-                return { backgroundColor: '#6c757d', color: '#ffffff' }; // สีเทา (กรณีไม่มีข้อมูล)
+                return { backgroundColor: '#6c757d', color: '#ffffff' }; 
         }
     };
 
@@ -50,38 +48,32 @@ export default function AnalysisResult() {
     useEffect(() => {
         const fetchAnalysis = async () => {
             try {
-                // 1. ดึงข้อมูลที่ผู้ใช้กรอกไว้จาก LocalStorage
                 const savedData = localStorage.getItem("vaccineFormData");
                 if (!savedData) {
                     alert("ไม่พบข้อมูลการกรอก กรุณากรอกข้อมูลใหม่");
-                    router.push('/form'); // เด้งกลับไปหน้ากรอกข้อมูล (แก้ path ให้ตรงกับโปรเจกต์คุณ)
+                    router.push('/form'); 
                     return;
                 }
 
                 const rawData = JSON.parse(savedData);
 
                 // ======================================================
-                // 2. แปลงข้อมูล (Data Mapping) ให้ตรงสเปค API
+                // แปลงข้อมูล (Data Mapping) ให้ตรงสเปค API
                 // ======================================================
-
-                // กรองเฉพาะโรคที่เลือก (ตัดค่าว่าง และ "ไม่มีโรคประจำตัว" ออก)
                 const selectedDiseases = Object.values(rawData.disease).filter(
                     (val) => val !== "" && val !== "ไม่มีโรคประจำตัว"
                 );
 
-                // จัดการการตั้งครรภ์ และ ดึงอายุครรภ์ออกมาเป็นตัวเลข
                 let is_pregnant = false;
                 let gestational_weeks = null;
 
                 if (rawData.basic.pregnant === "ตั้งครรภ์") {
                     is_pregnant = true;
-                    // ดึงตัวเลขจากช่องที่เราเพิ่งสร้างมาใช้ได้เลย!
                     if (rawData.basic.gestational_weeks) {
                         gestational_weeks = parseInt(rawData.basic.gestational_weeks);
                     }
                 }
 
-                // แปลงข้อมูลการแพ้อาหารให้อยู่ในรูปแบบ Object (และปรับชื่อให้ตรง DB)
                 const allergiesObj = {};
                 if (rawData.allergy && rawData.allergy.foodList) {
                     rawData.allergy.foodList.forEach(item => {
@@ -90,32 +82,27 @@ export default function AnalysisResult() {
                         else allergiesObj[item] = true;
                     });
                 }
-                // รวมแพ้ยา/วัคซีนเข้าไปด้วย
                 if (rawData.allergy && rawData.allergy.drugAndVaccineList) {
                     rawData.allergy.drugAndVaccineList.forEach(item => {
                         allergiesObj[item] = true;
                     });
                 }
 
-                // จัดการประวัติการฉีดวัคซีนเก่า
                 let history = [];
                 if (rawData.vaccines && rawData.vaccines.received) {
                     history = rawData.vaccines.received
                         .filter(item => item.vaccine !== "" && item.date !== "")
                         .map(item => ({
-                            vaccine_name_en: item.vaccine, // ส่งชื่อภาษาอังกฤษไปเทียบใน API
+                            vaccine_name_en: item.vaccine, 
                             date_received: item.date
                         }));
                 }
 
                 let wantedVaccines = [];
-                // เช็คว่าผู้ใช้เลือกว่า "มีความต้องการวัคซีนเฉพาะเจาะจง" หรือไม่
                 if (rawData.vaccines && rawData.vaccines.want_type === "yes" && rawData.vaccines.selected) {
-                    // กรองเอาเฉพาะวัคซีนที่ถูกเลือก (ตัดค่าว่างทิ้ง)
                     wantedVaccines = rawData.vaccines.selected.filter(v => v !== "");
                 }
 
-                // 📦 แพ็คข้อมูลเตรียมส่งให้ API
                 const payload = {
                     age: parseInt(rawData.basic.age) || 0,
                     is_pregnant: is_pregnant,
@@ -124,15 +111,9 @@ export default function AnalysisResult() {
                     diseases: selectedDiseases,
                     allergies: allergiesObj,
                     history: history,
-                    wanted_vaccines: wantedVaccines // 🆕 2. ส่ง Array รายชื่อวัคซีนแนบไปให้ API ด้วย
+                    wanted_vaccines: wantedVaccines 
                 };
 
-                console.log("ข้อมูลที่แปลงแล้ว เตรียมส่งเข้า API:", payload);
-                // (ส่ง fetch API ต่อไปตามปกติ)
-
-                // ======================================================
-                // 3. ยิงข้อมูลไปหา API วิเคราะห์ความปลอดภัย
-                // ======================================================
                 const res = await fetch('/api/analyze', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
@@ -155,16 +136,14 @@ export default function AnalysisResult() {
     }, [router]);
 
     const sortedAllowedVaccines = useMemo(() => {
-        // ถ้ายังไม่มีข้อมูล ให้รีเทิร์นอาเรย์ว่างกลับไปก่อน
         if (!allowedVaccines || allowedVaccines.length === 0) return [];
 
-        // ทำการ Copy อาเรย์ (...allowedVaccines) ก่อน Sort เพื่อป้องกันการแก้ไขข้อมูลต้นฉบับ
         return [...allowedVaccines].sort((a, b) => {
             const priorityA = STATUS_PRIORITY[a.matchStatus] || 99;
             const priorityB = STATUS_PRIORITY[b.matchStatus] || 99;
             return priorityA - priorityB;
         });
-    }, [allowedVaccines]); // <-- จุดสำคัญ: ทำงานเมื่อ allowedVaccines เปลี่ยนแปลงเท่านั้น
+    }, [allowedVaccines]);
 
     // ฟังก์ชันจัดการ UI
     const toggleExpand = (id) => {
@@ -179,12 +158,16 @@ export default function AnalysisResult() {
         }
     };
 
-    const handleNext = () => {
-        // เซฟวัคซีนที่เลือกไว้ เผื่อเอาไปใช้หน้าถัดไป (หน้าสรุป/นัดหมาย)
-        localStorage.setItem("selectedVaccinesFinal", JSON.stringify(selectedVaccines));
-        alert(`คุณเลือกวัคซีนไปทั้งหมด ${selectedVaccines.length} ชนิด`);
-        // router.push('/summary'); // เปลี่ยนหน้าไปยังหน้าถัดไป
-    };
+    // 🌟 🆕 พระเอกของเรา! ทำหน้าที่แพ็คข้อมูลส่งไปให้หน้า 4 ทันทีที่มีการติ๊กเลือก
+    useEffect(() => {
+        // ดึงข้อมูลวัคซีนแบบ "เต็มก้อน" จาก ID ที่ผู้ใช้ติ๊กไว้
+        const fullSelectedVaccinesData = allowedVaccines.filter(vac => 
+            selectedVaccines.includes(vac.id)
+        );
+        // จับยัดลง localStorage ด้วยชื่อคีย์ 'selectedVaccinesForDetails'
+        localStorage.setItem("selectedVaccinesForDetails", JSON.stringify(fullSelectedVaccinesData));
+    }, [selectedVaccines, allowedVaccines]);
+
 
     return (
         <Container className="py-5">
@@ -214,7 +197,7 @@ export default function AnalysisResult() {
                                         />
                                     </Col>
                                     <Col xs="auto" className="d-none d-sm-block">
-                                        {/* กล่องใส่รูป (ซ่อนในมือถือจอเล็กเพื่อประหยัดพื้นที่) */}
+                                        {/* กล่องใส่รูป */}
                                         <div style={{
                                             width: '100px', height: '100px',
                                             backgroundColor: '#e9ecef', borderRadius: '8px',
@@ -243,7 +226,7 @@ export default function AnalysisResult() {
                                             <Row className="small text-center text-md-start">
                                                 <Col xs={4} md={4}>
                                                     <span className="text-muted d-block" style={{ fontSize: '0.8rem' }}>ขนาด</span>
-                                                    {vac.dose_amount || '-'}
+                                                    {vac.dosage_ml || '-'}
                                                 </Col>
                                                 <Col xs={4} md={4}>
                                                     <span className="text-muted d-block" style={{ fontSize: '0.8rem' }}>จำนวนโดส</span>
@@ -256,36 +239,6 @@ export default function AnalysisResult() {
                                             </Row>
                                         </div>
 
-                                        {/* โชว์เหตุผลที่อนุญาตให้ฉีดได้ (ข้อความสีเขียว) กับป้าย reccomendation */}
-                                        {/* <div>
-                                            {vac.matchStatus && (
-                                                <span
-                                                    className="ms-2 px-3 py-1 rounded-pill"
-                                                    style={{
-                                                        fontSize: '0.85rem',
-                                                        fontWeight: 'bold',
-                                                        ...getStatusBadgeStyle(vac.matchStatus)
-                                                    }}
-                                                >
-                                                    {vac.matchStatus}
-                                                </span>
-                                            )}
-                                            {vac.reason && (
-                                                <div className="mt-2">
-                                                    <p className="small text-success fw-bold mb-1 d-flex align-items-center">
-                                                        <CheckCircleFill className="me-2" size={14} />
-                                                        เข้าเกณฑ์แนะนำสำหรับ :
-                                                    </p>
-                                                    <ul className="">
-                                                        {vac.reason.split('|').map((text, index) => (
-                                                            <li key={index} className="small text-success ms-4" style={{ lineHeight: '1.4' }}>
-                                                                {text.trim()}
-                                                            </li>
-                                                        ))}
-                                                    </ul>
-                                                </div>
-                                            )}
-                                        </div> */}
                                         <div className="mt-3">
                                             {(vac.reason || vac.matchStatus) && (
                                                 <div className="d-flex justify-content-between align-items-center mb-1">
@@ -302,7 +255,7 @@ export default function AnalysisResult() {
                                                             style={{
                                                                 fontSize: '0.75rem',
                                                                 fontWeight: 'bold',
-                                                                whiteSpace: 'nowrap', // ป้องกันข้อความตัดบรรทัด
+                                                                whiteSpace: 'nowrap',
                                                                 ...getStatusBadgeStyle(vac.matchStatus)
                                                             }}
                                                         >
@@ -327,7 +280,7 @@ export default function AnalysisResult() {
 
                                         {/* ดูผลข้างเคียง Toggle */}
                                         <div
-                                            className="text-primary small fw-bold user-select-none"
+                                            className="text-primary small fw-bold user-select-none mt-2"
                                             style={{ cursor: 'pointer', display: 'inline-block' }}
                                             onClick={() => toggleExpand(vac.id)}
                                         >
@@ -364,11 +317,9 @@ export default function AnalysisResult() {
                             <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
                                 <div>
                                     <h6 className="fw-bold mb-2">{vac.name_th} <span className="text-muted small fw-normal">({vac.name_en})</span></h6>
-                                    {/* เหตุผลจาก API จะมาแสดงตรงนี้ */}
                                     <p className="text-danger small mb-0 fw-bold">เหตุผล : <span className="fw-normal">{vac.reason}</span></p>
                                 </div>
 
-                                {/* โชว์ Badge สมมติว่ามีระบบนัดหมาย หรือแค่แจ้งเตือน */}
                                 <div className="text-md-end">
                                     <Badge bg="secondary" className="p-2 px-3 rounded-pill fw-normal">
                                         ไม่อยู่ในเกณฑ์รับบริการ
