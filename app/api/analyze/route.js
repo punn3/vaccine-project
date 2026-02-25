@@ -18,7 +18,7 @@ export async function POST(request) {
             "SELECT * FROM vaccine_rules_condition",
         );
 
-        // 🔥 🆕 ส่วนที่เพิ่มเข้ามา: กรองวัคซีนตามที่ผู้ใช้ต้องการ
+        //  ส่วนที่เพิ่มเข้ามา: กรองวัคซีนตามที่ผู้ใช้ต้องการ
         let vaccinesToAnalyze = vaccines; // ค่าเริ่มต้น: วิเคราะห์วัคซีนทั้งหมดที่มี
 
         // เช็คว่าผู้ใช้มีการส่งรายชื่อวัคซีนที่ต้องการมาด้วยไหม และต้องไม่เป็น Array ว่าง
@@ -43,7 +43,7 @@ export async function POST(request) {
         }
 
         // 3. เริ่มวิเคราะห์ทีละวัคซีน
-        // 🔥 🆕 สำคัญ: เปลี่ยนจาก for (const vac of vaccines) เป็นตัวแปร vaccinesToAnalyze ที่กรองแล้ว
+        //  สำคัญ: เปลี่ยนจาก for (const vac of vaccines) เป็นตัวแปร vaccinesToAnalyze ที่กรองแล้ว
         for (const vac of vaccinesToAnalyze) {
             let isAllowed = false;
             let isBlocked = false;
@@ -51,7 +51,7 @@ export async function POST(request) {
             let matchStatus = "";
             let requiredDoses = 1;
 
-            // 🧠 ดึงกฎพื้นฐานของ "อายุ" มาเตรียมไว้ก่อนเลย (เพื่อเอาจำนวนโดสพื้นฐาน)
+            //  ดึงกฎพื้นฐานของ "อายุ" มาเตรียมไว้ก่อนเลย (เพื่อเอาจำนวนโดสพื้นฐาน)
             const ageRule = ageRules.find(
                 (r) =>
                     r.vaccine_id === vac.id &&
@@ -72,7 +72,7 @@ export async function POST(request) {
                 for (const [allergyKey, isAllergic] of Object.entries(user.allergies)) {
                     if (isAllergic && vacAllergies[allergyKey]) {
                         isBlocked = true;
-                        reasons.push("❌ ผู้ป่วยมีประวัติแพ้ส่วนประกอบของวัคซีนตัวนี้");
+                        reasons.push(" ผู้ป่วยมีประวัติแพ้ส่วนประกอบของวัคซีนตัวนี้");
                     }
                 }
             }
@@ -89,7 +89,7 @@ export async function POST(request) {
                     if (matchedRule) {
                         if (matchedRule.status === "Cautious") {
                             isBlocked = true;
-                            reasons.push(`⚠️ ข้อห้ามใช้/ควรระวัง สำหรับภาวะ: ${condition}`);
+                            reasons.push(` ข้อห้ามใช้/ควรระวัง สำหรับภาวะ: ${condition}`);
                         } else {
                             isAllowed = true;
                             matchStatus = matchedRule.status;
@@ -101,7 +101,7 @@ export async function POST(request) {
                                 vac.rule_freq = matchedRule.frequency_desc;
                             requiredDoses = vac.rule_dose || requiredDoses;
 
-                            // 🧠 เช็คเงื่อนไขคนท้องแบบ Dynamic (อ่านค่าจาก Database ไม่ฟิกซ์ ID)
+                            //  เช็คเงื่อนไขคนท้องแบบ Dynamic (อ่านค่าจาก Database ไม่ฟิกซ์ ID)
                             if (condition === "ตั้งครรภ์" && user.gestational_weeks) {
                                 // ใช้ Regex ดึงตัวเลข "เริ่มต้น" และ "สิ้นสุด" ออกมาจากช่อง frequency_desc
                                 const weekMatch = matchedRule.frequency_desc
@@ -118,7 +118,7 @@ export async function POST(request) {
                                     ) {
                                         isBlocked = true;
                                         reasons.push(
-                                            `⏳ อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`,
+                                            ` อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`,
                                         );
                                     } else {
                                         reasons.push(` อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้`);
@@ -152,7 +152,7 @@ export async function POST(request) {
                 reasons.push("ไม่อยู่ในช่วงอายุที่แนะนำ และไม่เข้าเกณฑ์กลุ่มเสี่ยง");
             }
 
-            // --- D. 🧠 เช็คประวัติการฉีดแบบ Dynamic (ไม่ฟิกซ์ ID วัคซีนรายปี) ---
+            // --- D.  เช็คประวัติการฉีดแบบ Dynamic (ไม่ฟิกซ์ ID วัคซีนรายปี) ---
             if (isAllowed && !isBlocked && user.history && user.history.length > 0) {
                 const pastDoses = user.history.filter(
                     (h) => h.vaccine_name_en === vac.name_en,
@@ -167,7 +167,7 @@ export async function POST(request) {
                     const monthsSinceLastDose =
                         (today - lastDoseDate) / (1000 * 60 * 60 * 24 * 30.44);
 
-                    // 🎯 ถอดรหัสเวลาการฉีดกระตุ้นจากข้อความในฐานข้อมูล (เช่น "ปีละ 1 เข็ม", "ทุก 10 ปี")
+                    //  ถอดรหัสเวลาการฉีดกระตุ้นจากข้อความในฐานข้อมูล (เช่น "ปีละ 1 เข็ม", "ทุก 10 ปี")
                     let boosterMonthsRequired = 0;
                     if (vac.rule_freq) {
                         if (
@@ -191,16 +191,16 @@ export async function POST(request) {
                             if (monthsSinceLastDose < boosterMonthsRequired - 2) {
                                 isBlocked = true;
                                 reasons.push(
-                                    `⏳ เพิ่งรับวัคซีนนี้ไปเมื่อ ${Math.round(monthsSinceLastDose)} เดือนที่แล้ว (รอบกระตุ้นถัดไปคือทุก ${boosterMonthsRequired / 12} ปี)`,
+                                    ` เพิ่งรับวัคซีนนี้ไปเมื่อ ${Math.round(monthsSinceLastDose)} เดือนที่แล้ว (รอบกระตุ้นถัดไปคือทุก ${boosterMonthsRequired / 12} ปี)`,
                                 );
                             } else {
-                                reasons.push(`🔄 ถึงรอบฉีดกระตุ้นตามกำหนดเวลาแล้ว`);
+                                reasons.push(` ถึงรอบฉีดกระตุ้นตามกำหนดเวลาแล้ว`);
                             }
                         } else {
                             // ถ้าไม่ใช่วัคซีนฉีดกระตุ้น (ฉีดครบแล้วจบกัน)
                             isBlocked = true;
                             reasons.push(
-                                `✔️ ท่านได้รับวัคซีนนี้ครบ ${requiredDoses} โดสตามเกณฑ์แล้ว ไม่จำเป็นต้องรับซ้ำ`,
+                                ` ท่านได้รับวัคซีนนี้ครบ ${requiredDoses} โดสตามเกณฑ์แล้ว ไม่จำเป็นต้องรับซ้ำ`,
                             );
                         }
                     } else {
@@ -208,11 +208,11 @@ export async function POST(request) {
                         if (monthsSinceLastDose < 1) {
                             isBlocked = true;
                             reasons.push(
-                                `⏳ เพิ่งรับเข็มล่าสุดไปเมื่อ ${Math.round(monthsSinceLastDose * 30)} วันที่แล้ว (ควรรออย่างน้อย 1 เดือน)`,
+                                ` เพิ่งรับเข็มล่าสุดไปเมื่อ ${Math.round(monthsSinceLastDose * 30)} วันที่แล้ว (ควรรออย่างน้อย 1 เดือน)`,
                             );
                         } else {
                             reasons.push(
-                                `💉 ท่านฉีดไปแล้ว ${pastDoses.length}/${requiredDoses} โดส ถึงกำหนดรับเข็มถัดไปแล้ว`,
+                                ` ท่านฉีดไปแล้ว ${pastDoses.length}/${requiredDoses} โดส ถึงกำหนดรับเข็มถัดไปแล้ว`,
                             );
                         }
                     }
