@@ -242,6 +242,7 @@ function BasicInfo() {
                     onBlur={handleBlur}
                     isInvalid={touched.pregnant && (!formData.basic.pregnant || formData.basic.pregnant === "กรุณาระบุข้อมูล")}
                   >
+                    <option value="">กรุณาระบุข้อมูล</option>
                     <option value="ไม่ตั้งครรภ์">ไม่ตั้งครรภ์</option>
                     <option value="ให้นมบุตร">ให้นมบุตร</option>
                     <option value="ตั้งครรภ์">ตั้งครรภ์</option>
