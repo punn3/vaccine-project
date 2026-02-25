@@ -1,8 +1,17 @@
 "use client";
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation'; // สำหรับ Next.js App Router
 import { Container, Card, Row, Col, Form, Button, Collapse, Badge } from 'react-bootstrap';
 import { CheckCircleFill, XCircleFill, ChevronDown, ChevronUp, InfoCircle } from 'react-bootstrap-icons';
+
+const STATUS_PRIORITY = {
+    'Risk-base': 1,
+    'Recommended': 2,
+    'Consider': 3,
+    'Share-decision': 4,
+    'Cautious': 5,
+    'No specific': 6
+};
 
 export default function AnalysisResult() {
     const router = useRouter();
@@ -36,6 +45,7 @@ export default function AnalysisResult() {
                 return { backgroundColor: '#6c757d', color: '#ffffff' }; // สีเทา (กรณีไม่มีข้อมูล)
         }
     };
+
     // โหลดข้อมูลและวิเคราะห์เมื่อเปิดหน้า
     useEffect(() => {
         const fetchAnalysis = async () => {
@@ -62,7 +72,7 @@ export default function AnalysisResult() {
                 // จัดการการตั้งครรภ์ และ ดึงอายุครรภ์ออกมาเป็นตัวเลข
                 let is_pregnant = false;
                 let gestational_weeks = null;
-                
+
                 if (rawData.basic.pregnant === "ตั้งครรภ์") {
                     is_pregnant = true;
                     // ดึงตัวเลขจากช่องที่เราเพิ่งสร้างมาใช้ได้เลย!
@@ -144,6 +154,18 @@ export default function AnalysisResult() {
         fetchAnalysis();
     }, [router]);
 
+    const sortedAllowedVaccines = useMemo(() => {
+        // ถ้ายังไม่มีข้อมูล ให้รีเทิร์นอาเรย์ว่างกลับไปก่อน
+        if (!allowedVaccines || allowedVaccines.length === 0) return [];
+
+        // ทำการ Copy อาเรย์ (...allowedVaccines) ก่อน Sort เพื่อป้องกันการแก้ไขข้อมูลต้นฉบับ
+        return [...allowedVaccines].sort((a, b) => {
+            const priorityA = STATUS_PRIORITY[a.matchStatus] || 99;
+            const priorityB = STATUS_PRIORITY[b.matchStatus] || 99;
+            return priorityA - priorityB;
+        });
+    }, [allowedVaccines]); // <-- จุดสำคัญ: ทำงานเมื่อ allowedVaccines เปลี่ยนแปลงเท่านั้น
+
     // ฟังก์ชันจัดการ UI
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
@@ -176,10 +198,10 @@ export default function AnalysisResult() {
                     วัคซีนที่สามารถฉีดได้ ({allowedVaccines.length} ชนิด)
                 </h5>
 
-                {allowedVaccines.length === 0 ? (
+                {sortedAllowedVaccines.length === 0 ? (
                     <div className="text-muted text-center p-4 bg-white rounded-4 shadow-sm">ไม่มีวัคซีนที่เข้าเกณฑ์ของคุณในขณะนี้</div>
                 ) : (
-                    allowedVaccines.map((vac) => (
+                    sortedAllowedVaccines.map((vac) => (
                         <Card key={vac.id} className="border-0 shadow-sm mb-3 rounded-4 overflow-hidden">
                             <Card.Body className="p-4">
                                 <Row>
@@ -213,18 +235,6 @@ export default function AnalysisResult() {
 
                                         <p className="small mb-3">
                                             <span className="text-muted">ชนิดวัคซีน :</span> {vac.vaccine_type}
-                                            {vac.matchStatus && (
-                                                <span
-                                                    className="ms-2 px-3 py-1 rounded-pill"
-                                                    style={{
-                                                        fontSize: '0.85rem',
-                                                        fontWeight: 'bold',
-                                                        ...getStatusBadgeStyle(vac.matchStatus)
-                                                    }}
-                                                >
-                                                    {vac.matchStatus}
-                                                </span>
-                                            )}
                                         </p>
 
                                         {/* รายละเอียดการบริหารวัคซีน */}
@@ -246,12 +256,74 @@ export default function AnalysisResult() {
                                             </Row>
                                         </div>
 
-                                        {/* โชว์เหตุผลที่อนุญาตให้ฉีดได้ (ข้อความสีเขียว) */}
-                                        {vac.reason && (
-                                            <p className="small text-success mb-3">
-                                                <CheckCircleFill className="me-1" /> {vac.reason}
-                                            </p>
-                                        )}
+                                        {/* โชว์เหตุผลที่อนุญาตให้ฉีดได้ (ข้อความสีเขียว) กับป้าย reccomendation */}
+                                        {/* <div>
+                                            {vac.matchStatus && (
+                                                <span
+                                                    className="ms-2 px-3 py-1 rounded-pill"
+                                                    style={{
+                                                        fontSize: '0.85rem',
+                                                        fontWeight: 'bold',
+                                                        ...getStatusBadgeStyle(vac.matchStatus)
+                                                    }}
+                                                >
+                                                    {vac.matchStatus}
+                                                </span>
+                                            )}
+                                            {vac.reason && (
+                                                <div className="mt-2">
+                                                    <p className="small text-success fw-bold mb-1 d-flex align-items-center">
+                                                        <CheckCircleFill className="me-2" size={14} />
+                                                        เข้าเกณฑ์แนะนำสำหรับ :
+                                                    </p>
+                                                    <ul className="">
+                                                        {vac.reason.split('|').map((text, index) => (
+                                                            <li key={index} className="small text-success ms-4" style={{ lineHeight: '1.4' }}>
+                                                                {text.trim()}
+                                                            </li>
+                                                        ))}
+                                                    </ul>
+                                                </div>
+                                            )}
+                                        </div> */}
+                                        <div className="mt-3">
+                                            {(vac.reason || vac.matchStatus) && (
+                                                <div className="d-flex justify-content-between align-items-center mb-1">
+                                                    {/* ฝั่งซ้าย: ไอคอนและข้อความหัวข้อ */}
+                                                    <p className="small text-success fw-bold mb-0 d-flex align-items-center">
+                                                        <CheckCircleFill className="me-2" size={14} />
+                                                        เข้าเกณฑ์แนะนำสำหรับ :
+                                                    </p>
+
+                                                    {/* ฝั่งขวา: Badge สถานะ */}
+                                                    {vac.matchStatus && (
+                                                        <span
+                                                            className="px-3 py-1 rounded-pill shadow-sm"
+                                                            style={{
+                                                                fontSize: '0.75rem',
+                                                                fontWeight: 'bold',
+                                                                whiteSpace: 'nowrap', // ป้องกันข้อความตัดบรรทัด
+                                                                ...getStatusBadgeStyle(vac.matchStatus)
+                                                            }}
+                                                        >
+                                                            {vac.matchStatus}
+                                                        </span>
+                                                    )}
+                                                </div>
+                                            )}
+
+                                            {/* รายการเหตุผลแบบจุด (Bullet points) */}
+                                            {vac.reason && (
+                                                <ul className="mb-0 ps-4">
+                                                    {vac.reason.split('|').map((text, index) => (
+                                                        <li key={index} className="small text-success mb-1" style={{ lineHeight: '1.4' }}>
+                                                            {text.trim()}
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            )}
+                                        </div>
+
 
                                         {/* ดูผลข้างเคียง Toggle */}
                                         <div

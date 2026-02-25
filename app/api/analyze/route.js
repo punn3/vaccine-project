@@ -131,7 +131,7 @@ export async function POST(request) {
                                 }
                             } else {
                                 // สำหรับโรคประจำตัวอื่นๆ
-                                reasons.push(` เข้าเกณฑ์แนะนำสำหรับภาวะ: ${condition}`);
+                                reasons.push(condition);
                             }
                         }
                     }
