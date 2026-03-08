@@ -2,9 +2,17 @@
     padding: 30px 100px;
     background-color: #CBDCEB;
     height: 80px;
+
+    @media screen and (max-width: 768px) {
+        padding: 20px;
+    }
 }
 .accordionWrapper :global(.accordion-body){
     padding: 30px 100px;
+
+    @media screen and (max-width: 768px) {
+        padding: 20px;
+    }
 }
 .accordionWrapper :global(select){
         width: 100%;
