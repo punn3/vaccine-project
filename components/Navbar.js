@@ -19,7 +19,7 @@ function NavbarBox() {
                     <Nav className={`ms-auto mt-3 mt-md-0 ${styles.navitem}`}>
                         <Nav.Link as={Link} href="/#stepper">กรอกข้อมูล</Nav.Link>
                         <Nav.Link as={Link} href="/VaccinesPage">รายการวัคซีน</Nav.Link>
-                        <Nav.Link as={Link} href="/AdminPage">แอดมิน</Nav.Link>
+                        {/* <Nav.Link as={Link} href="/AdminPage">แอดมิน</Nav.Link> */}
                     </Nav>
                 </Navbar.Collapse>
             </Container>
