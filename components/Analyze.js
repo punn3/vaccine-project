@@ -40,7 +40,7 @@ export default function AnalysisResult() {
             case 'No specific':
                 return { backgroundColor: '#e9e9e9', color: '#333333', border: '1px solid #e9e9e9' };
             default:
-                return { backgroundColor: '#6c757d', color: '#ffffff' }; 
+                return { backgroundColor: '#6c757d', color: '#ffffff' };
         }
     };
 
@@ -51,7 +51,7 @@ export default function AnalysisResult() {
                 const savedData = localStorage.getItem("vaccineFormData");
                 if (!savedData) {
                     alert("ไม่พบข้อมูลการกรอก กรุณากรอกข้อมูลใหม่");
-                    router.push('/form'); 
+                    router.push('/form');
                     return;
                 }
 
@@ -93,7 +93,7 @@ export default function AnalysisResult() {
                     history = rawData.vaccines.received
                         .filter(item => item.vaccine !== "" && item.date !== "")
                         .map(item => ({
-                            vaccine_name_en: item.vaccine, 
+                            vaccine_name_en: item.vaccine,
                             date_received: item.date
                         }));
                 }
@@ -111,7 +111,7 @@ export default function AnalysisResult() {
                     diseases: selectedDiseases,
                     allergies: allergiesObj,
                     history: history,
-                    wanted_vaccines: wantedVaccines 
+                    wanted_vaccines: wantedVaccines
                 };
 
                 const res = await fetch('/api/analyze', {
@@ -161,7 +161,7 @@ export default function AnalysisResult() {
     // 🌟 🆕 พระเอกของเรา! ทำหน้าที่แพ็คข้อมูลส่งไปให้หน้า 4 ทันทีที่มีการติ๊กเลือก
     useEffect(() => {
         // ดึงข้อมูลวัคซีนแบบ "เต็มก้อน" จาก ID ที่ผู้ใช้ติ๊กไว้
-        const fullSelectedVaccinesData = allowedVaccines.filter(vac => 
+        const fullSelectedVaccinesData = allowedVaccines.filter(vac =>
             selectedVaccines.includes(vac.id)
         );
         // จับยัดลง localStorage ด้วยชื่อคีย์ 'selectedVaccinesForDetails'
@@ -314,17 +314,30 @@ export default function AnalysisResult() {
                 ) : (
                     notAllowedVaccines.map((vac) => (
                         <Card key={vac.id} className="border-0 shadow-sm mb-3 rounded-4 border-start border-danger border-4" style={{ backgroundColor: '#fff5f5' }}>
-                            <Card.Body className="p-4 d-flex flex-column flex-md-row justify-content-between align-items-md-center gap-3">
-                                <div>
-                                    <h6 className="fw-bold mb-2">{vac.name_th} <span className="text-muted small fw-normal">({vac.name_en})</span></h6>
-                                    <p className="text-danger small mb-0 fw-bold">เหตุผล : <span className="fw-normal">{vac.reason}</span></p>
+                            <Card.Body className="p-4">
+                                <div className="d-flex justify-content-between align-items-start w-100">
+                                    <h6 className="fw-bold mb-0 pe-3">
+                                        {vac.name_th} <span className="text-muted small fw-normal">({vac.name_en})</span>
+                                    </h6>
+                                    <div className="flex-shrink-0 text-end">
+                                        <Badge bg="secondary" className="p-2 px-3 rounded-pill fw-normal">
+                                            ไม่อยู่ในเกณฑ์รับบริการ
+                                        </Badge>
+                                    </div>
                                 </div>
-
-                                <div className="text-md-end">
-                                    <Badge bg="secondary" className="p-2 px-3 rounded-pill fw-normal">
-                                        ไม่อยู่ในเกณฑ์รับบริการ
-                                    </Badge>
-                                </div>
+                                {/* แถวเหตุผล */}
+                                {vac.reason && (
+                                    <div className="mt-3 w-100">
+                                        <p className="text-danger small mb-1 fw-bold">เหตุผล :</p>
+                                        <ul className="mb-0 ps-4">
+                                            {vac.reason.split('|').map((text, index) => (
+                                                <li key={index} className="small text-danger mb-1" style={{ lineHeight: '1.4' }}>
+                                                    {text.trim()}
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    </div>
+                                )}
                             </Card.Body>
                         </Card>
                     ))
