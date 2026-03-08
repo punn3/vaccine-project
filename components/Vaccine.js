@@ -45,8 +45,8 @@ function Vaccines() {
                 <Container className="mt-5">
                     <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
 
-                    <div className="shadow-sm rounded overflow-hidden">
-                        <table className="table table-hover mb-0">
+                    <div className="shadow-sm rounded table-responsive">
+                        <table className="table table-hover mb-0" style={{ minWidth: "800px" }}>
                             <thead className="table-light align-middle">
                                 <tr className="text-center fw-bold">
                                     <th style={{ width: "180px" }}>รูปวัคซีน</th>

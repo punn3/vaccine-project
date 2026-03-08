@@ -78,9 +78,8 @@ function Admin() {
                             <Plus className="me-2" size={20} /> เพิ่มวัคซีน
                         </Button>
                     </div>
-
-                    <div className="shadow-sm rounded overflow-hidden">
-                        <table className="table table-hover mb-0">
+                    <div className="shadow-sm rounded table-responsive">
+                        <table className="table table-hover mb-0" style={{ minWidth: "800px" }}>
                             <thead className="table-light align-middle">
                                 <tr className="text-center fw-bold">
                                     <th style={{ width: "180px" }}>รูปวัคซีน</th>
@@ -95,7 +94,7 @@ function Admin() {
                             <tbody className="text-center align-middle">
                                 {loading ? (
                                     <tr>
-                                        <td colSpan="6" className="py-5">
+                                        <td colSpan="7" className="py-5"> {/* แก้ colSpan จาก 6 เป็น 7 ให้ตรงกับจำนวนคอลัมน์ */}
                                             กำลังโหลดข้อมูล...
                                         </td>
                                     </tr>
