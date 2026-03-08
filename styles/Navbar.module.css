@@ -1,12 +1,16 @@
-.NavComponents{
-    background-color: #608BC1;
+.NavComponents {
+    background-color: #608bc1;
     display: flex;
     justify-content: space-between;
     align-items: center;
     color: #ffff;
     padding: 30px;
-    a{
+    a {
         color: white;
         padding: 0 20px;
+    }
+    
+    @media screen and (max-width: 768px) {
+        padding: 30px 10px;
     }
 }
