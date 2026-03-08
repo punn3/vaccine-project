@@ -10,7 +10,7 @@ export default function AdminPage() {
         <>
             <NavbarBox></NavbarBox>
             <Container className="mt-5">
-                <Admin/> Component Vaccines ของคุณ
+                <Admin/>
             </Container>
         </>
     );
