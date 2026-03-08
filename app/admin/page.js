@@ -1,7 +1,6 @@
 "use client";
-
 import { Container } from "react-bootstrap";
-import NavbarBox from "../../components/Navbar"; // ถอยกลับไป import Navbar มาด้วยถ้าอยากให้มีเมนู
+import NavbarBox from "../../components/Navbar"; 
 import Admin from "@/components/Admin";
 
 

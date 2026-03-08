@@ -2,7 +2,6 @@
 "use client";
 import React, { useState } from "react";
 import styles from "../styles/Stepper.module.css";
-// เอา Navbar, Nav, Offcanvas, ProgressBar ออก เพราะไม่ใช้ Hamburger แล้ว
 import { Container } from "react-bootstrap";
 import BasicInfo from "./BasicInfo";
 import CheckInfomation from "./CheckInfo";
