@@ -218,7 +218,7 @@ export async function POST(request) {
                 }
             }
 
-            // 🌟 --- บังคับ No specific ให้ไปอยู่กลุ่มฉีดไม่ได้ --- 🌟
+            // --- บังคับ No specific ให้ไปอยู่กลุ่มฉีดไม่ได้ --- 
             if (matchStatus === "No specific" || matchStatus === "No Specific") {
                 isBlocked = true;
                 isAllowed = false;
