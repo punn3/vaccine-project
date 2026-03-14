@@ -63,7 +63,15 @@ function BasicInfo() {
         const res = await fetch('/api/vaccines');
         if (!res.ok) throw new Error(`HTTP error! status: ${res.status}`);
         const data = await res.json();
-        setVaccineList(data); 
+        const sortedData = data.sort((a, b) => {
+          const nameA = a.name_en.trim().toLowerCase();
+          const nameB = b.name_en.trim().toLowerCase();
+          return nameA.localeCompare(nameB);
+        });
+        const uniqueData = sortedData.filter((v, index, self) =>
+          index === self.findIndex((t) => t.name_en.trim() === v.name_en.trim())
+        );
+        setVaccineList(uniqueData); 
       } catch (err) {
         console.error("Error fetching vaccines:", err);
       }
@@ -163,14 +171,28 @@ function BasicInfo() {
     });
   };
 
-  // ✅ ตัวแปรเช็คความครบถ้วนของข้อมูล (Validation Rules)
+  const getAvailableWantedVaccines = (currentIndex) => {
+    // เอาชื่อวัคซีนในช่อง "อื่นๆ" มาเก็บไว้
+    const selectedInOtherDropdowns = formData.vaccines.selected.filter((_, i) => i !== currentIndex);
+    // คืนค่าเฉพาะวัคซีนที่ยังไม่ถูกเลือกในช่องอื่น
+    return vaccineList.filter(v => !selectedInOtherDropdowns.includes(v.name_en));
+  };
+
+  const getAvailableReceivedVaccines = (currentIndex) => {
+    const receivedInOtherDropdowns = formData.vaccines.received
+      .filter((_, i) => i !== currentIndex)
+      .map(item => item.vaccine); // ดึงมาแค่ชื่อวัคซีน
+    return vaccineList.filter(v => !receivedInOtherDropdowns.includes(v.name_en));
+  };
+
+  // ตัวแปรเช็คความครบถ้วนของข้อมูล (Validation Rules)
   const isDiseaseValid = Object.values(formData.disease).some(val => val !== "");
   const isAllergyValid = formData.allergy.none || formData.allergy.food || formData.allergy.drugAndVaccine;
   const isFoodAllergyValid = !formData.allergy.food || formData.allergy.foodList.length > 0;
   const isDrugAllergyValid = !formData.allergy.drugAndVaccine || formData.allergy.drugAndVaccineList.length > 0;
 
   return (
-    <div className={styles.accordionWrapper}>
+    <div className={`${styles.accordionWrapper} ${styles.customCheckbox}`}>
       <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
         
         {/* ================= Section 1: ข้อมูลพื้นฐาน ================= */}
@@ -280,7 +302,7 @@ function BasicInfo() {
                   <Form.Check
                     inline
                     type="checkbox"
-                    label="บุคลากรทางการแพทย์"
+                    label="เป็นบุคลากรทางการแพทย์"
                     name="medical"
                     value="เป็น"
                     checked={formData.basic.medical !== ""}
@@ -446,7 +468,7 @@ function BasicInfo() {
                             isInvalid={formData.vaccines.want_type === "yes" && value === ""}
                           >
                             <option value="">เลือกวัคซีนที่ต้องการ</option>
-                            {vaccineList.map((v) => (
+                            {getAvailableWantedVaccines(index).map((v) => (
                               <option key={v.id} value={v.name_en}>
                                 {v.name_en}
                               </option>
@@ -489,7 +511,7 @@ function BasicInfo() {
                         onChange={(e) => handleReceivedChange(index, "vaccine", e.target.value)}
                       >
                         <option value="">เลือกวัคซีน</option>
-                        {vaccineList.map((v) => (
+                        {getAvailableReceivedVaccines(index).map((v) => (
                           <option key={v.id} value={v.name_en}>{v.name_en}</option>
                         ))}
                       </Form.Select>

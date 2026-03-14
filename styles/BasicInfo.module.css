@@ -1,32 +1,47 @@
-.accordionWrapper :global(.accordion-button){
+
+.customCheckbox :global(.form-check-input) {
+    border-color: #495057 !important;
+    border-width: 1.5px !important;
+}
+
+.customCheckbox :global(.form-check-input:checked) {
+    background-color: #117ce7!important;
+    border-color: #117ce7 !important;
+}
+
+.accordionWrapper :global(.accordion-button) {
     padding: 30px 100px;
-    background-color: #CBDCEB;
+    background-color: #cbdceb;
     height: 80px;
 
     @media screen and (max-width: 768px) {
         padding: 20px;
     }
 }
-.accordionWrapper :global(.accordion-body){
+
+.accordionWrapper :global(.accordion-body) {
     padding: 30px 100px;
 
     @media screen and (max-width: 768px) {
         padding: 20px;
     }
 }
-.accordionWrapper :global(select){
-        width: 100%;
-        height: 40px;
-        border-radius: 5px;
-        border-color: #d4d4d4;
-        padding: 6px 12px;
-        &:focus {
-            border-color: #86b7fe;
-            outline: 0;
-            box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
-        }
+
+.accordionWrapper :global(select) {
+    width: 100%;
+    height: 40px;
+    border-radius: 5px;
+    border-color: #d4d4d4;
+    padding: 6px 12px;
+
+    &:focus {
+        border-color: #86b7fe;
+        outline: 0;
+        box-shadow: 0 0 0 0.25rem rgba(13, 110, 253, 0.25);
+    }
 }
-.accordionWrapper :global(:disabled){
+
+.accordionWrapper :global(:disabled) {
     background-color: white;
 }
 
@@ -38,13 +53,10 @@
 .pregnantbox {
     display: flex;
     flex-direction: column;
-
 }
 
-.travelchoice{
+.travelchoice {
     display: flex;
     flex-direction: column;
     gap: 10px;
-
-    
 }

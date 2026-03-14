@@ -57,3 +57,29 @@ a {
     color-scheme: dark;
   }
 }
+
+
+@media print {
+    body * {
+        visibility: hidden;
+    }
+
+    #printable-vaccine-area, 
+    #printable-vaccine-area * {
+        visibility: visible;
+    }
+    
+    #printable-vaccine-area {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 100%;
+    }
+
+    .card {
+        background-color: #ffffff !important;
+        border: 1px solid #dee2e6 !important;
+        box-shadow: none !important;
+        page-break-inside: avoid;
+    }
+}

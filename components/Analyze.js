@@ -158,7 +158,7 @@ export default function AnalysisResult() {
         }
     };
 
-    // 🌟 🆕 พระเอกของเรา! ทำหน้าที่แพ็คข้อมูลส่งไปให้หน้า 4 ทันทีที่มีการติ๊กเลือก
+    // ทำหน้าที่แพ็คข้อมูลส่งไปให้หน้า 4 ทันทีที่มีการติ๊กเลือก
     useEffect(() => {
         // ดึงข้อมูลวัคซีนแบบ "เต็มก้อน" จาก ID ที่ผู้ใช้ติ๊กไว้
         const fullSelectedVaccinesData = allowedVaccines.filter(vac =>

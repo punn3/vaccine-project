@@ -75,6 +75,7 @@ const MyStepperForm = () => {
 
         if (currentStep === steps.length - 1) {
             console.log("Submitting form...");
+            setCurrentStep(0);
         } else {
             setCurrentStep((prev) => Math.min(steps.length - 1, prev + 1));
         }
@@ -137,11 +138,11 @@ const MyStepperForm = () => {
                 <button
                     className={`btn ${styles.btn_outline}`}
                     onClick={() => setCurrentStep(Math.max(0, currentStep - 1))}
+                    style={{ visibility: currentStep === 0 ? "hidden" : "visible" }}
                     disabled={currentStep === 0}
                 >
                     ย้อนกลับ
                 </button>
-                {/* เอา d-none d-md-block ออก เพื่อให้ตัวนับแสดงในมือถือด้วย (ถ้าต้องการ) */}
                 <div className={styles.step_counter}>
                     ขั้นตอนที่ {currentStep + 1} จาก {steps.length}
                 </div>

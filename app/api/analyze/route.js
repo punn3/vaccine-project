@@ -76,6 +76,15 @@ export async function POST(request) {
                 }
             }
 
+            if (
+                user.is_pregnant && 
+                vac.vaccine_type && 
+                vac.vaccine_type.toLowerCase().includes("live attenuated")
+            ) {
+                isBlocked = true; 
+                reasons.push("ห้ามฉีดวัคซีนชนิดเชื้อเป็น (Live Attenuated) ในหญิงตั้งครรภ์");
+            }
+
             // --- B. เช็คโรคประจำตัว / การตั้งครรภ์ ---
             const vacDiseaseRules = diseaseRules.filter(
                 (r) => r.vaccine_id === vac.id,
