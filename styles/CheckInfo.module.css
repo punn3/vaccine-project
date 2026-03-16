@@ -3,3 +3,27 @@
     flex-direction: column;
     gap: 30px;
 }
+
+.headerStyle {
+    background-color: #CBDCEB;
+    color: #052C65;
+    font-weight: bolder;
+    border-bottom: none;
+    padding: 30px 100px;
+
+    @media screen and (max-width: 768px) {
+        padding: 20px;
+    }
+}
+
+.cardStyle {
+    border-radius: 1px solid #d4d4d4;
+}
+
+.bodyStyle {
+    padding: 30px 100px;
+
+    @media screen and (max-width: 768px) {
+        padding: 20px;
+    }
+}
