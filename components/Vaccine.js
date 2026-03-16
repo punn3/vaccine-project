@@ -29,48 +29,38 @@ const SortIcon = ({ active, direction }) => {
 
 // Component ไอคอนมีจำหน่าย
 const CheckIcon = () => (
-    <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        className="me-2"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" className="me-2">
         {/* พื้นหลังวงกลมสีเขียว  */}
         <circle cx="12" cy="12" r="12" fill="#198754" />
-        
+
         {/* เครื่องหมายถูกสีขาว */}
-        <polyline 
-            points="17 8 10 16 7 13" 
-            fill="none" 
-            stroke="white" 
-            strokeWidth="3" 
-            strokeLinecap="round" 
-            strokeLinejoin="round" 
+        <polyline
+            points="17 8 10 16 7 13"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
+            strokeLinejoin="round"
         />
     </svg>
 );
 
 // Component ไอคอนไม่มีจำหน่าย (
 const MinusIcon = () => (
-    <svg
-        width="20"
-        height="20"
-        viewBox="0 0 24 24"
-        className="me-2"
-    >
+    <svg width="20" height="20" viewBox="0 0 24 24" className="me-2">
         {/* พื้นหลังวงกลมสีเทาอ่อน */}
         <circle cx="12" cy="12" r="12" fill="#737373" />
-        
+
         {/* เครื่องหมายลบสีขาว */}
-        <line 
-            x1="7" 
-            y1="12" 
-            x2="17" 
-            y2="12" 
-            fill="none" 
-            stroke="white" 
-            strokeWidth="3" 
-            strokeLinecap="round" 
+        <line
+            x1="7"
+            y1="12"
+            x2="17"
+            y2="12"
+            fill="none"
+            stroke="white"
+            strokeWidth="3"
+            strokeLinecap="round"
         />
     </svg>
 );
@@ -85,11 +75,17 @@ function Vaccines() {
     const fetchVaccines = async () => {
         try {
             const res = await fetch("/api/vaccines");
+            // ถ้าระบบหลังบ้าน Error (เช่น 500) ให้โยนเข้า catch เลย
+            if (!res.ok) throw new Error("API Error");
+
             const data = await res.json();
-            setVaccines(data);
+            // ป้องกัน API ส่งของแปลกๆ มา ให้เช็กก่อนว่าเป็น Array ไหม
+            setVaccines(Array.isArray(data) ? data : []);
             setLoading(false);
         } catch (error) {
             console.error("Error fetching:", error);
+            // ถ้า Error ให้เซ็ตเป็น Array ว่าง โค้ดจะได้ไม่พัง
+            setVaccines([]);
             setLoading(false);
         }
     };
@@ -101,7 +97,7 @@ function Vaccines() {
         }
     }, [view]);
 
-    const filteredVaccines = vaccines.filter((item) => {
+    const filteredVaccines = (Array.isArray(vaccines) ? vaccines : []).filter((item) => {
         const search = searchTerm.toLowerCase();
         return (
             item.name_th?.toLowerCase().includes(search) ||
