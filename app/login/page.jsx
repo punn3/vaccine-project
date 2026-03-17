@@ -51,7 +51,6 @@ export default function LoginPage() {
                             <Form.Label className="small fw-bold">อีเมล</Form.Label>
                             <Form.Control 
                                 type="email" 
-                                placeholder="name@hospital.com"
                                 value={email}
                                 onChange={(e) => setEmail(e.target.value)}
                                 required
@@ -62,7 +61,6 @@ export default function LoginPage() {
                             <Form.Label className="small fw-bold">รหัสผ่าน</Form.Label>
                             <Form.Control 
                                 type="password" 
-                                placeholder="********"
                                 value={password}
                                 onChange={(e) => setPassword(e.target.value)}
                                 required
