@@ -47,79 +47,59 @@ function EditVaccine({ onBack, data }) {
         polymyxinB: false,
     });
 
-    // ✅ เพิ่ม useEffect เพื่อดึงข้อมูลจาก props 'data' มาใส่ใน Form เมื่อโหลดหน้าเสร็จ
+    // ✅ เปลี่ยน useEffect เป็นการดึงข้อมูลฉบับเต็มจาก API แทน
     useEffect(() => {
-        if (data) {
-            console.log("EditVaccine received data:", data); // เช็คใน Console ว่าข้อมูลมาไหม
-
-            // 1. Map ข้อมูลพื้นฐาน
-            setFormData({
-                name_th: data.name_th || "",
-                name_en: data.name_en || "",
-                trade_name: data.trade_name || "",
-                indication: data.indication || "",
-                vaccine_type: data.vaccine_type || "",
-                price: data.price || "",
-                // เช็ค 2 ค่า เผื่อ API ส่งมาเป็น administration หรือ dosage_ml
-                dosage_ml: data.dosage_ml || data.administration || "",
-                admin_route: data.admin_route || "",
-                side_effects: data.side_effects || data.precautions || "", // เผื่อใช้ชื่อ precautions
-                is_available:
-                    data.is_available !== undefined ? Boolean(data.is_available) : true,
-            });
-
-            // 2. Map รูปภาพ
-            if (data.image_url) {
-                setPreviewImage(data.image_url);
-            }
-
-            // 3. Map เงื่อนไขอายุ (ถ้ามี)
-            // ตรวจสอบว่าเป็น String (JSON) หรือ Array แล้ว
-            let parsedAge = [];
-            if (Array.isArray(data.age_conditions)) {
-                parsedAge = data.age_conditions;
-            } else if (
-                typeof data.age_conditions === "string" &&
-                data.age_conditions.trim() !== ""
-            ) {
+        const fetchFullVaccineData = async () => {
+            if (data && data.id) {
                 try {
-                    parsedAge = JSON.parse(data.age_conditions);
-                } catch (e) { }
-            }
-            if (parsedAge.length > 0) setAgeConditions(parsedAge);
+                    // วิ่งไปขอข้อมูลแบบจัดเต็ม (ที่มีเงื่อนไขอายุ+โรค) จาก API
+                    const res = await fetch(`/api/vaccines/${data.id}`);
+                    const fullData = await res.json();
 
-            // 4. Map เงื่อนไขโรค (ถ้ามี)
-            let parsedDisease = [];
-            if (Array.isArray(data.disease_conditions)) {
-                parsedDisease = data.disease_conditions;
-            } else if (
-                typeof data.disease_conditions === "string" &&
-                data.disease_conditions.trim() !== ""
-            ) {
-                try {
-                    parsedDisease = JSON.parse(data.disease_conditions);
-                } catch (e) { }
-            }
-            if (parsedDisease.length > 0) setDiseaseConditions(parsedDisease);
+                    console.log("Full Data จาก API:", fullData); // เช็กข้อมูลที่ได้ใน Console
 
-            // 5. Map ภูมิแพ้ (ถ้ามี)
-            let parsedAllergies = null;
-            if (typeof data.allergies === "object" && data.allergies !== null) {
-                parsedAllergies = data.allergies;
-            } else if (
-                typeof data.allergies === "string" &&
-                data.allergies.trim() !== ""
-            ) {
-                try {
-                    parsedAllergies = JSON.parse(data.allergies);
-                } catch (e) { }
-            }
+                    // 1. Map ข้อมูลพื้นฐาน
+                    setFormData({
+                        name_th: fullData.name_th || "",
+                        name_en: fullData.name_en || "",
+                        trade_name: fullData.trade_name || "",
+                        indication: fullData.indication || "",
+                        vaccine_type: fullData.vaccine_type || "",
+                        price: fullData.price || "",
+                        dosage_ml: fullData.dosage_ml || fullData.administration || "",
+                        admin_route: fullData.admin_route || "",
+                        side_effects: fullData.side_effects || fullData.precautions || "",
+                        is_available: fullData.is_available !== undefined ? Boolean(fullData.is_available) : true,
+                    });
 
-            if (parsedAllergies) {
-                setAllergies((prev) => ({ ...prev, ...parsedAllergies }));
+                    // 2. Map รูปภาพ
+                    if (fullData.image_url) {
+                        setPreviewImage(fullData.image_url);
+                    }
+
+                    // 3. Map เงื่อนไขอายุ (เอา Array จาก API มายัดใส่ State ตรงๆ เลย)
+                    if (fullData.age_conditions && fullData.age_conditions.length > 0) {
+                        setAgeConditions(fullData.age_conditions);
+                    }
+
+                    // 4. Map เงื่อนไขโรค (เอา Array ที่เรา Group ไว้จาก API มายัดใส่ State ตรงๆ)
+                    if (fullData.disease_conditions && fullData.disease_conditions.length > 0) {
+                        setDiseaseConditions(fullData.disease_conditions);
+                    }
+
+                    // 5. Map ภูมิแพ้
+                    if (fullData.allergies) {
+                        setAllergies((prev) => ({ ...prev, ...fullData.allergies }));
+                    }
+
+                } catch (error) {
+                    console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
+                }
             }
-        }
-    }, [data]); // ทำงานเมื่อค่า data เปลี่ยนแปลง
+        };
+
+        fetchFullVaccineData(); // สั่งให้ฟังก์ชันทำงาน
+    }, [data]); // ทำงานใหม่ทุกครั้งที่กดเข้า Edit วัคซีนตัวใหม่
 
     // --- Functions (เหมือนเดิม) ---
     const handleChange = (e, field) => {

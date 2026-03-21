@@ -32,23 +32,42 @@ export async function GET(request, { params }) {
         );
 
         // D. ประกอบร่างข้อมูลส่งกลับไปให้หน้าเว็บ
+        // เขียนฟังก์ชันแอบจัดกลุ่ม (Group) โรคที่มี "เข็ม" และ "ความถี่" เท่ากัน ให้อยู่กล่องเดียวกัน
+        const groupedDiseases = [];
+        
+        diseaseRules.forEach((rule) => {
+            // เช็กว่ามีกลุ่มนี้อยู่หรือยัง (เข็มเท่ากัน ความถี่เท่ากัน)
+            const existingGroup = groupedDiseases.find(
+                (g) => g.dose === rule.dose_count && g.frequency === rule.frequency_desc
+            );
+
+            if (existingGroup) {
+                // ถ้ามีแล้ว ยัดชื่อโรคเพิ่มเข้าไปใน Array เดิม
+                existingGroup.selectedDiseases.push(rule.condition_name);
+            } else {
+                // ถ้ายังไม่มี สร้างกลุ่มใหม่ (Array ใหม่)
+                groupedDiseases.push({
+                    selectedDiseases: [rule.condition_name], // เติม s ให้ตรงกับหน้า UI แล้ว
+                    dose: rule.dose_count,
+                    frequency: rule.frequency_desc,
+                    detail: "" 
+                });
+            }
+        });
+
         const responseData = {
             ...vaccine,
-            // แปลงชื่อตัวแปรให้ตรงกับที่หน้า EditVaccine.js รอรับ (min_age -> minAge)
             age_conditions: ageRules.map((r) => ({
                 minAge: r.min_age,
                 maxAge: r.max_age,
                 dose: r.dose_count,
                 frequency: r.frequency_desc,
-                detail: "", // ถ้าใน DB ไม่มีเก็บ detail ก็เว้นว่างไว้
+                detail: "", 
             })),
-            disease_conditions: diseaseRules.map((r) => ({
-                selectedDisease: r.condition_name, // ดึงชื่อโรคมาใส่
-                dose: r.dose_count,
-                frequency: r.frequency_desc,
-                detail: "",
-            })),
-            // แปลง Text JSON ให้กลับเป็น Object เพื่อให้ Checkbox ทำงาน
+            
+            // ส่งก้อนที่จัดกลุ่มเสร็จแล้วไปให้หน้าเว็บ
+            disease_conditions: groupedDiseases, 
+
             allergies: vaccine.allergies ? JSON.parse(vaccine.allergies) : null,
         };
 
@@ -120,20 +139,24 @@ export async function PUT(request, { params }) {
         // D. ยัดข้อมูลเงื่อนไขโรคชุดใหม่ลงไป
         if (body.disease_conditions && body.disease_conditions.length > 0) {
             for (const dis of body.disease_conditions) {
-                // บันทึกเฉพาะที่มีการเลือกชื่อโรค
-                if (dis.selectedDisease) {
-                    await db.query(
-                        `
-                        INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status) 
-                        VALUES (?, ?, ?, ?, ?)`,
-                        [
-                            dis.selectedDisease,
-                            id,
-                            dis.dose || 1,
-                            dis.frequency || "",
-                            "Recommended",
-                        ],
-                    );
+                // เช็กว่ามี array selectedDiseases ส่งมาและไม่ว่าง
+                if (dis.selectedDiseases && dis.selectedDiseases.length > 0) {
+                    
+                    // แตก Array ออกมาบันทึกทีละโรค
+                    for (const diseaseName of dis.selectedDiseases) {
+                        await db.query(
+                            `
+                            INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status) 
+                            VALUES (?, ?, ?, ?, ?)`,
+                            [
+                                diseaseName,       // บันทึกทีละ 1 ชื่อโรค
+                                id,
+                                dis.dose || 1,
+                                dis.frequency || "",
+                                "Recommended",
+                            ]
+                        );
+                    }
                 }
             }
         }

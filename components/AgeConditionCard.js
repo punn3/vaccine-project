@@ -14,7 +14,7 @@ function AgeCondition({ index, data, onChange, onRemove }) {
           <Form.Label>อายุเริ่มต้น (ปี)</Form.Label>
           <Form.Control 
             type="number" 
-            value={data.minAge} 
+            value={data.minAge || ""} 
             onChange={(e) => onChange(index, 'minAge', e.target.value)} 
           />
         </Col>
@@ -22,7 +22,7 @@ function AgeCondition({ index, data, onChange, onRemove }) {
           <Form.Label>อายุสูงสุด (ปี)</Form.Label>
           <Form.Control 
             type="number" 
-            value={data.maxAge} 
+            value={data.maxAge || ""} 
             onChange={(e) => onChange(index, 'maxAge', e.target.value)} 
           />
         </Col>
@@ -32,23 +32,25 @@ function AgeCondition({ index, data, onChange, onRemove }) {
           <Form.Label>จำนวนโดส</Form.Label>
           <Form.Control 
             type="number" 
-            value={data.dose} 
+            value={data.dose || ""} 
             onChange={(e) => onChange(index, 'dose', e.target.value)} 
           />
         </Col>
         <Col md={6}>
           <Form.Label>ความถี่ในการฉีด</Form.Label>
           <Form.Select 
-            value={data.frequency} 
+            value={data.frequency || ""} 
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>
-            <option value="one-time">ครั้งเดียว</option>
-            <option value="0,1,6">0,1,6</option>
-            <option value="0,1,2,6">0,1,2,6</option>
-            <option value="0,3">0,3</option>
-            <option value="everyYear">ทุกปี</option>
-            <option value="every 10 year">ทุก 10 ปี</option>
+            <option value="ครั้งเดียว">ครั้งเดียว</option>
+            <option value="ปีละ 1 เข็ม">ปีละ 1 เข็ม</option>
+            <option value="กระตุ้นทุก 10 ปี">กระตุ้นทุก 10 ปี</option>
+            <option value="ห่าง 0, 1, 6 เดือน">ห่าง 0, 1, 6 เดือน</option>
+            <option value="ห่าง 0, 1, 2, 6 เดือน">ห่าง 0, 1, 2, 6 เดือน</option>
+            <option value="ห่าง 0, 3 เดือน">ห่าง 0, 3 เดือน</option>
+            <option value="ห่าง 4 สัปดาห์">ห่าง 4 สัปดาห์</option>
+            <option value="ห่าง 4 - 8 สัปดาห์">ห่าง 4 - 8 สัปดาห์</option>
           </Form.Select>
         </Col>
       </Row>
