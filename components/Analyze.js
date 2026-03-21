@@ -5,9 +5,9 @@ import { Container, Card, Row, Col, Form, Collapse, Badge } from 'react-bootstra
 import { CheckCircleFill, XCircleFill, ChevronDown, ChevronUp, InfoCircle } from 'react-bootstrap-icons';
 
 const STATUS_PRIORITY = {
-    'Risk-base': 1,
-    'Reccomended': 2,
-    'Consider': 3,
+    'Recommended with risk-factor': 1,
+    'Recommended': 2,
+    'Optional': 3,
     'Share-decision': 4,
     'Cautious': 5,
     'No specific': 6
@@ -27,11 +27,11 @@ export default function AnalysisResult() {
     // ฟังก์ชันกำหนดสี Badge ตามสถานะ
     const getStatusBadgeStyle = (status) => {
         switch (status) {
-            case 'Reccomended':
+            case 'Recommended':
                 return { backgroundColor: '#1a7742', color: '#ffffff', border: '1px solid #1a7742' };
-            case 'Consider':
+            case 'Optional':
                 return { backgroundColor: '#ffe5a0', color: '#68501c', border: '1px solid #ffe5a0' };
-            case 'Risk-base':
+            case 'Recommended with risk-factor':
                 return { backgroundColor: '#0d5bb5', color: '#ffffff', border: '1px solid #0d5bb5' };
             case 'Cautious':
                 return { backgroundColor: '#b70f18', color: '#ffd6d6', border: '1px solid #b70f18' };
@@ -57,9 +57,6 @@ export default function AnalysisResult() {
 
                 const rawData = JSON.parse(savedData);
 
-                // ======================================================
-                // แปลงข้อมูล (Data Mapping) ให้ตรงสเปค API
-                // ======================================================
                 const selectedDiseases = Object.values(rawData.disease).filter(
                     (val) => val !== "" && val !== "ไม่มีโรคประจำตัว"
                 );

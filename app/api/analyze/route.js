@@ -17,13 +17,8 @@ export async function POST(request) {
         const [diseaseRules] = await db.query(
             "SELECT * FROM vaccine_rules_condition",
         );
-
-        // ส่วนที่เพิ่มเข้ามา: กรองวัคซีนตามที่ผู้ใช้ต้องการ
-        let vaccinesToAnalyze = vaccines; // ค่าเริ่มต้น: วิเคราะห์วัคซีนทั้งหมดที่มี
-
-        // เช็คว่าผู้ใช้มีการส่งรายชื่อวัคซีนที่ต้องการมาด้วยไหม และต้องไม่เป็น Array ว่าง
+        let vaccinesToAnalyze = vaccines; 
         if (user.wanted_vaccines && user.wanted_vaccines.length > 0) {
-            // กรองเอาเฉพาะวัคซีนที่มีชื่อภาษาอังกฤษ (name_en) ตรงกับที่ผู้ใช้เลือกมา
             vaccinesToAnalyze = vaccines.filter(vac => 
                 user.wanted_vaccines.includes(vac.name_en)
             );
@@ -36,7 +31,7 @@ export async function POST(request) {
         let userConditions = user.diseases ? [...user.diseases] : [];
         if (user.is_pregnant) {
             userConditions.push("ตั้งครรภ์");
-            userConditions.push("ตั้ั้งครรภ์"); // กันเหนียวพิมพ์ผิดใน DB
+            userConditions.push("ตั้ั้งครรภ์"); 
         }
         if (user.is_med_personnel) {
             userConditions.push("บุคลากรทางการแพทย์");
