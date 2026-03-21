@@ -433,14 +433,17 @@ function AddVaccine({ onBack }) {
                     </Row>
                     <p className="fw-bold">การแพ้ยาและวัคซีน</p>
                     <Row>
-                        {["Neomycin", "Steptomycin", "Polymycin B"].map((drug) => (
-                            <Col md={3} key={drug} className="mb-2">
+                        {[{ label: "Neomycin", key: "neomycin" },
+                        { label: "Streptomycin", key: "streptomycin" },
+                        { label: "Polymyxin B", key: "polymyxinB" }]
+                        .map((drug) => (
+                            <Col md={3} key={drug.key} className="mb-2">
                                 <div className="border rounded p-2">
                                     <Form.Check
                                         type="checkbox"
-                                        label={drug}
-                                        checked={allergies[drug]}
-                                        onChange={() => handleAllergyChange(drug)}
+                                        label={drug.label}
+                                        checked={allergies[drug.key] || false}
+                                        onChange={() => handleAllergyChange(drug.key)}
                                     />
                                 </div>
                             </Col>
@@ -528,10 +531,10 @@ function AddVaccine({ onBack }) {
                 </Button>
                 <div className="d-flex gap-3">
                     {/* ปุ่มเคลียร์ข้อมูลที่แก้ไขแล้ว */}
-                    <Button 
+                    <Button
                         onClick={handleClear}
                         className="px-4"
-                        style={{ 
+                        style={{
                             backgroundColor: "#ffffff", // พื้นหลังสีขาว
                             color: "#4a7fc1",           // ตัวอักษรสีฟ้า
                             borderColor: "#4a7fc1",     // กรอบสีฟ้า
@@ -541,7 +544,7 @@ function AddVaccine({ onBack }) {
                     >
                         เคลียร์ข้อมูล
                     </Button>
-                    
+
                     <Button
                         variant="primary"
                         className="px-5"
