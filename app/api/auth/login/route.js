@@ -13,7 +13,9 @@ export async function POST(request) {
                 name: 'admin_session',
                 value: 'authenticated',
                 httpOnly: true, // ป้องกันการถูกขโมยผ่าน JavaScript
-                secure: process.env.NODE_ENV === 'production',
+                // secure: process.env.NODE_ENV === 'production',
+                secure: false,
+                sameSite: 'lax',
                 path: '/',
                 maxAge: 60 * 60 * 24 // 24 ชั่วโมง (เป็นวินาที)
             });
