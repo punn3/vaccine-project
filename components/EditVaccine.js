@@ -344,7 +344,7 @@ function EditVaccine({ onBack, data }) {
                             />
                             <Form.Group className="mt-2">
                                 <Form.Label className="small fw-bold">
-                                    รายละเอียดเพิ่มเติม
+                                    คำแนะนำเพิ่มเติม
                                 </Form.Label>
                                 <Form.Control
                                     as="textarea"

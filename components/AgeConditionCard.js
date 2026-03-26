@@ -43,14 +43,26 @@ function AgeCondition({ index, data, onChange, onRemove }) {
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>
+            <option value="-">-</option>
             <option value="ครั้งเดียว">ครั้งเดียว</option>
             <option value="ปีละ 1 เข็ม">ปีละ 1 เข็ม</option>
             <option value="กระตุ้นทุก 10 ปี">กระตุ้นทุก 10 ปี</option>
-            <option value="ห่าง 0, 1, 6 เดือน">ห่าง 0, 1, 6 เดือน</option>
-            <option value="ห่าง 0, 1, 2, 6 เดือน">ห่าง 0, 1, 2, 6 เดือน</option>
-            <option value="ห่าง 0, 3 เดือน">ห่าง 0, 3 เดือน</option>
+            <option value="ห่าง 7 วัน">ห่าง 7 วัน</option>
             <option value="ห่าง 4 สัปดาห์">ห่าง 4 สัปดาห์</option>
-            <option value="ห่าง 4 - 8 สัปดาห์">ห่าง 4 - 8 สัปดาห์</option>
+            <option value="ห่าง 4-8 สัปดาห์">ห่าง 4-8 สัปดาห์</option>
+            <option value="ห่าง 8 สัปดาห์">ห่าง 8 สัปดาห์</option>
+            <option value="ห่าง 1-2 เดือน">ห่าง 1-2 เดือน</option>
+            <option value="ห่าง 2-6 เดือน">ห่าง 2-6 เดือน</option>
+            <option value="ห่าง 6 เดือน">ห่าง 6 เดือน</option>
+            <option value="ห่าง 0, 3 เดือน">ห่าง 0, 3 เดือน</option>
+            <option value="ห่าง 0, 1, 6 เดือน">ห่าง 0, 1, 6 เดือน</option>
+            <option value="ห่าง 0, 1-2, 6 เดือน">ห่าง 0, 1-2, 6 เดือน</option>
+            <option value="ห่าง 0, 1, 2, 6 เดือน">ห่าง 0, 1, 2, 6 เดือน</option>
+            <option value="ห่าง 7-28 วัน และ 1 ปี">ห่าง 7-28 วัน และ 1 ปี</option>
+            <option value="ห่าง 1-2 เดือน หรือ 2-6 เดือน">ห่าง 1-2 เดือน หรือ 2-6 เดือน</option>
+            <option value="ทุกท้อง 12 - 20 สัปดาห์">ทุกท้อง 12 - 20 สัปดาห์</option>
+            <option value="ทุกท้อง 20 - 32 สัปดาห์">ทุกท้อง 20 - 32 สัปดาห์</option>
+            <option value="ทุกท้อง 24 - 36 สัปดาห์">ทุกท้อง 24 - 36 สัปดาห์</option>
           </Form.Select>
         </Col>
       </Row>

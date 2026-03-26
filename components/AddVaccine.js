@@ -333,7 +333,7 @@ function AddVaccine({ onBack }) {
                             />
                             <Form.Group className="mt-2">
                                 <Form.Label className="small fw-bold">
-                                    รายละเอียดเพิ่มเติมสำหรับช่วงอายุนี้
+                                    คำแนะนำเพิ่มเติมสำหรับช่วงอายุนี้
                                 </Form.Label>
                                 <Form.Control
                                     as="textarea"
