@@ -47,7 +47,7 @@ export async function GET(request, { params }) {
                     dose: rule.dose_count,
                     frequency: rule.frequency_desc,
                     status: rule.status,
-                    detail: rule.detail || "", // ✨ ดึง detail มาด้วย
+                    detail: rule.detail || "", 
                 });
             }
         });

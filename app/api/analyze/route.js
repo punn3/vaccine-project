@@ -1,41 +1,37 @@
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 
+// Helper: ฟังก์ชันช่วยแปลง JSON 
+const parseJSON = (str) => {
+    try { return str ? JSON.parse(str) : {}; }
+    catch (e) { return {}; }
+};
+
 export async function POST(request) {
     let db;
     try {
-        // รับข้อมูลจากหน้าเว็บ
         const user = await request.json();
-
         db = await pool.getConnection();
 
         // 1. ดึงข้อมูลจากฐานข้อมูล
-        const [vaccines] = await db.query(
-            "SELECT * FROM vaccines WHERE is_available = 1",
-        );
+        const [vaccines] = await db.query("SELECT * FROM vaccines WHERE is_available = 1");
         const [ageRules] = await db.query("SELECT * FROM vaccine_rules_age");
-        const [diseaseRules] = await db.query(
-            "SELECT * FROM vaccine_rules_condition",
-        );
-        let vaccinesToAnalyze = vaccines; 
-        if (user.wanted_vaccines && user.wanted_vaccines.length > 0) {
-            vaccinesToAnalyze = vaccines.filter(vac => 
-                user.wanted_vaccines.includes(vac.name_en)
-            );
-        }
+        const [diseaseRules] = await db.query("SELECT * FROM vaccine_rules_condition");
 
-        let allowedVaccines = [];
-        let notAllowedVaccines = [];
+        // กรองเฉพาะวัคซีนที่สนใจ (ถ้ามี)
+        const vaccinesToAnalyze = user.wanted_vaccines?.length > 0
+            ? vaccines.filter(vac => user.wanted_vaccines.includes(vac.name_en))
+            : vaccines;
 
-        // 2. เตรียมเงื่อนไขคนไข้
-        let userConditions = user.diseases ? [...user.diseases] : [];
+        // 2. เตรียมเงื่อนไขคนไข้ (ใช้ Set เพื่อกันค่าซ้ำ)
+        const userConditions = new Set(user.diseases || []);
         if (user.is_pregnant) {
-            userConditions.push("ตั้งครรภ์");
-            userConditions.push("ตั้ั้งครรภ์"); 
+            userConditions.add("ตั้งครรภ์");
         }
-        if (user.is_med_personnel) {
-            userConditions.push("บุคลากรทางการแพทย์");
-        }
+        if (user.is_med_personnel) userConditions.add("บุคลากรทางการแพทย์");
+
+        const allowedVaccines = [];
+        const notAllowedVaccines = [];
 
         // 3. เริ่มวิเคราะห์ทีละวัคซีน
         for (const vac of vaccinesToAnalyze) {
@@ -45,204 +41,153 @@ export async function POST(request) {
             let matchStatus = "";
             let requiredDoses = 1;
 
-            // ดึงกฎพื้นฐานของ "อายุ" มาเตรียมไว้ก่อนเลย (เพื่อเอาจำนวนโดสพื้นฐาน)
-            const ageRule = ageRules.find(
-                (r) =>
-                    r.vaccine_id === vac.id &&
-                    user.age >= r.min_age &&
-                    (r.max_age === null || user.age <= r.max_age),
+            // --- A. ดึงกฎอายุพื้นฐานมาเตรียมไว้ ---
+            const ageRule = ageRules.find(r => 
+                r.vaccine_id === vac.id && 
+                user.age >= r.min_age && 
+                (r.max_age === null || user.age <= r.max_age)
             );
+
             if (ageRule) {
                 vac.rule_dose = ageRule.dose_count;
                 vac.rule_freq = ageRule.frequency_desc;
             }
 
-            // --- A. เช็คประวัติการแพ้ (ห้ามฉีดเด็ดขาด) ---
-            let vacAllergies = {};
-            try {
-                vacAllergies = vac.allergies ? JSON.parse(vac.allergies) : {};
-            } catch (e) { }
-            if (user.allergies) {
-                for (const [allergyKey, isAllergic] of Object.entries(user.allergies)) {
-                    if (isAllergic && vacAllergies[allergyKey]) {
-                        isBlocked = true;
-                        reasons.push(" ผู้ป่วยมีประวัติแพ้ส่วนประกอบของวัคซีนตัวนี้");
-                    }
-                }
+            // --- B. เช็คข้อห้ามเด็ดขาด (ประวัติแพ้ & คนท้องฉีดเชื้อเป็น) ---
+            const vacAllergies = parseJSON(vac.allergies);
+            // ตรวจว่ามีการแพ้ตรงกับส่วนประกอบวัคซีนหรือไม่ (เจอ 1 ตัวคือบล็อกเลย)
+            const hasAllergy = Object.entries(user.allergies || {})
+                .some(([key, isAllergic]) => isAllergic && vacAllergies[key]);
+
+            if (hasAllergy) {
+                isBlocked = true;
+                reasons.push("ผู้ป่วยมีประวัติแพ้ส่วนประกอบของวัคซีนตัวนี้");
             }
 
-            if (
-                user.is_pregnant && 
-                vac.vaccine_type && 
-                vac.vaccine_type.toLowerCase().includes("live attenuated")
-            ) {
-                isBlocked = true; 
+            const isLiveVaccine = vac.vaccine_type?.toLowerCase().includes("live attenuated");
+            if (user.is_pregnant && isLiveVaccine) {
+                isBlocked = true;
                 reasons.push("ห้ามฉีดวัคซีนชนิดเชื้อเป็น (Live Attenuated) ในหญิงตั้งครรภ์");
             }
 
-            // --- B. เช็คโรคประจำตัว / การตั้งครรภ์ ---
-            const vacDiseaseRules = diseaseRules.filter(
-                (r) => r.vaccine_id === vac.id,
-            );
-            if (userConditions.length > 0) {
-                for (const condition of userConditions) {
-                    const matchedRule = vacDiseaseRules.find(
-                        (r) => r.condition_name === condition,
-                    );
-                    if (matchedRule) {
-                        if (matchedRule.status === "Cautious") {
-                            isBlocked = true;
-                            reasons.push(`${condition}`);
-                        } else {
-                            isAllowed = true;
-                            matchStatus = matchedRule.status;
+            // --- C. เช็คโรคประจำตัว / การตั้งครรภ์ ---
+            const vacDiseaseRules = diseaseRules.filter(r => r.vaccine_id === vac.id);
+            
+            for (const condition of userConditions) {
+                const matchedRule = vacDiseaseRules.find(r => r.condition_name === condition);
+                
+                if (matchedRule) {
+                    if (matchedRule.status === "Cautious") {
+                        isBlocked = true;
+                        reasons.push(condition);
+                    } else {
+                        isAllowed = true;
+                        matchStatus = matchedRule.status;
 
-                            // ดึงโดสจากเงื่อนไขโรคมาใส่ด้วย (ถ้าโรคมีโดสเฉพาะ ให้ทับโดสอายุ)
-                            if (matchedRule.dose_count)
-                                vac.rule_dose = matchedRule.dose_count;
-                            if (matchedRule.frequency_desc)
-                                vac.rule_freq = matchedRule.frequency_desc;
-                            requiredDoses = vac.rule_dose || requiredDoses;
+                        // โดสของโรค ชนะ โดสของอายุ
+                        vac.rule_dose = matchedRule.dose_count || vac.rule_dose;
+                        vac.rule_freq = matchedRule.frequency_desc || vac.rule_freq;
+                        requiredDoses = vac.rule_dose || requiredDoses;
 
-                            // เช็คเงื่อนไขคนท้องแบบ Dynamic (อ่านค่าจาก Database ไม่ฟิกซ์ ID)
-                            if (condition === "ตั้งครรภ์" && user.gestational_weeks) {
-                                // ใช้ Regex ดึงตัวเลข "เริ่มต้น" และ "สิ้นสุด" ออกมาจากช่อง frequency_desc
-                                const weekMatch = matchedRule.frequency_desc
-                                    ? matchedRule.frequency_desc.match(/(\d+)\s*-\s*(\d+)/)
-                                    : null;
-
-                                if (weekMatch) {
-                                    const minWeek = parseInt(weekMatch[1]);
-                                    const maxWeek = parseInt(weekMatch[2]);
-
-                                    if (
-                                        user.gestational_weeks < minWeek ||
-                                        user.gestational_weeks > maxWeek
-                                    ) {
-                                        isBlocked = true;
-                                        reasons.push(
-                                            ` อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`,
-                                        );
-                                    } else {
-                                        reasons.push(` อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้`);
-                                    }
+                        // จัดการคนท้องแบบ Dynamic
+                        if (condition === "ตั้งครรภ์" && user.gestational_weeks) {
+                            const weekMatch = matchedRule.frequency_desc?.match(/(\d+)\s*-\s*(\d+)/);
+                            if (weekMatch) {
+                                const [_, minWeek, maxWeek] = weekMatch.map(Number);
+                                if (user.gestational_weeks < minWeek || user.gestational_weeks > maxWeek) {
+                                    isBlocked = true;
+                                    reasons.push(`อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`);
                                 } else {
-                                    // ถ้าวัคซีนไม่ได้ระบุช่วงสัปดาห์ (แปลว่าคนท้องฉีดตอนไหนก็ได้)
-                                    reasons.push(
-                                        ` อายุครรภ์เหมาะสม (สามารถรับวัคซีนได้ในทุกช่วงของการตั้งครรภ์)`,
-                                    );
+                                    reasons.push("อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้");
                                 }
                             } else {
-                                // สำหรับโรคประจำตัวอื่นๆ
-                                reasons.push(condition);
+                                reasons.push("อายุครรภ์เหมาะสม (สามารถรับวัคซีนได้ในทุกช่วงของการตั้งครรภ์)");
                             }
+                        } else {
+                            reasons.push(condition); // โรคประจำตัวทั่วไป
                         }
                     }
                 }
             }
 
-            // --- C. เช็คช่วงอายุ ---
+            // --- D. เช็คช่วงอายุ (ถ้ายังไม่ถูกตัดสินด้วยโรค) ---
             if (!isBlocked && !isAllowed && ageRule) {
                 isAllowed = true;
-                if (!matchStatus) matchStatus = ageRule.status;
+                matchStatus = matchStatus || ageRule.status;
                 requiredDoses = ageRule.dose_count || requiredDoses;
-                reasons.push(`อยู่ในช่วงอายุที่แนะนำให้ฉีด`);
+                reasons.push("อยู่ในช่วงอายุที่แนะนำให้ฉีด");
             }
 
-            // ถ้าเช็คอายุและโรคแล้วไม่เข้าเกณฑ์เลย
+            // สรุปเบื้องต้น: ไม่เข้าเกณฑ์กลุ่มใดๆ เลย
             if (!isAllowed && !isBlocked) {
                 isBlocked = true;
                 reasons.push("ไม่อยู่ในช่วงอายุที่แนะนำ และไม่เข้าเกณฑ์กลุ่มเสี่ยง");
             }
 
-            // --- D. เช็คประวัติการฉีดแบบ Dynamic (ไม่ฟิกซ์ ID วัคซีนรายปี) ---
-            if (isAllowed && !isBlocked && user.history && user.history.length > 0) {
-                const pastDoses = user.history.filter(
-                    (h) => h.vaccine_name_en === vac.name_en,
-                );
+            // บังคับ "No specific" ให้ไปตกฝั่งสีแดง
+            if (matchStatus?.toLowerCase() === "no specific") {
+                isBlocked = true;
+                isAllowed = false;
+                reasons = ["ไม่อยู่ในเกณฑ์ที่จำเป็นต้องได้รับ (No specific)"];
+            }
+
+            // --- E. เช็คประวัติการฉีดวัคซีนเดิม ---
+            if (isAllowed && !isBlocked && user.history?.length > 0) {
+                // กรองเฉพาะประวัติวัคซีนนี้ และเรียงจากล่าสุดไปเก่า
+                const pastDoses = user.history
+                    .filter(h => h.vaccine_name_en === vac.name_en)
+                    .sort((a, b) => new Date(b.date_received) - new Date(a.date_received));
 
                 if (pastDoses.length > 0) {
-                    pastDoses.sort(
-                        (a, b) => new Date(b.date_received) - new Date(a.date_received),
-                    );
-                    const lastDoseDate = new Date(pastDoses[0].date_received);
-                    const today = new Date();
-                    const monthsSinceLastDose =
-                        (today - lastDoseDate) / (1000 * 60 * 60 * 24 * 30.44);
+                    const monthsSinceLastDose = (new Date() - new Date(pastDoses[0].date_received)) / (1000 * 60 * 60 * 24 * 30.44);
 
-                    // ถอดรหัสเวลาการฉีดกระตุ้นจากข้อความในฐานข้อมูล (เช่น "ปีละ 1 เข็ม", "ทุก 10 ปี")
+                    // คำนวณรอบกระตุ้น
                     let boosterMonthsRequired = 0;
                     if (vac.rule_freq) {
-                        if (
-                            vac.rule_freq.includes("ปีละ") ||
-                            vac.rule_freq.includes("ประจำปี")
-                        ) {
-                            boosterMonthsRequired = 12; // กระตุ้นทุก 1 ปี (12 เดือน)
+                        if (/ปีละ|ประจำปี/.test(vac.rule_freq)) {
+                            boosterMonthsRequired = 12; 
                         } else {
-                            // หาข้อความแบบ "ทุก X ปี" เช่น "กระตุ้นทุก 10 ปี"
                             const yearMatch = vac.rule_freq.match(/ทุก\s*(\d+)\s*ปี/);
-                            if (yearMatch) {
-                                boosterMonthsRequired = parseInt(yearMatch[1]) * 12; // เอาตัวเลขคูณ 12 เดือน
-                            }
+                            if (yearMatch) boosterMonthsRequired = parseInt(yearMatch[1]) * 12;
                         }
                     }
 
+                    // เช็คเงื่อนไขโดส
                     if (pastDoses.length >= requiredDoses) {
-                        // เช็คว่าเป็นวัคซีนที่ต้องฉีดกระตุ้นไหม (boosterMonthsRequired > 0)
                         if (boosterMonthsRequired > 0) {
-                            // ลดหย่อนให้ 2 เดือน เผื่อคนไข้มาฉีดก่อนกำหนดนิดหน่อย
                             if (monthsSinceLastDose < boosterMonthsRequired - 2) {
                                 isBlocked = true;
-                                reasons.push(
-                                    ` เพิ่งรับวัคซีนนี้ไปเมื่อ ${Math.round(monthsSinceLastDose)} เดือนที่แล้ว (รอบกระตุ้นถัดไปคือทุก ${boosterMonthsRequired / 12} ปี)`,
-                                );
+                                reasons.push(`เพิ่งรับวัคซีนนี้ไปเมื่อ ${Math.round(monthsSinceLastDose)} เดือนที่แล้ว (รอบกระตุ้นถัดไปคือทุก ${boosterMonthsRequired / 12} ปี)`);
                             } else {
-                                reasons.push(` ถึงรอบฉีดกระตุ้นตามกำหนดเวลาแล้ว`);
+                                reasons.push("ถึงรอบฉีดกระตุ้นตามกำหนดเวลาแล้ว");
                             }
                         } else {
-                            // ถ้าไม่ใช่วัคซีนฉีดกระตุ้น (ฉีดครบแล้วจบกัน)
                             isBlocked = true;
-                            reasons.push(
-                                ` ท่านได้รับวัคซีนนี้ครบ ${requiredDoses} โดสตามเกณฑ์แล้ว ไม่จำเป็นต้องรับซ้ำ`,
-                            );
+                            reasons.push(`ท่านได้รับวัคซีนนี้ครบ ${requiredDoses} โดสตามเกณฑ์แล้ว ไม่จำเป็นต้องรับซ้ำ`);
                         }
                     } else {
-                        // กรณียังฉีดไม่ครบโดส
+                        // กรณีฉีดไม่ครบ
                         if (monthsSinceLastDose < 1) {
                             isBlocked = true;
-                            reasons.push(
-                                ` เพิ่งรับเข็มล่าสุดไปเมื่อ ${Math.round(monthsSinceLastDose * 30)} วันที่แล้ว (ควรรออย่างน้อย 1 เดือน)`,
-                            );
+                            reasons.push(`เพิ่งรับเข็มล่าสุดไปเมื่อ ${Math.round(monthsSinceLastDose * 30)} วันที่แล้ว (ควรรออย่างน้อย 1 เดือน)`);
                         } else {
-                            reasons.push(
-                                ` ท่านฉีดไปแล้ว ${pastDoses.length}/${requiredDoses} โดส ถึงกำหนดรับเข็มถัดไปแล้ว`,
-                            );
+                            reasons.push(`ท่านฉีดไปแล้ว ${pastDoses.length}/${requiredDoses} โดส ถึงกำหนดรับเข็มถัดไปแล้ว`);
                         }
                     }
                 }
             }
 
-            // --- บังคับ No specific ให้ไปอยู่กลุ่มฉีดไม่ได้ --- 
-            if (matchStatus === "No specific" || matchStatus === "No Specific") {
-                isBlocked = true;
-                isAllowed = false;
-                // ตั้งเหตุผลใหม่ เพื่อไม่ให้มีคำว่า 'อยู่ในช่วงอายุที่แนะนำ' ปนมาในลิสต์สีแดง
-                reasons = ["ไม่อยู่ในเกณฑ์ที่จำเป็นต้องได้รับ (No specific)"];
-            }
+            // --- F. จัดกลุ่มผลลัพธ์ลง Array ---
+            const finalResult = { 
+                ...vac, 
+                matchStatus, 
+                reason: reasons.join(" | ") 
+            };
 
-            // --- จัดกลุ่มผลลัพธ์ ---
             if (isBlocked) {
-                notAllowedVaccines.push({ 
-                    ...vac, 
-                    matchStatus, // ส่งไปเผื่อ Front-end ต้องการใช้
-                    reason: reasons.join(" | ") 
-                });
+                notAllowedVaccines.push(finalResult);
             } else if (isAllowed) {
-                allowedVaccines.push({
-                    ...vac,
-                    matchStatus,
-                    reason: reasons.join(" | "),
-                });
+                allowedVaccines.push(finalResult);
             }
         }
 
@@ -250,6 +195,7 @@ export async function POST(request) {
             allowed: allowedVaccines,
             notAllowed: notAllowedVaccines,
         });
+
     } catch (error) {
         console.error("Analyze Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });

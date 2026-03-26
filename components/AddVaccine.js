@@ -105,7 +105,6 @@ function AddVaccine({ onBack }) {
             }
 
             const payload = {
-                id: Math.floor(Math.random() * 100000),
                 ...formData,
                 age_conditions: ageConditions,
                 disease_conditions: diseaseConditions,
