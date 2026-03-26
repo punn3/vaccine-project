@@ -1,17 +1,3 @@
-import { NextResponse } from "next/server";
-import pool from "@/lib/db";
-
-export async function GET() {
-    try {
-        const db = await pool.getConnection();
-        const [rows] = await db.query("SELECT * FROM vaccines");
-        db.release();
-        return NextResponse.json(rows);
-    } catch (error) {
-        return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-}
-
 export async function POST(request) {
     let db;
     try {
@@ -42,9 +28,13 @@ export async function POST(request) {
             body.side_effects,
         ]);
 
-        // 2. บันทึกเงื่อนไขอายุ (Loop ลงตารางลูก)
+        // 2. บันทึกเงื่อนไขอายุ (แก้ status ให้ดึงตามที่ผู้ใช้เลือกแล้ว)
         if (body.age_conditions && body.age_conditions.length > 0) {
             for (const age of body.age_conditions) {
+                // เซฟโซน: ป้องกันค่าว่าง
+                const min = age.minAge && age.minAge !== "" ? age.minAge : 0;
+                const max = age.maxAge && age.maxAge !== "" ? age.maxAge : 999;
+
                 await db.query(
                     `
                     INSERT INTO vaccine_rules_age (vaccine_id, min_age, max_age, dose_count, frequency_desc, status)
@@ -52,33 +42,57 @@ export async function POST(request) {
                 `,
                     [
                         body.id,
-                        age.minAge || 0,
-                        age.maxAge || 999,
+                        min,
+                        max,
                         age.dose || 1,
                         age.frequency || "",
-                        "Recommended",
+                        age.status || "", 
                     ],
                 );
             }
         }
 
-        // 3. บันทึกเงื่อนไขโรค (Loop ลงตารางลูก)
+        // 3. บันทึกเงื่อนไขโรค (อัปเกรดให้อ่าน Array ได้เหมือนตอนทำ Edit แล้ว)
         if (body.disease_conditions && body.disease_conditions.length > 0) {
             for (const dis of body.disease_conditions) {
-                // ต้องมี condition_id (สมมติให้ใส่ 0 ไปก่อนถ้าไม่มีใน Master)
-                await db.query(
-                    `
-                    INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status)
-                    VALUES (?, ?, ?, ?, ?)
-                `,
-                    [
-                        dis.selectedDisease,
-                        body.id,
-                        dis.dose || 1,
-                        dis.frequency || "",
-                        "Recommended",
-                    ],
-                );
+                // เช็กว่ามี Array ของโรคส่งมาไหม
+                if (dis.selectedDiseases && dis.selectedDiseases.length > 0) {
+                    for (const diseaseName of dis.selectedDiseases) {
+                        await db.query(
+                            `
+                            INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status)
+                            VALUES (?, ?, ?, ?, ?)
+                        `,
+                            [
+                                diseaseName, 
+                                body.id,
+                                dis.dose || 1,
+                                dis.frequency || "",
+                                dis.status || "Recommended",
+                            ],
+                        );
+                    }
+                }
+            }
+        }
+
+        // 4.บันทึกข้อห้ามฉีดวัคซีน (เพิ่มตารางใหม่เข้าไปแล้ว)
+        if (body.contraindicated_conditions && body.contraindicated_conditions.length > 0) {
+            for (const contra of body.contraindicated_conditions) {
+                if (contra.contraindicated_vaccine && contra.contraindicated_vaccine.trim() !== "") {
+                    await db.query(
+                        `
+                        INSERT INTO vaccine_rules_contraindication (vaccine_id, contraindicated_vaccine, interval_desc, detail) 
+                        VALUES (?, ?, ?, ?)
+                        `,
+                        [
+                            body.id, 
+                            contra.contraindicated_vaccine, 
+                            contra.interval_desc || "", 
+                            contra.detail || ""
+                        ]
+                    );
+                }
             }
         }
 

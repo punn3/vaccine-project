@@ -3,9 +3,9 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { CloudArrowUp } from "react-bootstrap-icons";
 import AgeLimitCondition from "./AgeConditionCard";
 import DiseaseCondition from "./DiseaseConditionCard";
+import ContraindicatedCondition from "./ContraindicatedConditionCard"; // ✨ อย่าลืมสร้างไฟล์ Component นี้นะครับ
 
 function EditVaccine({ onBack, data }) {
-    // 1. State หลัก
     const [formData, setFormData] = useState({
         name_th: "",
         name_en: "",
@@ -22,21 +22,8 @@ function EditVaccine({ onBack, data }) {
     const [selectedFile, setSelectedFile] = useState(null);
     const [previewImage, setPreviewImage] = useState(null);
     const fileInputRef = useRef(null);
-
-    // State สำหรับเงื่อนไขและภูมิแพ้
-    const [ageConditions, setAgeConditions] = useState([
-        { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
-    ]);
-    const [diseaseConditions, setDiseaseConditions] = useState([
-        {
-            selectedDisease: "",
-            kidneyStage: "",
-            dose: "",
-            frequency: "",
-            recommendation: "",
-            detail: "",
-        },
-    ]);
+    const [ageConditions, setAgeConditions] = useState([]);
+    const [diseaseConditions, setDiseaseConditions] = useState([]);
     const [allergies, setAllergies] = useState({
         egg: false,
         milk: false,
@@ -46,19 +33,27 @@ function EditVaccine({ onBack, data }) {
         streptomycin: false,
         polymyxinB: false,
     });
+    const [contraindicatedConditions, setContraindicatedConditions] = useState([]);
+    const [allVaccinesList, setAllVaccinesList] = useState([]);
 
-    // ✅ เปลี่ยน useEffect เป็นการดึงข้อมูลฉบับเต็มจาก API แทน
     useEffect(() => {
+        // ดึงรายชื่อวัคซีนทั้งหมด เพื่อเอาไปทำ Dropdown
+        const fetchAllVaccines = async () => {
+            try {
+                const res = await fetch("/api/vaccines"); // ต้องมี API route นี้นะครับ
+                const vList = await res.json();
+                setAllVaccinesList(vList);
+            } catch (error) {
+                console.error("ดึงรายชื่อวัคซีนทั้งหมดไม่สำเร็จ:", error);
+            }
+        };
+
         const fetchFullVaccineData = async () => {
             if (data && data.id) {
                 try {
-                    // วิ่งไปขอข้อมูลแบบจัดเต็ม (ที่มีเงื่อนไขอายุ+โรค) จาก API
                     const res = await fetch(`/api/vaccines/${data.id}`);
                     const fullData = await res.json();
 
-                    console.log("Full Data จาก API:", fullData); // เช็กข้อมูลที่ได้ใน Console
-
-                    // 1. Map ข้อมูลพื้นฐาน
                     setFormData({
                         name_th: fullData.name_th || "",
                         name_en: fullData.name_en || "",
@@ -69,81 +64,130 @@ function EditVaccine({ onBack, data }) {
                         dosage_ml: fullData.dosage_ml || fullData.administration || "",
                         admin_route: fullData.admin_route || "",
                         side_effects: fullData.side_effects || fullData.precautions || "",
-                        is_available: fullData.is_available !== undefined ? Boolean(fullData.is_available) : true,
+                        is_available:
+                            fullData.is_available !== undefined
+                                ? Boolean(fullData.is_available)
+                                : true,
                     });
 
-                    // 2. Map รูปภาพ
-                    if (fullData.image_url) {
-                        setPreviewImage(fullData.image_url);
-                    }
-
-                    // 3. Map เงื่อนไขอายุ (เอา Array จาก API มายัดใส่ State ตรงๆ เลย)
-                    if (fullData.age_conditions && fullData.age_conditions.length > 0) {
+                    if (fullData.image_url) setPreviewImage(fullData.image_url);
+                    if (fullData.age_conditions)
                         setAgeConditions(fullData.age_conditions);
-                    }
-
-                    // 4. Map เงื่อนไขโรค (เอา Array ที่เรา Group ไว้จาก API มายัดใส่ State ตรงๆ)
-                    if (fullData.disease_conditions && fullData.disease_conditions.length > 0) {
+                    if (fullData.disease_conditions)
                         setDiseaseConditions(fullData.disease_conditions);
+
+                    // ยัดข้อมูลวัคซีนห้ามฉีดร่วมที่ดึงมาเข้า State
+                    if (fullData.contraindicated_conditions) {
+                        setContraindicatedConditions(fullData.contraindicated_conditions);
                     }
 
-                    // 5. Map ภูมิแพ้
                     if (fullData.allergies) {
                         setAllergies((prev) => ({ ...prev, ...fullData.allergies }));
                     }
-
                 } catch (error) {
                     console.error("เกิดข้อผิดพลาดในการดึงข้อมูล:", error);
                 }
             }
         };
 
-        fetchFullVaccineData(); // สั่งให้ฟังก์ชันทำงาน
-    }, [data]); // ทำงานใหม่ทุกครั้งที่กดเข้า Edit วัคซีนตัวใหม่
+        fetchAllVaccines();
+        fetchFullVaccineData();
+    }, [data]);
 
-    // --- Functions (เหมือนเดิม) ---
-    const handleChange = (e, field) => {
+    // Handlers
+    const handleChange = (e, field) =>
         setFormData({ ...formData, [field]: e.target.value });
+
+    // Handlers Age
+    const addCondition = () =>
+        setAgeConditions([
+            ...ageConditions,
+            {
+                minAge: "",
+                maxAge: "",
+                dose: "",
+                frequency: "",
+                status: "",
+                detail: "",
+            },
+        ]);
+    const removeCondition = (i) =>
+        setAgeConditions(ageConditions.filter((_, idx) => idx !== i));
+    const handleConditionChange = (i, f, v) => {
+        const n = [...ageConditions];
+        n[i][f] = v;
+        setAgeConditions(n);
+    };
+
+    // Handlers Disease
+    const addDiseaseCondition = () =>
+        setDiseaseConditions([
+            ...diseaseConditions,
+            { selectedDiseases: [], dose: "", frequency: "", status: "", detail: "" },
+        ]);
+    const removeDiseaseCondition = (i) =>
+        setDiseaseConditions(diseaseConditions.filter((_, idx) => idx !== i));
+    const handleDiseaseChange = (i, f, v) => {
+        const n = [...diseaseConditions];
+        n[i][f] = v;
+        setDiseaseConditions(n);
+    };
+
+    // Handlers ข้อห้ามฉีดวัคซีน
+    const addContraindicated = () =>
+        setContraindicatedConditions([
+            ...contraindicatedConditions,
+            { contraindicated_vaccine: "", interval_desc: "", detail: "" },
+        ]);
+    const removeContraindicated = (i) =>
+        setContraindicatedConditions(
+            contraindicatedConditions.filter((_, idx) => idx !== i),
+        );
+    const handleContraindicatedChange = (i, f, v) => {
+        const n = [...contraindicatedConditions];
+        n[i][f] = v;
+        setContraindicatedConditions(n);
+    };
+
+    const handleAllergyChange = (f) =>
+        setAllergies({ ...allergies, [f]: !allergies[f] });
+    const handleFileChange = (e) => {
+        if (e.target.files[0]) {
+            setSelectedFile(e.target.files[0]);
+            setPreviewImage(URL.createObjectURL(e.target.files[0]));
+        }
+    };
+    const handleUploadClick = () => fileInputRef.current.click();
+    const handleRemoveFile = (e) => {
+        e.stopPropagation();
+        setSelectedFile(null);
+        setPreviewImage(data?.image_url || null);
+        fileInputRef.current.value = "";
     };
 
     const handleSave = async () => {
-        if (!formData.name_th) {
-            alert("กรุณากรอกชื่อวัคซีน");
-            return;
-        }
-
+        if (!formData.name_th) return alert("กรุณากรอกชื่อวัคซีน");
         try {
             let finalImageUrl = data?.image_url;
-
-            // อัปโหลดไฟล์ใหม่ถ้ามีการเลือก
-            if (selectedFile) {
-                // สมมติว่ามี API Upload (ถ้ายังไม่มีข้ามส่วนนี้ไปก่อนได้)
-                // const uploadData = new FormData();
-                // uploadData.append("file", selectedFile);
-                // const uploadRes = await fetch("/api/upload", { method: "POST", body: uploadData });
-                // const uploadJson = await uploadRes.json();
-                // finalImageUrl = uploadJson.imageUrl;
-            }
-
             const payload = {
-                id: data.id, // ส่ง ID กลับไปด้วย
+                id: data.id,
                 ...formData,
                 age_conditions: ageConditions,
                 disease_conditions: diseaseConditions,
+                contraindicated_conditions: contraindicatedConditions, // ✨ แนบส่ง API
                 allergies: allergies,
                 image_url: finalImageUrl,
             };
 
             const res = await fetch(`/api/vaccines/${data.id}`, {
-                // ใช้ Dynamic Route ID
-                method: "PUT", // หรือ POST ขึ้นอยู่กับ API ของคุณ
+                method: "PUT",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify(payload),
             });
 
             if (res.ok) {
                 alert("✅ แก้ไขข้อมูลวัคซีนสำเร็จ!");
-                onBack(); // กลับไปหน้า List
+                onBack();
             } else {
                 const errorData = await res.json();
                 alert(
@@ -154,58 +198,6 @@ function EditVaccine({ onBack, data }) {
             console.error(err);
             alert("เกิดข้อผิดพลาดในการเชื่อมต่อ");
         }
-    };
-
-    // Condition Handlers (คงเดิม)
-    const addCondition = () =>
-        setAgeConditions([
-            ...ageConditions,
-            { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
-        ]);
-    const removeCondition = (i) =>
-        setAgeConditions(ageConditions.filter((_, idx) => idx !== i));
-    const handleConditionChange = (i, f, v) => {
-        const n = [...ageConditions];
-        n[i][f] = v;
-        setAgeConditions(n);
-    };
-
-    const addDiseaseCondition = () =>
-        setDiseaseConditions([
-            ...diseaseConditions,
-            {
-                selectedDisease: "",
-                kidneyStage: "",
-                dose: "",
-                frequency: "",
-                recommendation: "",
-                detail: "",
-            },
-        ]);
-    const removeDiseaseCondition = (i) =>
-        setDiseaseConditions(diseaseConditions.filter((_, idx) => idx !== i));
-    const handleDiseaseChange = (i, f, v) => {
-        const n = [...diseaseConditions];
-        n[i][f] = v;
-        setDiseaseConditions(n);
-    };
-
-    const handleAllergyChange = (f) =>
-        setAllergies({ ...allergies, [f]: !allergies[f] });
-
-    const handleFileChange = (e) => {
-        if (e.target.files[0]) {
-            const file = e.target.files[0];
-            setSelectedFile(file);
-            setPreviewImage(URL.createObjectURL(file));
-        }
-    };
-    const handleUploadClick = () => fileInputRef.current.click();
-    const handleRemoveFile = (e) => {
-        e.stopPropagation();
-        setSelectedFile(null);
-        setPreviewImage(data?.image_url || null); // กลับไปใช้รูปเดิมถ้าลบรูปที่เพิ่งเลือก
-        fileInputRef.current.value = "";
     };
 
     const headerStyle = {
@@ -311,13 +303,25 @@ function EditVaccine({ onBack, data }) {
                         <Col md={6}>
                             <Form.Label>ตำแหน่งที่ฉีด</Form.Label>
                             <Form.Select
-                                value={formData.admin_route}
+                                value={formData.admin_route || ""}
                                 onChange={(e) => handleChange(e, "admin_route")}
                             >
                                 <option value="">เลือกตำแหน่งที่ฉีด</option>
-                                <option value="Instramuscular">ฉีดเข้ากล้ามเนื้อ (IM)</option>
-                                <option value="Subcutaneous">ฉีดเข้าชั้นใต้ผิวหนัง (SC)</option>
-                                <option value="Intradermal">ฉีดเข้าชั้นผิวหนัง (ID)</option>
+                                <option value="ฉีดเข้ากล้ามเนื้อ (Instramuscular)">
+                                    ฉีดเข้ากล้ามเนื้อ (IM)
+                                </option>
+                                <option value="ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous)">
+                                    ฉีดเข้าชั้นใต้ผิวหนัง (SC)
+                                </option>
+                                <option value="ชนิดรับประทาน (Oral)">
+                                    ชนิดรับประทาน (Oral)
+                                </option>
+                                <option value="ฉีดเข้ากล้ามเนื้อ (Instramuscular) หรือ ฉีดเข้าในผิวหนังที่ต้นแขน">
+                                    ฉีดเข้ากล้ามเนื้อ (IM) หรือ ชั้นผิวหนัง (ID)
+                                </option>
+                                <option value="ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous) หรือ ฉีดเข้ากล้ามเนื้อ (Insramuscular) ก็ได้">
+                                    ฉีดเข้าชั้นใต้ผิวหนัง (SC) หรือ กล้ามเนื้อ (IM)
+                                </option>
                             </Form.Select>
                         </Col>
                     </Row>
@@ -325,7 +329,6 @@ function EditVaccine({ onBack, data }) {
             </Card>
 
             {/* ส่วน Age, Disease, Allergy, Image, Button ใช้โค้ดเดิมของคุณได้เลยครับ ... */}
-            {/* ผมละไว้เพื่อความกระชับ แต่ Logic การแสดงผลจะใช้ตัวแปร state ที่ update แล้วจาก useEffect ครับ */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     การจำกัดอายุ
@@ -409,6 +412,32 @@ function EditVaccine({ onBack, data }) {
                     </Button>
                 </Card.Body>
             </Card>
+            <Card className="mb-4 shadow-sm border-0">
+                <Card.Header className="py-3" style={headerStyle}>
+                    เงื่อนไขวัคซีนที่ไม่สามารถฉีดร่วมได้
+                </Card.Header>
+                <Card.Body className="p-4">
+                    {contraindicatedConditions.map((item, index) => (
+                        <ContraindicatedCondition
+                            key={`contra-${index}`}
+                            index={index}
+                            data={item}
+                            onChange={handleContraindicatedChange}
+                            onRemove={removeContraindicated}
+                            vaccineList={allVaccinesList} // โยนตัวเลือกไปทำ Dropdown
+                        />
+                        
+                    ))}
+                    <Button
+                        variant="primary"
+                        onClick={addContraindicated}
+                        className="mt-3"
+                        style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    >
+                        + เพิ่มเงื่อนไขวัคซีน
+                    </Button>
+                </Card.Body>
+            </Card>
 
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
@@ -443,19 +472,20 @@ function EditVaccine({ onBack, data }) {
                         {[
                             { key: "neomycin", label: "Neomycin" },
                             { key: "streptomycin", label: "Streptomycin" },
-                            { key: "polymyxinB", label: "Polymyxin B" }].map((item) => (
-                                <Col md={3} key={item.key}>
-                                    <div className="border rounded p-2">
-                                        <Form.Check
-                                            type="checkbox"
-                                            id={`check-${item.key}`}
-                                            label={item.label}
-                                            checked={allergies[item.key] || false}
-                                            onChange={() => handleAllergyChange(item.key)}
-                                        />
-                                    </div>
-                                </Col>
-                            ))}
+                            { key: "polymyxinB", label: "Polymyxin B" },
+                        ].map((item) => (
+                            <Col md={3} key={item.key}>
+                                <div className="border rounded p-2">
+                                    <Form.Check
+                                        type="checkbox"
+                                        id={`check-${item.key}`}
+                                        label={item.label}
+                                        checked={allergies[item.key] || false}
+                                        onChange={() => handleAllergyChange(item.key)}
+                                    />
+                                </div>
+                            </Col>
+                        ))}
                     </Row>
                 </Card.Body>
             </Card>

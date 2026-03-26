@@ -28,6 +28,23 @@ function AgeCondition({ index, data, onChange, onRemove }) {
         </Col>
       </Row>
       <Row className="mb-3">
+      <Col md={6}>
+          <Form.Label>ระดับการเเนะนำ</Form.Label>
+          <Form.Select 
+            value={data.status || ""} 
+            onChange={(e) => onChange(index, 'status', e.target.value)}
+          >
+            <option value="">เลือกระดับการเเนะนำ</option>
+            <option value="Recommended">Recommended</option>
+            <option value="Optional">Optional</option>
+            <option value="Recommended with risk-factor">Recommended with risk-factor</option>
+            <option value="Cautious">Cautious</option>
+            <option value="Share-decision">Share-decision</option>
+            <option value="No specific">No specific</option>
+          </Form.Select>
+        </Col>
+      </Row>
+      <Row className="mb-3">
         <Col md={6}>
           <Form.Label>จำนวนโดส</Form.Label>
           <Form.Control 

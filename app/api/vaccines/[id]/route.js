@@ -3,11 +3,10 @@ import pool from "@/lib/db";
 
 // 1. GET: ดึงข้อมูลเพื่อไปโชว์ในหน้า Edit
 export async function GET(request, { params }) {
-    const { id } = await params; // (Next.js 15 ต้อง await params)
+    const { id } = await params;
     const db = await pool.getConnection();
 
     try {
-        // A. ดึงข้อมูลหลักจากตารางแม่
         const [vaccines] = await db.query("SELECT * FROM vaccines WHERE id = ?", [
             id,
         ]);
@@ -19,38 +18,36 @@ export async function GET(request, { params }) {
         }
         const vaccine = vaccines[0];
 
-        // B. วิ่งไปดึงข้อมูล "เงื่อนไขอายุ" จากตารางลูก
         const [ageRules] = await db.query(
             "SELECT * FROM vaccine_rules_age WHERE vaccine_id = ?",
             [id],
         );
-
-        // C. วิ่งไปดึงข้อมูล "เงื่อนไขโรค" จากตารางลูก
         const [diseaseRules] = await db.query(
             "SELECT * FROM vaccine_rules_condition WHERE vaccine_id = ?",
             [id],
         );
 
-        // D. ประกอบร่างข้อมูลส่งกลับไปให้หน้าเว็บ
-        // เขียนฟังก์ชันแอบจัดกลุ่ม (Group) โรคที่มี "เข็ม" และ "ความถี่" เท่ากัน ให้อยู่กล่องเดียวกัน
-        const groupedDiseases = [];
-        
-        diseaseRules.forEach((rule) => {
-            // เช็กว่ามีกลุ่มนี้อยู่หรือยัง (เข็มเท่ากัน ความถี่เท่ากัน)
-            const existingGroup = groupedDiseases.find(
-                (g) => g.dose === rule.dose_count && g.frequency === rule.frequency_desc
-            );
+        // ดึงข้อมูลวัคซีนที่ห้ามฉีดร่วม
+        const [contraRules] = await db.query(
+            "SELECT * FROM vaccine_rules_contraindication WHERE vaccine_id = ?",
+            [id],
+        );
 
+        const groupedDiseases = [];
+        diseaseRules.forEach((rule) => {
+            const existingGroup = groupedDiseases.find(
+                (g) =>
+                    g.dose === rule.dose_count && g.frequency === rule.frequency_desc,
+            );
             if (existingGroup) {
-                // ถ้ามีแล้ว ยัดชื่อโรคเพิ่มเข้าไปใน Array เดิม
                 existingGroup.selectedDiseases.push(rule.condition_name);
             } else {
-                // ถ้ายังไม่มี สร้างกลุ่มใหม่ (Array ใหม่)
                 groupedDiseases.push({
-                    selectedDiseases: [rule.condition_name], // เติม s ให้ตรงกับหน้า UI แล้ว
+                    selectedDiseases: [rule.condition_name],
                     dose: rule.dose_count,
                     frequency: rule.frequency_desc,
-                    detail: "" 
+                    status: rule.status,
+                    detail: rule.detail || "", // ✨ ดึง detail มาด้วย
                 });
             }
         });
@@ -62,12 +59,11 @@ export async function GET(request, { params }) {
                 maxAge: r.max_age,
                 dose: r.dose_count,
                 frequency: r.frequency_desc,
-                detail: "", 
+                status: r.status,
+                detail: r.detail || "", 
             })),
-            
-            // ส่งก้อนที่จัดกลุ่มเสร็จแล้วไปให้หน้าเว็บ
-            disease_conditions: groupedDiseases, 
-
+            disease_conditions: groupedDiseases,
+            contraindicated_conditions: contraRules,
             allergies: vaccine.allergies ? JSON.parse(vaccine.allergies) : null,
         };
 
@@ -88,9 +84,9 @@ export async function PUT(request, { params }) {
     try {
         const body = await request.json();
         db = await pool.getConnection();
-        await db.beginTransaction(); // เริ่มระบบ Transaction (ต้องสำเร็จทุกขั้น ไม่งั้นยกเลิกหมด)
+        await db.beginTransaction();
 
-        // A. อัปเดตข้อมูลตารางแม่ (vaccines)
+        // A. อัปเดตข้อมูลตารางแม่
         const sql = `
             UPDATE vaccines SET 
             trade_name=?, name_th=?, name_en=?, indication=?, vaccine_type=?, price=?, 
@@ -109,62 +105,93 @@ export async function PUT(request, { params }) {
             body.dosage_ml,
             body.admin_route,
             body.image_url,
-            JSON.stringify(body.allergies), // แปลง Checkbox เป็นข้อความก่อนเก็บ
+            JSON.stringify(body.allergies),
             body.side_effects,
             id,
         ]);
 
-        // B. ล้างข้อมูลเงื่อนไขเก่าทิ้งให้หมด (Reset)
+        // B. ล้างข้อมูลเก่าก่อนอัปเดต
         await db.query("DELETE FROM vaccine_rules_age WHERE vaccine_id = ?", [id]);
         await db.query("DELETE FROM vaccine_rules_condition WHERE vaccine_id = ?", [
             id,
         ]);
+        await db.query(
+            "DELETE FROM vaccine_rules_contraindication WHERE vaccine_id = ?",
+            [id],
+        );
 
-        // C. ยัดข้อมูลเงื่อนไขอายุชุดใหม่ลงไป
+        // C. ยัดข้อมูลอายุ (เพิ่ม detail เข้าไปด้วย)
         if (body.age_conditions && body.age_conditions.length > 0) {
             for (const age of body.age_conditions) {
-                // เช็คค่าว่างก่อนบันทึก
-                const min = age.minAge && age.minAge !== "" ? age.minAge : 0;
-                const max = age.maxAge && age.maxAge !== "" ? age.maxAge : 999;
+                const min = age.minAge !== "" && age.minAge !== null ? age.minAge : 0;
+                const max = age.maxAge !== "" && age.maxAge !== null ? age.maxAge : 999;
 
                 await db.query(
-                    `
-                    INSERT INTO vaccine_rules_age (vaccine_id, min_age, max_age, dose_count, frequency_desc, status) 
-                    VALUES (?, ?, ?, ?, ?, ?)`,
-                    [id, min, max, age.dose || 1, age.frequency || "", "Recommended"],
+                    `INSERT INTO vaccine_rules_age (vaccine_id, min_age, max_age, dose_count, frequency_desc, status, detail) 
+                     VALUES (?, ?, ?, ?, ?, ?, ?)`,
+                    [
+                        id,
+                        min,
+                        max,
+                        age.dose || 1,
+                        age.frequency || "",
+                        age.status || "",
+                        age.detail || "",
+                    ],
                 );
             }
         }
 
-        // D. ยัดข้อมูลเงื่อนไขโรคชุดใหม่ลงไป
+        // D. ยัดข้อมูลโรค (เพิ่ม detail เข้าไปด้วย)
         if (body.disease_conditions && body.disease_conditions.length > 0) {
             for (const dis of body.disease_conditions) {
-                // เช็กว่ามี array selectedDiseases ส่งมาและไม่ว่าง
                 if (dis.selectedDiseases && dis.selectedDiseases.length > 0) {
-                    
-                    // แตก Array ออกมาบันทึกทีละโรค
                     for (const diseaseName of dis.selectedDiseases) {
                         await db.query(
-                            `
-                            INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status) 
-                            VALUES (?, ?, ?, ?, ?)`,
+                            `INSERT INTO vaccine_rules_condition (condition_name, vaccine_id, dose_count, frequency_desc, status, detail) 
+                             VALUES (?, ?, ?, ?, ?, ?)`,
                             [
-                                diseaseName,       // บันทึกทีละ 1 ชื่อโรค
+                                diseaseName,
                                 id,
                                 dis.dose || 1,
                                 dis.frequency || "",
-                                "Recommended",
-                            ]
+                                dis.status || "",
+                                dis.detail || "",
+                            ],
                         );
                     }
                 }
             }
         }
 
-        await db.commit(); // ยืนยันการบันทึก
+        // E. ยัดข้อมูลวัคซีนห้ามฉีดร่วม
+        if (
+            body.contraindicated_conditions &&
+            body.contraindicated_conditions.length > 0
+        ) {
+            for (const contra of body.contraindicated_conditions) {
+                if (
+                    contra.contraindicated_vaccine &&
+                    contra.contraindicated_vaccine.trim() !== ""
+                ) {
+                    await db.query(
+                        `INSERT INTO vaccine_rules_contraindication (vaccine_id, contraindicated_vaccine, interval_desc, detail) 
+                         VALUES (?, ?, ?, ?)`,
+                        [
+                            id,
+                            contra.contraindicated_vaccine,
+                            contra.interval_desc || "",
+                            contra.detail || "",
+                        ],
+                    );
+                }
+            }
+        }
+
+        await db.commit();
         return NextResponse.json({ message: "Updated successfully" });
     } catch (error) {
-        if (db) await db.rollback(); // ถ้าพังตรงไหน ให้ย้อนกลับหมด
+        if (db) await db.rollback();
         console.error("Update Error:", error);
         return NextResponse.json({ error: error.message }, { status: 500 });
     } finally {
@@ -172,7 +199,7 @@ export async function PUT(request, { params }) {
     }
 }
 
-// 3. DELETE: ลบข้อมูล (เหมือนเดิม)
+// 3. DELETE: ลบข้อมูล
 export async function DELETE(request, { params }) {
     const { id } = await params;
     const db = await pool.getConnection();

@@ -3,6 +3,7 @@ import { Form, Button, Container, Row, Col, Card } from "react-bootstrap";
 import { CloudArrowUp } from "react-bootstrap-icons";
 import AgeLimitCondition from "./AgeConditionCard";
 import DiseaseCondition from "./DiseaseConditionCard";
+import ContraindicatedCondition from "./ContraindicatedConditionCard";
 
 function AddVaccine({ onBack }) {
     // 1. State สำหรับข้อมูลหลัก
@@ -20,7 +21,7 @@ function AddVaccine({ onBack }) {
     });
 
     const [selectedFile, setSelectedFile] = useState(null);
-    const [previewImage, setPreviewImage] = useState(null); // แก้ไข: ลบ data?.image_url ออก
+    const [previewImage, setPreviewImage] = useState(null);
     const fileInputRef = useRef(null);
 
     // 2. จัดการรูปภาพ Preview เมื่อไฟล์เปลี่ยน
@@ -29,11 +30,8 @@ function AddVaccine({ onBack }) {
             setPreviewImage(null);
             return;
         }
-
         const objectUrl = URL.createObjectURL(selectedFile);
         setPreviewImage(objectUrl);
-
-        // Cleanup function เพื่อคืนหน่วยความจำ
         return () => URL.revokeObjectURL(objectUrl);
     }, [selectedFile]);
 
@@ -61,6 +59,25 @@ function AddVaccine({ onBack }) {
         polymyxinB: false,
     });
 
+    const [contraindicatedConditions, setContraindicatedConditions] = useState(
+        [],
+    );
+
+    const [allVaccinesList, setAllVaccinesList] = useState([]);
+
+    useEffect(() => {
+        const fetchAllVaccines = async () => {
+            try {
+                const res = await fetch("/api/vaccines");
+                const vList = await res.json();
+                setAllVaccinesList(vList);
+            } catch (error) {
+                console.error("ดึงรายชื่อวัคซีนทั้งหมดไม่สำเร็จ:", error);
+            }
+        };
+        fetchAllVaccines();
+    }, []);
+
     // --- Functions ---
     const handleChange = (e, field) => {
         setFormData({ ...formData, [field]: e.target.value });
@@ -75,28 +92,24 @@ function AddVaccine({ onBack }) {
         try {
             let finalImageUrl = null;
 
-            // อัปโหลดรูปภาพก่อน (ถ้ามี)
             if (selectedFile) {
                 const uploadData = new FormData();
                 uploadData.append("file", selectedFile);
-
                 const uploadRes = await fetch("/api/upload", {
                     method: "POST",
                     body: uploadData,
                 });
-
                 if (!uploadRes.ok) throw new Error("Upload failed");
-
                 const uploadJson = await uploadRes.json();
                 finalImageUrl = uploadJson.imageUrl;
             }
 
-            // เตรียม Payload
             const payload = {
                 id: Math.floor(Math.random() * 100000),
                 ...formData,
                 age_conditions: ageConditions,
                 disease_conditions: diseaseConditions,
+                contraindicated_conditions: contraindicatedConditions, 
                 allergies: allergies,
                 image_url: finalImageUrl,
             };
@@ -120,6 +133,21 @@ function AddVaccine({ onBack }) {
     };
 
     // Handlers สำหรับ Dynamic Fields
+    const addContraindicated = () =>
+        setContraindicatedConditions([
+            ...contraindicatedConditions,
+            { contraindicated_vaccine: "", interval_desc: "", detail: "" },
+        ]);
+    const removeContraindicated = (i) =>
+        setContraindicatedConditions(
+            contraindicatedConditions.filter((_, idx) => idx !== i),
+        );
+    const handleContraindicatedChange = (i, field, value) => {
+        const n = [...contraindicatedConditions];
+        n[i][field] = value;
+        setContraindicatedConditions(n);
+    };
+
     const addCondition = () =>
         setAgeConditions([
             ...ageConditions,
@@ -173,8 +201,9 @@ function AddVaccine({ onBack }) {
     };
 
     const handleClear = () => {
-        // เพิ่มการแจ้งเตือนยืนยันก่อนเคลียร์ ป้องกันการเผลอกดโดน
-        if (window.confirm("คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมดที่กรอกไว้?")) {
+        if (
+            window.confirm("คุณแน่ใจหรือไม่ว่าต้องการล้างข้อมูลทั้งหมดที่กรอกไว้?")
+        ) {
             setFormData({
                 name_th: "",
                 name_en: "",
@@ -190,13 +219,28 @@ function AddVaccine({ onBack }) {
             setSelectedFile(null);
             setPreviewImage(null);
             if (fileInputRef.current) fileInputRef.current.value = "";
-            setAgeConditions([{ minAge: "", maxAge: "", dose: "", frequency: "", detail: "" }]);
-            setDiseaseConditions([{
-                selectedDisease: "", kidneyStage: "", dose: "", frequency: "", recommendation: "", detail: ""
-            }]);
+            setAgeConditions([
+                { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
+            ]);
+            setDiseaseConditions([
+                {
+                    selectedDisease: "",
+                    kidneyStage: "",
+                    dose: "",
+                    frequency: "",
+                    recommendation: "",
+                    detail: "",
+                },
+            ]);
+            setContraindicatedConditions([]); // 
             setAllergies({
-                egg: false, milk: false, gelatin: false, yeast: false,
-                neomycin: false, streptomycin: false, polymyxinB: false,
+                egg: false,
+                milk: false,
+                gelatin: false,
+                yeast: false,
+                neomycin: false,
+                streptomycin: false,
+                polymyxinB: false,
             });
         }
     };
@@ -210,6 +254,7 @@ function AddVaccine({ onBack }) {
     return (
         <Container className="mt-5 pb-5" style={{ maxWidth: "900px" }}>
             <h3 className="text-center mb-4 fw-bold">เพิ่มวัคซีนใหม่</h3>
+
             {/* Section 1: ข้อมูลวัคซีน */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
@@ -262,6 +307,7 @@ function AddVaccine({ onBack }) {
                                 <option value="">เลือกชนิดวัคซีน</option>
                                 <option value="Inactivated">Inactivated</option>
                                 <option value="Live">Live Attenuated</option>
+                                <option value="mRNA">mRNA</option>
                             </Form.Select>
                         </Col>
                         <Col md={6}>
@@ -306,8 +352,21 @@ function AddVaccine({ onBack }) {
                                 onChange={(e) => handleChange(e, "admin_route")}
                             >
                                 <option value="">เลือกตำแหน่งที่ฉีด</option>
-                                <option value="Instramuscular">ฉีดเข้ากล้ามเนื้อ (IM)</option>
-                                <option value="Subcutaneous">ฉีดเข้าชั้นใต้ผิวหนัง (SC)</option>
+                                <option value="ฉีดเข้ากล้ามเนื้อ (Instramuscular)">
+                                    ฉีดเข้ากล้ามเนื้อ (IM)
+                                </option>
+                                <option value="ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous)">
+                                    ฉีดเข้าชั้นใต้ผิวหนัง (SC)
+                                </option>
+                                <option value="ชนิดรับประทาน (Oral)">
+                                    ชนิดรับประทาน (Oral)
+                                </option>
+                                <option value="ฉีดเข้ากล้ามเนื้อ (Instramuscular) หรือ ฉีดเข้าในผิวหนังที่ต้นแขน">
+                                    ฉีดเข้ากล้ามเนื้อ (IM) หรือ ชั้นผิวหนัง (ID)
+                                </option>
+                                <option value="ฉีดเข้าชั้นใต้ผิวหนัง (Subcutaneous) หรือ ฉีดเข้ากล้ามเนื้อ (Insramuscular) ก็ได้">
+                                    ฉีดเข้าชั้นใต้ผิวหนัง (SC) หรือ กล้ามเนื้อ (IM)
+                                </option>
                             </Form.Select>
                         </Col>
                     </Row>
@@ -338,7 +397,7 @@ function AddVaccine({ onBack }) {
                                 <Form.Control
                                     as="textarea"
                                     rows={2}
-                                    placeholder="เช่น เฉพาะผู้ที่มีความเสี่ยงสูง..."
+                                    placeholder="ระบุคำแนะนำเพิ่มเติม"
                                     value={item.detail}
                                     onChange={(e) =>
                                         handleConditionChange(index, "detail", e.target.value)
@@ -382,7 +441,7 @@ function AddVaccine({ onBack }) {
                                 <Form.Control
                                     as="textarea"
                                     rows={2}
-                                    placeholder="ระบุคำแนะนำทางการแพทย์เพิ่มเติม..."
+                                    placeholder="ระบุคำแนะนำเพิ่มเติม"
                                     value={item.detail}
                                     onChange={(e) =>
                                         handleDiseaseChange(index, "detail", e.target.value)
@@ -402,7 +461,34 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 4: แพ้อาหาร/ยา (แก้ไข Syntax Error ตรงนี้) */}
+            {/* Section 4: เงื่อนไขวัคซีนที่ไม่สามารถฉีดร่วมได้ */}
+            <Card className="mb-4 shadow-sm border-0">
+                <Card.Header className="py-3" style={headerStyle}>
+                    เงื่อนไขวัคซีนที่ไม่สามารถฉีดร่วมได้
+                </Card.Header>
+                <Card.Body className="p-4">
+                    {contraindicatedConditions.map((item, index) => (
+                        <ContraindicatedCondition
+                            key={`contra-${index}`}
+                            index={index}
+                            data={item}
+                            onChange={handleContraindicatedChange}
+                            onRemove={removeContraindicated}
+                            vaccineList={allVaccinesList} // โยนตัวเลือกไปทำ Dropdown
+                        />
+                    ))}
+                    <Button
+                        variant="primary"
+                        onClick={addContraindicated}
+                        className="mt-3"
+                        style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                    >
+                        + เพิ่มเงื่อนไขวัคซีน
+                    </Button>
+                </Card.Body>
+            </Card>
+
+            {/* Section 5: แพ้อาหาร/ยา */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     การแพ้อาหาร ยา และวัคซีน
@@ -433,14 +519,16 @@ function AddVaccine({ onBack }) {
                     </Row>
                     <p className="fw-bold">การแพ้ยาและวัคซีน</p>
                     <Row>
-                        {[{ label: "Neomycin", key: "neomycin" },
-                        { label: "Streptomycin", key: "streptomycin" },
-                        { label: "Polymyxin B", key: "polymyxinB" }]
-                        .map((drug) => (
+                        {[
+                            { label: "Neomycin", key: "neomycin" },
+                            { label: "Streptomycin", key: "streptomycin" },
+                            { label: "Polymyxin B", key: "polymyxinB" },
+                        ].map((drug) => (
                             <Col md={3} key={drug.key} className="mb-2">
                                 <div className="border rounded p-2">
                                     <Form.Check
                                         type="checkbox"
+                                        id={`check-${drug.key}`}
                                         label={drug.label}
                                         checked={allergies[drug.key] || false}
                                         onChange={() => handleAllergyChange(drug.key)}
@@ -452,7 +540,7 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 5: Side Effects */}
+            {/* Section 6: Side Effects */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง
@@ -468,7 +556,7 @@ function AddVaccine({ onBack }) {
                 </Card.Body>
             </Card>
 
-            {/* Section 6: Image Upload */}
+            {/* Section 7: Image Upload */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
                     รูปภาพวัคซีน
@@ -530,21 +618,19 @@ function AddVaccine({ onBack }) {
                     ยกเลิก
                 </Button>
                 <div className="d-flex gap-3">
-                    {/* ปุ่มเคลียร์ข้อมูลที่แก้ไขแล้ว */}
                     <Button
                         onClick={handleClear}
                         className="px-4"
                         style={{
-                            backgroundColor: "#ffffff", // พื้นหลังสีขาว
-                            color: "#4a7fc1",           // ตัวอักษรสีฟ้า
-                            borderColor: "#4a7fc1",     // กรอบสีฟ้า
+                            backgroundColor: "#ffffff",
+                            color: "#4a7fc1",
+                            borderColor: "#4a7fc1",
                             borderWidth: "1px",
-                            borderStyle: "solid"
+                            borderStyle: "solid",
                         }}
                     >
                         เคลียร์ข้อมูล
                     </Button>
-
                     <Button
                         variant="primary"
                         className="px-5"
