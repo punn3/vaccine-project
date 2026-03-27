@@ -15,7 +15,7 @@ function BasicInfo() {
     basic: {
       age: "",
       gender: "",
-      pregnant: "",
+      pregnant: "ไม่ตั้งครรภ์",
       gestational_weeks: "",
       medical: "",
     },
