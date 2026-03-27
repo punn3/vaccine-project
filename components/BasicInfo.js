@@ -16,7 +16,7 @@ function BasicInfo() {
       age: "",
       gender: "",
       pregnant: "",
-      gestational_weeks: "", 
+      gestational_weeks: "",
       medical: "",
     },
     travel: {
@@ -71,7 +71,7 @@ function BasicInfo() {
         const uniqueData = sortedData.filter((v, index, self) =>
           index === self.findIndex((t) => t.name_en.trim() === v.name_en.trim())
         );
-        setVaccineList(uniqueData); 
+        setVaccineList(uniqueData);
       } catch (err) {
         console.error("Error fetching vaccines:", err);
       }
@@ -99,7 +99,7 @@ function BasicInfo() {
 
     // ดักจับห้ามพิมพ์ตัวเลขติดลบ
     if (type === "number" && Number(value) < 0) {
-      return; 
+      return;
     }
 
     setFormData((prev) => ({
@@ -194,7 +194,7 @@ function BasicInfo() {
   return (
     <div className={`${styles.accordionWrapper} ${styles.customCheckbox}`}>
       <Accordion defaultActiveKey="0" alwaysOpen className="my-5">
-        
+
         {/* ================= Section 1: ข้อมูลพื้นฐาน ================= */}
         <Accordion.Item eventKey="0" className="mb-5 border rounded">
           <Accordion.Header>
@@ -262,9 +262,7 @@ function BasicInfo() {
                       }
                     }}
                     onBlur={handleBlur}
-                    isInvalid={touched.pregnant && (!formData.basic.pregnant || formData.basic.pregnant === "กรุณาระบุข้อมูล")}
-                  >
-                    <option value="">กรุณาระบุข้อมูล</option>
+                    isInvalid={touched.pregnant && (!formData.basic.pregnant || formData.basic.pregnant === "กรุณาระบุข้อมูล")}>
                     <option value="ไม่ตั้งครรภ์">ไม่ตั้งครรภ์</option>
                     <option value="ให้นมบุตร">ให้นมบุตร</option>
                     <option value="ตั้งครรภ์">ตั้งครรภ์</option>
@@ -455,7 +453,7 @@ function BasicInfo() {
                     onChange={() => handleVaccineTypeChange("no")}
                   />
                 </Col>
-                
+
                 {formData.vaccines.want_type === "yes" && (
                   <div className="border p-3 rounded bg-light">
                     <p>ระบุวัคซีนที่ต้องการ: <span className="text-danger">*</span></p>
