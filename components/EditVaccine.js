@@ -73,8 +73,33 @@ function EditVaccine({ onBack, data }) {
                     if (fullData.image_url) setPreviewImage(fullData.image_url);
                     if (fullData.age_conditions)
                         setAgeConditions(fullData.age_conditions);
-                    if (fullData.disease_conditions)
-                        setDiseaseConditions(fullData.disease_conditions);
+                    if (fullData.disease_conditions) {
+                        // แยกชื่อโรค และ ดึงระยะโรคไตกลับมาให้ Dropdown
+                        const parsedDiseaseConditions = fullData.disease_conditions.map(condition => {
+                            const updatedDiseases = [];
+                            let extractedStage = "";
+
+                            (condition.selectedDiseases || []).forEach(disease => {
+                                // เช็คว่าชื่อโรคมีคำว่า "ระยะที่" ต่อท้ายไหม
+                                if (disease.startsWith("Chronic kidney disease ระยะที่ ")) {
+                                    // คืนค่าชื่อโรคกลับเป็นแบบเดิมเพื่อให้ Checkbox ติ๊กถูก
+                                    updatedDiseases.push("Chronic kidney disease");
+                                    // ดึงตัวเลขระยะโรคออกมาเก็บไว้
+                                    extractedStage = disease.replace("Chronic kidney disease ระยะที่ ", "");
+                                } else {
+                                    updatedDiseases.push(disease);
+                                }
+                            });
+
+                            return {
+                                ...condition,
+                                selectedDiseases: updatedDiseases,
+                                kidneyStage: extractedStage // ส่งค่าระยะโรคไตกลับไปให้ Dropdown
+                            };
+                        });
+
+                        setDiseaseConditions(parsedDiseaseConditions);
+                    }
 
                     // ยัดข้อมูลวัคซีนห้ามฉีดร่วมที่ดึงมาเข้า State
                     if (fullData.contraindicated_conditions) {
@@ -169,11 +194,32 @@ function EditVaccine({ onBack, data }) {
         if (!formData.name_th) return alert("กรุณากรอกชื่อวัคซีน");
         try {
             let finalImageUrl = data?.image_url;
+
+            const processedDiseaseConditions = diseaseConditions.map(condition => {
+                // สร้าง copy ของ array โรคที่เลือกไว้
+                const updatedDiseases = [...(condition.selectedDiseases || [])];
+
+                // เช็คว่าในเงื่อนไขนี้มีการเลือกโรคไตไว้หรือเปล่า
+                const kidneyIndex = updatedDiseases.indexOf("Chronic kidney disease");
+
+                // ถ้าเลือกโรคไตไว้ และมีการระบุระยะด้วย
+                if (kidneyIndex !== -1 && condition.kidneyStage) {
+                    // เปลี่ยนชื่อใน Array เป็น "Chronic kidney disease ระยะที่ X"
+                    updatedDiseases[kidneyIndex] = `Chronic kidney disease ระยะที่ ${condition.kidneyStage}`;
+                }
+
+                // คืนค่า condition เดิมกลับไป แต่เอา array โรคที่อัปเดตชื่อแล้วไปแทนที่
+                return {
+                    ...condition,
+                    selectedDiseases: updatedDiseases
+                };
+            });
+
             const payload = {
                 id: data.id,
                 ...formData,
                 age_conditions: ageConditions,
-                disease_conditions: diseaseConditions,
+                disease_conditions: processedDiseaseConditions,
                 contraindicated_conditions: contraindicatedConditions, // ✨ แนบส่ง API
                 allergies: allergies,
                 image_url: finalImageUrl,

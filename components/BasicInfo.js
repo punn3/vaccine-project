@@ -26,6 +26,7 @@ function BasicInfo() {
     disease: {
       heart_disease: "",
       chronic_kidney: "",
+      kidney_stage: "1",
       chronic_liver: "",
       asplenia: "",
       cd4: "",
@@ -341,7 +342,13 @@ function BasicInfo() {
                     checked={formData.disease.chronic_kidney !== ""}
                     onChange={(e) => handleChange("disease", e)}
                   />
-                  <select className="form-select mt-1" disabled={formData.disease.chronic_kidney === ""}>
+                  <select
+                    className="form-select mt-1"
+                    disabled={formData.disease.chronic_kidney === ""}
+                    name="kidney_stage"
+                    value={formData.disease.kidney_stage}
+                    onChange={(e) => handleChange("disease", e)}
+                  >
                     <option value="state1">ระยะที่ 1</option>
                     <option value="state2">ระยะที่ 2</option>
                     <option value="state3">ระยะที่ 3</option>
