@@ -285,7 +285,22 @@ export default function AnalysisResult() {
                                         </div>
                                         <Collapse in={expandedId === vac.id}>
                                             <div className="mt-2 text-danger small bg-danger bg-opacity-10 p-3 rounded-3 border border-danger border-opacity-25">
-                                                {vac.side_effects || vac.precautions || 'ไม่มีระบุข้อมูลผลข้างเคียง'}
+                                                {vac.side_effects ? (
+                                                    <div className="mb-0">
+                                                        {vac.side_effects.split('\n').map((line, index) => {
+                                                            if (line.trim() !== "") {
+                                                                return (
+                                                                    <div key={index} className="mb-1" style={{ lineHeight: '1.5' }}>
+                                                                        {line}
+                                                                    </div>
+                                                                );
+                                                            }
+                                                            return null;
+                                                        })}
+                                                    </div>
+                                                ) : (
+                                                    <span>ไม่มีระบุข้อมูลผลข้างเคียง ข้อห้ามใช้ และข้อควรระวัง</span>
+                                                )}
                                             </div>
                                         </Collapse>
 

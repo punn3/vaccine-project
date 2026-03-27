@@ -16,13 +16,32 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
     "Traveler"
   ];
 
+  const getStatusColor = (status) => {
+    switch (status) {
+      case 'Recommended':
+        return '#1a7742';
+      case 'Optional':
+        return '#ffe5a0';
+      case 'Recommended with risk-factor':
+        return '#0d5bb5';
+      case 'Cautious':
+        return '#b70f18';
+      case 'Share-decision':
+        return '#bfe2f8';
+      case 'No specific':
+        return '#e9e9e9';
+      default:
+        return '#000000';
+    }
+  };
+
   // ดึงค่าโรคที่เลือกมา (ถ้ายังไม่มีค่า ให้เป็น Array ว่าง [] เสมอ เพื่อกัน Error)
   const selectedDiseases = data.selectedDiseases || [];
 
   // ฟังก์ชันจัดการการติ๊กเลือก (เพิ่ม/ลบ ออกจาก Array)
   const handleCheckboxChange = (diseaseName) => {
     let newSelected;
-    
+
     if (selectedDiseases.includes(diseaseName)) {
       // ถ้ามีอยู่แล้ว -> เอาออก (Uncheck)
       newSelected = selectedDiseases.filter((d) => d !== diseaseName);
@@ -40,8 +59,8 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h6 className="fw-bold">เงื่อนไขที่ {index + 1}</h6>
         {index > 0 && (
-          <button 
-            className="btn btn-sm btn-outline-danger" 
+          <button
+            className="btn btn-sm btn-outline-danger"
             onClick={() => onRemove(index)}
           >
             ลบ
@@ -65,22 +84,22 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
                 checked={isChecked}
                 onChange={() => handleCheckboxChange(disease)}
               />
-              
+
               {/* Logic พิเศษ: ถ้าเลือกโรคไต ให้โชว์ Dropdown ระยะโรคไต */}
               {disease === "Chronic kidney disease" && isChecked && (
                 <div className="mt-2 ms-4" style={{ width: '80%' }}>
-                    <Form.Select 
-                      size="sm"
-                      value={data.kidneyStage || ""} // กัน Error ด้วย || ""
-                      onChange={(e) => onChange(index, 'kidneyStage', e.target.value)}
-                    >
-                      <option value="">ระบุระยะโรคไต</option>
-                      <option value="1">ระยะที่ 1</option>
-                      <option value="2">ระยะที่ 2</option>
-                      <option value="3">ระยะที่ 3</option>
-                      <option value="4">ระยะที่ 4</option>
-                      <option value="5">ระยะที่ 5</option>
-                    </Form.Select>
+                  <Form.Select
+                    size="sm"
+                    value={data.kidneyStage || ""} // กัน Error ด้วย || ""
+                    onChange={(e) => onChange(index, 'kidneyStage', e.target.value)}
+                  >
+                    <option value="">ระบุระยะโรคไต</option>
+                    <option value="1">ระยะที่ 1</option>
+                    <option value="2">ระยะที่ 2</option>
+                    <option value="3">ระยะที่ 3</option>
+                    <option value="4">ระยะที่ 4</option>
+                    <option value="5">ระยะที่ 5</option>
+                  </Form.Select>
                 </div>
               )}
             </Col>
@@ -90,36 +109,40 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
 
       <hr />
       <Row className="mb-3">
-      <Col md={6}>
+        <Col md={6}>
           <Form.Label>ระดับการเเนะนำ</Form.Label>
-          <Form.Select 
-            value={data.status || ""} 
+          <Form.Select
+            value={data.status || ""}
             onChange={(e) => onChange(index, 'status', e.target.value)}
+            style={{
+              color: getStatusColor(data.status),
+              backgroundColor: '#ffffff'
+            }}
           >
-            <option value="">เลือกระดับการเเนะนำ</option>
-            <option value="Recommended">Recommended</option>
-            <option value="Optional">Optional</option>
-            <option value="Recommended with risk-factor">Recommended with risk-factor</option>
-            <option value="Cautious">Cautious</option>
-            <option value="Share-decision">Share-decision</option>
-            <option value="No specific">No specific</option>
+            <option value="" style={{ color: "#000" }}>เลือกระดับการเเนะนำ</option>
+            <option value="Recommended" style={{ color: "#1a7742" }}>⬤ Recommended</option>
+            <option value="Optional" style={{ color: "#68501c" }}>⬤ Optional</option>
+            <option value="Recommended with risk-factor" style={{ color: "#0d5bb5" }}>⬤ Recommended with risk-factor</option>
+            <option value="Cautious" style={{ color: "#b70f18" }}>⬤ Cautious</option>
+            <option value="Share-decision" style={{ color: "#165e99" }}>⬤ Share-decision</option>
+            <option value="No specific" style={{ color: "#333333" }}>⬤ No specific</option>
           </Form.Select>
-      </Col>
+        </Col>
       </Row>
       {/* ส่วนกรอกข้อมูลด้านล่างของการ์ด */}
       <Row className="mb-3">
         <Col md={6}>
           <Form.Label>จำนวนโดส</Form.Label>
-          <Form.Control 
-            type="number" 
+          <Form.Control
+            type="number"
             value={data.dose || ""} // กัน Error ด้วย || ""
             onChange={(e) => onChange(index, 'dose', e.target.value)}
           />
         </Col>
         <Col md={6}>
           <Form.Label>ความถี่ในการฉีด</Form.Label>
-          <Form.Select 
-            value={data.frequency || ""} 
+          <Form.Select
+            value={data.frequency || ""}
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>

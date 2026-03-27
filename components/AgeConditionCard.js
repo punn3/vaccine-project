@@ -1,62 +1,85 @@
 import { Row, Col, Form, Button } from "react-bootstrap";
 
+const getStatusColor = (status) => {
+  switch (status) {
+    case 'Recommended':
+      return '#1a7742';
+    case 'Optional':
+      return '#ffe5a0';
+    case 'Recommended with risk-factor':
+      return '#0d5bb5';
+    case 'Cautious':
+      return '#b70f18';
+    case 'Share-decision':
+      return '#bfe2f8';
+    case 'No specific':
+      return '#e9e9e9';
+    default:
+      return '#000000';
+  }
+};
+
 function AgeCondition({ index, data, onChange, onRemove }) {
   return (
     <div className="p-3 mb-3 rounded" style={{ backgroundColor: "#f8f9fa", border: "1px solid #eee" }}>
       <div className="d-flex justify-content-between align-items-center mb-3">
         <h6 className="fw-bold mb-0">เงื่อนไขที่ {index + 1}</h6>
-        {index > 0 && ( // ให้ลบได้ตั้งแต่เงื่อนไขที่ 2 เป็นต้นไป
+        {index > 0 && (
           <Button variant="outline-danger" size="sm" onClick={() => onRemove(index)}>ลบ</Button>
         )}
       </div>
       <Row className="mb-3">
         <Col md={6}>
           <Form.Label>อายุเริ่มต้น (ปี)</Form.Label>
-          <Form.Control 
-            type="number" 
-            value={data.minAge || ""} 
-            onChange={(e) => onChange(index, 'minAge', e.target.value)} 
+          <Form.Control
+            type="number"
+            value={data.minAge || ""}
+            onChange={(e) => onChange(index, 'minAge', e.target.value)}
           />
         </Col>
         <Col md={6}>
           <Form.Label>อายุสูงสุด (ปี)</Form.Label>
-          <Form.Control 
-            type="number" 
-            value={data.maxAge || ""} 
-            onChange={(e) => onChange(index, 'maxAge', e.target.value)} 
+          <Form.Control
+            type="number"
+            value={data.maxAge || ""}
+            onChange={(e) => onChange(index, 'maxAge', e.target.value)}
           />
         </Col>
       </Row>
       <Row className="mb-3">
-      <Col md={6}>
+        <Col md={6}>
           <Form.Label>ระดับการเเนะนำ</Form.Label>
-          <Form.Select 
-            value={data.status || ""} 
+          <Form.Select
+            value={data.status || ""}
             onChange={(e) => onChange(index, 'status', e.target.value)}
+            style={{
+              color: getStatusColor(data.status),
+              backgroundColor: '#ffffff'
+            }}
           >
-            <option value="">เลือกระดับการเเนะนำ</option>
-            <option value="Recommended">Recommended</option>
-            <option value="Optional">Optional</option>
-            <option value="Recommended with risk-factor">Recommended with risk-factor</option>
-            <option value="Cautious">Cautious</option>
-            <option value="Share-decision">Share-decision</option>
-            <option value="No specific">No specific</option>
+            <option value="" style={{ color: "#000" }}>เลือกระดับการเเนะนำ</option>
+            <option value="Recommended" style={{ color: "#1a7742" }}>⬤ Recommended</option>
+            <option value="Optional" style={{ color: "#68501c" }}>⬤ Optional</option>
+            <option value="Recommended with risk-factor" style={{ color: "#0d5bb5" }}>⬤ Recommended with risk-factor</option>
+            <option value="Cautious" style={{ color: "#b70f18" }}>⬤ Cautious</option>
+            <option value="Share-decision" style={{ color: "#165e99" }}>⬤ Share-decision</option>
+            <option value="No specific" style={{ color: "#333333" }}>⬤ No specific</option>
           </Form.Select>
         </Col>
       </Row>
       <Row className="mb-3">
         <Col md={6}>
           <Form.Label>จำนวนโดส</Form.Label>
-          <Form.Control 
-            type="number" 
-            value={data.dose || ""} 
-            onChange={(e) => onChange(index, 'dose', e.target.value)} 
+          <Form.Control
+            type="number"
+            value={data.dose || ""}
+            onChange={(e) => onChange(index, 'dose', e.target.value)}
           />
         </Col>
         <Col md={6}>
           <Form.Label>ความถี่ในการฉีด</Form.Label>
-          <Form.Select 
-            value={data.frequency || ""} 
+          <Form.Select
+            value={data.frequency || ""}
             onChange={(e) => onChange(index, 'frequency', e.target.value)}
           >
             <option value="">เลือกความถี่</option>

@@ -426,7 +426,7 @@ function EditVaccine({ onBack, data }) {
                             onRemove={removeContraindicated}
                             vaccineList={allVaccinesList} // โยนตัวเลือกไปทำ Dropdown
                         />
-                        
+
                     ))}
                     <Button
                         variant="primary"
@@ -492,7 +492,7 @@ function EditVaccine({ onBack, data }) {
 
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
-                    ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง
+                    ผลข้างเคียง ข้อห้ามใช้ และข้อควรระวัง
                 </Card.Header>
                 <Card.Body className="p-4">
                     <Form.Control

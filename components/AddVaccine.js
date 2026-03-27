@@ -108,7 +108,7 @@ function AddVaccine({ onBack }) {
                 ...formData,
                 age_conditions: ageConditions,
                 disease_conditions: diseaseConditions,
-                contraindicated_conditions: contraindicatedConditions, 
+                contraindicated_conditions: contraindicatedConditions,
                 allergies: allergies,
                 image_url: finalImageUrl,
             };
@@ -542,7 +542,7 @@ function AddVaccine({ onBack }) {
             {/* Section 6: Side Effects */}
             <Card className="mb-4 shadow-sm border-0">
                 <Card.Header className="py-3" style={headerStyle}>
-                    ผลข้างเคียง ข้อห้ามใช้ ข้อควรระวัง
+                    ผลข้างเคียง ข้อห้ามใช้ และข้อควรระวัง
                 </Card.Header>
                 <Card.Body className="p-4">
                     <Form.Control
