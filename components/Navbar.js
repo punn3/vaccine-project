@@ -8,7 +8,7 @@ function NavbarBox() {
     return (
         <Navbar expand="md" className={styles.NavComponents}>
             <Container>
-                <Navbar.Brand as={Link} href="/" className="me-auto d-flex align-items-center" style={{ textDecoration: 'none', color: 'inherit' }}>
+                <Navbar.Brand as={Link} href="/" className={`me-auto d-flex align-items-center ${styles.navbrand}`}>
                     <h1 className="fs-5 mb-0 fw-bold " style={{ maxWidth: '200px' }}>
                         ระบบให้คำแนะนำวัคซีนที่ปลอดภัย
                     </h1>
