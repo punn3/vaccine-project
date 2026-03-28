@@ -11,6 +11,7 @@ export async function POST(request) {
     let db;
     try {
         const user = await request.json();
+        console.log(user)
         db = await pool.getConnection();
 
         // 1. ดึงข้อมูลจากฐานข้อมูล
@@ -73,41 +74,58 @@ export async function POST(request) {
             // --- C. เช็คโรคประจำตัว / การตั้งครรภ์ ---
             const vacDiseaseRules = diseaseRules.filter(r => r.vaccine_id === vac.id);
             
+            // เตรียมตัวแปรเพื่อหาจำนวนโดสที่ "มากที่สุด" กรณีมีหลายโรค
+            let maxDose = vac.rule_dose || 0;
+            let bestFreq = vac.rule_freq || "";
+            
             for (const condition of userConditions) {
                 const matchedRule = vacDiseaseRules.find(r => r.condition_name === condition);
                 
                 if (matchedRule) {
-                    if (matchedRule.status === "Cautious") {
+                    if (matchedRule.status === "Cautious" || matchedRule.status === "Contraindication") {
                         isBlocked = true;
-                        reasons.push(condition);
-                    } else {
-                        isAllowed = true;
-                        matchStatus = matchedRule.status;
+                        reasons.push(`ห้ามฉีดเนื่องจาก: ${condition}`);
+                        break; // หยุดเช็คโรคอื่นทันที
+                    } 
+                    
+                    isAllowed = true;
+                    matchStatus = matchedRule.status;
 
-                        // โดสของโรค ชนะ โดสของอายุ
-                        vac.rule_dose = matchedRule.dose_count || vac.rule_dose;
-                        vac.rule_freq = matchedRule.frequency_desc || vac.rule_freq;
-                        requiredDoses = vac.rule_dose || requiredDoses;
+                    // ป้องกัน Override: เลือกโดสที่มากที่สุด
+                    const diseaseDose = parseInt(matchedRule.dose_count || 0, 10);
+                    if (diseaseDose > maxDose) {
+                        maxDose = diseaseDose;
+                        bestFreq = matchedRule.frequency_desc || bestFreq;
+                    }
 
-                        // จัดการคนท้องแบบ Dynamic
-                        if (condition === "ตั้งครรภ์" && user.gestational_weeks) {
-                            const weekMatch = matchedRule.frequency_desc?.match(/(\d+)\s*-\s*(\d+)/);
-                            if (weekMatch) {
-                                const [_, minWeek, maxWeek] = weekMatch.map(Number);
-                                if (user.gestational_weeks < minWeek || user.gestational_weeks > maxWeek) {
-                                    isBlocked = true;
-                                    reasons.push(`อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ยังไม่อยู่ในช่วงที่แนะนำ (ช่วงเวลาที่เหมาะสมคือ ${minWeek}-${maxWeek} สัปดาห์)`);
-                                } else {
-                                    reasons.push("อายุครรภ์เหมาะสมสำหรับการรับวัคซีนนี้");
-                                }
+                    // จัดการคนท้อง
+                    if (condition === "ตั้งครรภ์" && user.gestational_weeks) {
+                        const weekMatch = matchedRule.frequency_desc?.match(/(\d+)\s*-\s*(\d+)/);
+                        if (weekMatch) {
+                            const [_, minWeek, maxWeek] = weekMatch.map(Number);
+                            if (user.gestational_weeks < minWeek || user.gestational_weeks > maxWeek) {
+                                isBlocked = true;
+                                reasons.push(`อายุครรภ์ ${user.gestational_weeks} สัปดาห์ ไม่อยู่ในช่วงที่แนะนำ (${minWeek}-${maxWeek} สัปดาห์)`);
+                                break; 
                             } else {
-                                reasons.push("อายุครรภ์เหมาะสม (สามารถรับวัคซีนได้ในทุกช่วงของการตั้งครรภ์)");
+                                reasons.push("อายุครรภ์เหมาะสม");
                             }
                         } else {
-                            reasons.push(condition); // โรคประจำตัวทั่วไป
+                            reasons.push("อายุครรภ์เหมาะสม");
+                        }
+                    } else {
+                        if (!reasons.includes(`มีโรคประจำตัว: ${condition}`)) {
+                            reasons.push(`มีโรคประจำตัว: ${condition}`);
                         }
                     }
                 }
+            }
+
+            // จบลูปโรคแล้ว ค่อยเอาโดสสูงสุดกลับไปใส่ให้วัคซีน
+            if (isAllowed && !isBlocked) {
+                vac.rule_dose = maxDose;
+                vac.rule_freq = bestFreq;
+                requiredDoses = maxDose || requiredDoses;
             }
 
             // --- D. เช็คช่วงอายุ (ถ้ายังไม่ถูกตัดสินด้วยโรค) ---

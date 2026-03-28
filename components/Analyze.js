@@ -1,6 +1,6 @@
 "use client";
 import { useState, useEffect, useMemo } from 'react';
-import { useRouter } from 'next/navigation'; // สำหรับ Next.js App Router
+import { useRouter } from 'next/navigation'; 
 import { Container, Card, Row, Col, Form, Collapse, Badge } from 'react-bootstrap';
 import { CheckCircleFill, XCircleFill, ChevronDown, ChevronUp, InfoCircle } from 'react-bootstrap-icons';
 
@@ -16,15 +16,12 @@ const STATUS_PRIORITY = {
 export default function AnalysisResult() {
     const router = useRouter();
 
-    // State เก็บข้อมูลที่โหลดมาจาก API
     const [allowedVaccines, setAllowedVaccines] = useState([]);
     const [notAllowedVaccines, setNotAllowedVaccines] = useState([]);
 
-    // State จัดการ UI
-    const [selectedVaccines, setSelectedVaccines] = useState([]); // เก็บ ID วัคซีนที่ผู้ใช้ติ๊กเลือก
-    const [expandedId, setExpandedId] = useState(null); // ควบคุมการเปิด/ปิด ดูผลข้างเคียง
+    const [selectedVaccines, setSelectedVaccines] = useState([]); 
+    const [expandedId, setExpandedId] = useState(null); 
 
-    // ฟังก์ชันกำหนดสี Badge ตามสถานะ
     const getStatusBadgeStyle = (status) => {
         switch (status) {
             case 'Recommended':
@@ -44,7 +41,6 @@ export default function AnalysisResult() {
         }
     };
 
-    // โหลดข้อมูลและวิเคราะห์เมื่อเปิดหน้า
     useEffect(() => {
         const fetchAnalysis = async () => {
             try {
@@ -57,9 +53,27 @@ export default function AnalysisResult() {
 
                 const rawData = JSON.parse(savedData);
 
-                const selectedDiseases = Object.values(rawData.disease).filter(
-                    (val) => val !== "" && val !== "ไม่มีโรคประจำตัว"
-                );
+                // ✨ แก้ไขจุดนี้: ปั้นข้อมูลโรคใหม่ให้ตรงกับฐานข้อมูลเป๊ะๆ
+                const selectedDiseases = [];
+                const d = rawData.disease;
+
+                if (d.heart_disease) selectedDiseases.push(d.heart_disease);
+                if (d.chronic_liver) selectedDiseases.push(d.chronic_liver);
+                if (d.asplenia) selectedDiseases.push(d.asplenia);
+                if (d.cd4) selectedDiseases.push(d.cd4);
+                
+                // สังเกตว่าใน DB คุณพิมพ์ Immunocom เฉยๆ เราเลยบังคับให้ตรงกัน
+                if (d.immunocon) selectedDiseases.push("Immunocom"); 
+                if (d.post_tramised) selectedDiseases.push(d.post_tramised);
+
+                // ✨ ประกอบร่างโรคไต
+                if (d.chronic_kidney) {
+                    selectedDiseases.push(`Chronic kidney disease ระยะที่ ${d.kidney_stage}`);
+                }
+
+                if (d.disease_selected && d.disease_selected !== "ไม่มีโรคประจำตัว") {
+                    selectedDiseases.push(d.disease_selected);
+                }
 
                 let is_pregnant = false;
                 let gestational_weeks = null;
@@ -105,7 +119,7 @@ export default function AnalysisResult() {
                     is_pregnant: is_pregnant,
                     gestational_weeks: gestational_weeks,
                     is_med_personnel: rawData.basic.medical === "เป็น",
-                    diseases: selectedDiseases,
+                    diseases: selectedDiseases, // ส่งตัวที่เราปั้นใหม่ไปแทน
                     allergies: allergiesObj,
                     history: history,
                     wanted_vaccines: wantedVaccines
@@ -142,7 +156,6 @@ export default function AnalysisResult() {
         });
     }, [allowedVaccines]);
 
-    // ฟังก์ชันจัดการ UI
     const toggleExpand = (id) => {
         setExpandedId(expandedId === id ? null : id);
     };
@@ -155,20 +168,16 @@ export default function AnalysisResult() {
         }
     };
 
-    // ทำหน้าที่แพ็คข้อมูลส่งไปให้หน้า 4 ทันทีที่มีการติ๊กเลือก
     useEffect(() => {
-        // ดึงข้อมูลวัคซีนแบบ "เต็มก้อน" จาก ID ที่ผู้ใช้ติ๊กไว้
         const fullSelectedVaccinesData = allowedVaccines.filter(vac =>
             selectedVaccines.includes(vac.id)
         );
-        // จับยัดลง localStorage ด้วยชื่อคีย์ 'selectedVaccinesForDetails'
         localStorage.setItem("selectedVaccinesForDetails", JSON.stringify(fullSelectedVaccinesData));
     }, [selectedVaccines, allowedVaccines]);
 
 
     return (
         <Container className="py-5">
-
             {/* ==============================================
                 ส่วนที่ 1: วัคซีนที่ฉีดได้ (สีเขียว)
             ============================================== */}
@@ -194,7 +203,6 @@ export default function AnalysisResult() {
                                         />
                                     </Col>
                                     <Col xs="auto" className="d-none d-sm-block">
-                                        {/* กล่องใส่รูป */}
                                         <div style={{
                                             width: '100px', height: '100px',
                                             backgroundColor: '#e9ecef', borderRadius: '8px',
@@ -217,7 +225,6 @@ export default function AnalysisResult() {
                                             <span className="text-muted">ชนิดวัคซีน :</span> {vac.vaccine_type}
                                         </p>
 
-                                        {/* รายละเอียดการบริหารวัคซีน */}
                                         <div className="bg-light p-3 rounded-3 mb-3">
                                             <p className="fw-bold small mb-2"><InfoCircle className="me-1" /> การบริหารวัคซีน</p>
                                             <Row className="small text-center text-md-start">
@@ -239,13 +246,11 @@ export default function AnalysisResult() {
                                         <div className="mt-3">
                                             {(vac.reason || vac.matchStatus) && (
                                                 <div className="d-flex justify-content-between align-items-center mb-1">
-                                                    {/* ฝั่งซ้าย: ไอคอนและข้อความหัวข้อ */}
                                                     <p className="small text-success fw-bold mb-0 d-flex align-items-center">
                                                         <CheckCircleFill className="me-2" size={14} />
                                                         เข้าเกณฑ์แนะนำสำหรับ :
                                                     </p>
 
-                                                    {/* ฝั่งขวา: Badge สถานะ */}
                                                     {vac.matchStatus && (
                                                         <span
                                                             className="px-3 py-1 rounded-pill shadow-sm"
@@ -262,7 +267,6 @@ export default function AnalysisResult() {
                                                 </div>
                                             )}
 
-                                            {/* รายการเหตุผลแบบจุด (Bullet points) */}
                                             {vac.reason && (
                                                 <ul className="mb-0 ps-4">
                                                     {vac.reason.split('|').map((text, index) => (
@@ -274,8 +278,6 @@ export default function AnalysisResult() {
                                             )}
                                         </div>
 
-
-                                        {/* ดูผลข้างเคียง Toggle */}
                                         <div
                                             className="text-primary small fw-bold user-select-none mt-2"
                                             style={{ cursor: 'pointer', display: 'inline-block' }}
@@ -337,7 +339,6 @@ export default function AnalysisResult() {
                                         </Badge>
                                     </div>
                                 </div>
-                                {/* แถวเหตุผล */}
                                 {vac.reason && (
                                     <div className="mt-3 w-100">
                                         <p className="text-danger small mb-1 fw-bold">เหตุผล :</p>

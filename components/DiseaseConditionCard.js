@@ -13,6 +13,7 @@ function DiseaseCondition({ index, data, onChange, onRemove }) {
     "Asplenia",
     "Immunocompromised",
     "Pregnancy",
+    "Lactation",
     "Traveler"
   ];
 

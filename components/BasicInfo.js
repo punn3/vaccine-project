@@ -349,11 +349,11 @@ function BasicInfo() {
                     value={formData.disease.kidney_stage}
                     onChange={(e) => handleChange("disease", e)}
                   >
-                    <option value="state1">ระยะที่ 1</option>
-                    <option value="state2">ระยะที่ 2</option>
-                    <option value="state3">ระยะที่ 3</option>
-                    <option value="state4">ระยะที่ 4</option>
-                    <option value="state5">ระยะที่ 5</option>
+                    <option value="1">ระยะที่ 1</option>
+                    <option value="2">ระยะที่ 2</option>
+                    <option value="3">ระยะที่ 3</option>
+                    <option value="4">ระยะที่ 4</option>
+                    <option value="5">ระยะที่ 5</option>
                   </select>
                 </Form>
               </Col>
@@ -617,7 +617,7 @@ function BasicInfo() {
                 <div className="border rounded p-3 my-4">
                   <Form.Label className="fw-bold">ยาและวัคซีนที่แพ้ <span className="text-danger">*</span></Form.Label>
                   <Row>
-                    {["Neomycin", "Steptomycin", "Polymyxin B"].map((item) => (
+                    {["Neomycin", "Streptomycin", "Polymyxin B"].map((item) => (
                       <Col md={4} key={item}>
                         <Form.Check
                           label={item}

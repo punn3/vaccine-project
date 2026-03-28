@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react";
 import { Form, Button, Container } from "react-bootstrap";
-import { PencilSquare, Trash, Plus } from "react-bootstrap-icons";
+import { PencilSquare, Trash, Plus, CardImage } from "react-bootstrap-icons";
 import AddVaccine from "./AddVaccine";
 import EditVaccine from "./EditVaccine";
+import SearchBar from "./SearchBar";
 
 //  Component สำหรับวาดไอคอนลูกศร
 const SortIcon = ({ active, direction }) => {
@@ -172,16 +173,18 @@ function Admin() {
 
             {view === "list" && (
                 <Container className="mt-5">
-                    {/* ปุ่มเพิ่มวัคซีน และ ช่องค้นหา จัดให้อยู่บรรทัดเดียวกันเพื่อความสวยงาม */}
-                    <div className="d-flex justify-content-end align-items-end mb-4">
+                    <div className="d-flex justify-content-between align-items-center mb-4">
                         <Button
                             variant="primary"
-                            className="d-flex align-items-center px-4 rounded-3 mb-3"
-                            style={{ backgroundColor: "#4a7fc1", border: "none" }}
+                            className="d-flex align-items-center px-4 rounded-3"
+                            style={{ backgroundColor: "#4a7fc1", border: "none", height: "100%", whiteSpace: "nowrap"}}
                             onClick={() => setView("add")}
                         >
                             <Plus className="me-2" size={20} /> เพิ่มวัคซีน
                         </Button>
+                        <div style={{ flex: 1, maxWidth: "600px" }}>
+                            <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                        </div>
                     </div>
 
                     <div className="shadow-sm rounded table-responsive">
@@ -262,29 +265,48 @@ function Admin() {
                                 ) : (
                                     sortedVaccines.map((item) => (
                                         <tr key={item.id}>
+                                            {/* ✨ แก้ไขส่วนแสดงรูปภาพตรงนี้ ✨ */}
                                             <td>
-                                                {item.image_url ? (
-                                                    <img
-                                                        src={item.image_url}
-                                                        alt="ไม่มีรูป"
-                                                        style={{
-                                                            width: "100px",
-                                                            height: "75px",
-                                                            objectFit: "cover",
-                                                            borderRadius: "4px",
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        style={{
-                                                            width: "100px",
-                                                            height: "75px",
-                                                            backgroundColor: "#dee2e6",
-                                                            borderRadius: "4px",
-                                                            margin: "0 auto",
-                                                        }}
-                                                    ></div>
-                                                )}
+                                                <div style={{ width: "100px", height: "75px", margin: "0 auto" }}>
+                                                    {item.image_url ? (
+                                                        <>
+                                                            <img
+                                                                src={item.image_url}
+                                                                alt={item.name_th}
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    objectFit: "cover",
+                                                                    borderRadius: "4px",
+                                                                }}
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none'; // ซ่อนรูปพัง
+                                                                    e.target.nextSibling.style.display = 'flex'; // โชว์กล่องไอคอน
+                                                                }}
+                                                            />
+                                                            <div
+                                                                className="bg-light text-secondary flex-wrap align-items-center justify-content-center rounded"
+                                                                style={{ display: 'none', width: "100%", height: "100%", border: "1px solid #dee2e6", gap: "5px" }}
+                                                            >
+                                                                <CardImage size={20} />
+                                                            <span style={{ fontSize: "11px", marginTop: "2px", marginLeft: "6px" }}>ไม่มีรูปภาพ</span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div
+                                                            className="bg-light text-secondary d-flex flex-wrap align-items-center justify-content-center rounded"
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                border: "1px solid #dee2e6",
+                                                                gap: "5px"
+                                                            }}
+                                                        >
+                                                            <CardImage size={20} />
+                                                            <span style={{ fontSize: "11px", marginTop: "2px", marginLeft: "6px" }}>ไม่มีรูปภาพ</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="text-start">
                                                 <div className="fw-bold">{item.name_th}</div>

@@ -39,16 +39,19 @@ function AddVaccine({ onBack }) {
     const [ageConditions, setAgeConditions] = useState([
         { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
     ]);
+    
+    // เปลี่ยน selectedDisease เป็น selectedDiseases (Array) ให้เลือกได้หลายโรค
     const [diseaseConditions, setDiseaseConditions] = useState([
         {
-            selectedDisease: "",
+            selectedDiseases: [], // <--- เปลี่ยนตรงนี้เป็น Array
             kidneyStage: "",
             dose: "",
             frequency: "",
-            recommendation: "",
+            status: "", // ปรับให้ตรงกับ EditVaccine (อาจจะเป็น recommendation หรือ status ขึ้นอยู่กับ Component ลูก)
             detail: "",
         },
     ]);
+
     const [allergies, setAllergies] = useState({
         egg: false,
         milk: false,
@@ -59,10 +62,7 @@ function AddVaccine({ onBack }) {
         polymyxinB: false,
     });
 
-    const [contraindicatedConditions, setContraindicatedConditions] = useState(
-        [],
-    );
-
+    const [contraindicatedConditions, setContraindicatedConditions] = useState([]);
     const [allVaccinesList, setAllVaccinesList] = useState([]);
 
     useEffect(() => {
@@ -83,6 +83,7 @@ function AddVaccine({ onBack }) {
         setFormData({ ...formData, [field]: e.target.value });
     };
 
+    // ✨ แก้ไข 2: เพิ่มการประกอบร่างโรคไตใน handleSave
     const handleSave = async () => {
         if (!formData.name_th) {
             alert("กรุณากรอกชื่อวัคซีน");
@@ -104,10 +105,28 @@ function AddVaccine({ onBack }) {
                 finalImageUrl = uploadJson.imageUrl;
             }
 
+            // ✨ ประกอบร่างโรคไตก่อนส่งไป API
+            const processedDiseaseConditions = diseaseConditions.map(condition => {
+                const updatedDiseases = [...(condition.selectedDiseases || [])];
+
+                // หาว่ามีการเลือกโรคไตไว้หรือไม่
+                const kidneyIndex = updatedDiseases.indexOf("Chronic kidney disease");
+
+                // ถ้าเลือกโรคไตไว้ และระบุระยะด้วย ให้ต่อท้ายด้วยระยะ
+                if (kidneyIndex !== -1 && condition.kidneyStage) {
+                    updatedDiseases[kidneyIndex] = `Chronic kidney disease ระยะที่ ${condition.kidneyStage}`;
+                }
+
+                return {
+                    ...condition,
+                    selectedDiseases: updatedDiseases // ใช้ Array โรคที่แปลงแล้ว
+                };
+            });
+
             const payload = {
                 ...formData,
                 age_conditions: ageConditions,
-                disease_conditions: diseaseConditions,
+                disease_conditions: processedDiseaseConditions, // ✨ ส่งตัวที่ประมวลผลแล้วไป
                 contraindicated_conditions: contraindicatedConditions,
                 allergies: allergies,
                 image_url: finalImageUrl,
@@ -162,15 +181,16 @@ function AddVaccine({ onBack }) {
         setAgeConditions(n);
     };
 
+    // ✨ แก้ไข 3: เปลี่ยนค่าเริ่มต้นตอนกด "เพิ่มเงื่อนไขโรคประจำตัว" ให้เป็น Array
     const addDiseaseCondition = () =>
         setDiseaseConditions([
             ...diseaseConditions,
             {
-                selectedDisease: "",
+                selectedDiseases: [], // <--- ตรงนี้เป็น Array
                 kidneyStage: "",
                 dose: "",
                 frequency: "",
-                recommendation: "",
+                status: "",
                 detail: "",
             },
         ]);
@@ -221,17 +241,18 @@ function AddVaccine({ onBack }) {
             setAgeConditions([
                 { minAge: "", maxAge: "", dose: "", frequency: "", detail: "" },
             ]);
+            // ✨ แก้ไข 4: ตอนล้างข้อมูลก็ต้องรีเซ็ตให้เป็น Array
             setDiseaseConditions([
                 {
-                    selectedDisease: "",
+                    selectedDiseases: [],
                     kidneyStage: "",
                     dose: "",
                     frequency: "",
-                    recommendation: "",
+                    status: "",
                     detail: "",
                 },
             ]);
-            setContraindicatedConditions([]); // 
+            setContraindicatedConditions([]); 
             setAllergies({
                 egg: false,
                 milk: false,
@@ -391,13 +412,13 @@ function AddVaccine({ onBack }) {
                             />
                             <Form.Group className="mt-2">
                                 <Form.Label className="small fw-bold">
-                                    คำแนะนำเพิ่มเติมสำหรับช่วงอายุนี้
+                                    คำแนะนำเพิ่มเติม
                                 </Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={2}
                                     placeholder="ระบุคำแนะนำเพิ่มเติม"
-                                    value={item.detail}
+                                    value={item.detail || ""}
                                     onChange={(e) =>
                                         handleConditionChange(index, "detail", e.target.value)
                                     }
@@ -435,13 +456,13 @@ function AddVaccine({ onBack }) {
                             />
                             <Form.Group className="mt-2">
                                 <Form.Label className="small fw-bold">
-                                    คำแนะนำเพิ่มเติมสำหรับกลุ่มโรคนี้
+                                    คำแนะนำเพิ่มเติม
                                 </Form.Label>
                                 <Form.Control
                                     as="textarea"
                                     rows={2}
                                     placeholder="ระบุคำแนะนำเพิ่มเติม"
-                                    value={item.detail}
+                                    value={item.detail || ""}
                                     onChange={(e) =>
                                         handleDiseaseChange(index, "detail", e.target.value)
                                     }
@@ -473,7 +494,7 @@ function AddVaccine({ onBack }) {
                             data={item}
                             onChange={handleContraindicatedChange}
                             onRemove={removeContraindicated}
-                            vaccineList={allVaccinesList} // โยนตัวเลือกไปทำ Dropdown
+                            vaccineList={allVaccinesList} 
                         />
                     ))}
                     <Button

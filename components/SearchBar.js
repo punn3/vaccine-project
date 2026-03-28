@@ -3,7 +3,7 @@ import { Form, Button } from "react-bootstrap";
 function SearchBar({ searchTerm, onSearchChange }) {
     return (
         <Form 
-            className="d-flex justify-content-end mb-4" 
+            className="d-flex justify-content-end" 
             onSubmit={(e) => e.preventDefault()}
         >
             <Form.Control

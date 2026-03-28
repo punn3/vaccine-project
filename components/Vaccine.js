@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Form, Button, Container } from "react-bootstrap";
+import { CardImage } from "react-bootstrap-icons";
 import AddVaccine from "./AddVaccine";
 import SearchBar from "./SearchBar";
 
@@ -45,7 +46,7 @@ const CheckIcon = () => (
     </svg>
 );
 
-// Component ไอคอนไม่มีจำหน่าย (
+// Component ไอคอนไม่มีจำหน่าย
 const MinusIcon = () => (
     <svg width="20" height="20" viewBox="0 0 24 24" className="me-2">
         {/* พื้นหลังวงกลมสีเทาอ่อน */}
@@ -151,7 +152,9 @@ function Vaccines() {
             {view === "add" && <AddVaccine onBack={() => setView("list")} />}
             {view === "list" && (
                 <Container className="mt-5">
-                    <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                    <div className="mb-4">
+                        <SearchBar searchTerm={searchTerm} onSearchChange={setSearchTerm} />
+                    </div>
 
                     <div className="shadow-sm rounded table-responsive">
                         <table
@@ -232,28 +235,45 @@ function Vaccines() {
                                     sortedVaccines.map((item) => (
                                         <tr key={item.id}>
                                             <td>
-                                                {item.image_url ? (
-                                                    <img
-                                                        src={item.image_url}
-                                                        alt="ไม่มีรูป"
-                                                        style={{
-                                                            width: "120px",
-                                                            height: "90px",
-                                                            objectFit: "cover",
-                                                            borderRadius: "4px",
-                                                        }}
-                                                    />
-                                                ) : (
-                                                    <div
-                                                        style={{
-                                                            width: "120px",
-                                                            height: "90px",
-                                                            backgroundColor: "#dee2e6",
-                                                            borderRadius: "4px",
-                                                            margin: "0 auto",
-                                                        }}
-                                                    ></div>
-                                                )}
+                                                <div style={{ width: "120px", height: "90px", margin: "0 auto" }}>
+                                                    {item.image_url ? (
+                                                        <>
+                                                            <img
+                                                                src={item.image_url}
+                                                                alt={item.name_th}
+                                                                style={{
+                                                                    width: "100%",
+                                                                    height: "100%",
+                                                                    objectFit: "cover",
+                                                                    borderRadius: "4px",
+                                                                }}
+                                                                onError={(e) => {
+                                                                    e.target.style.display = 'none'; // ซ่อนรูปพัง
+                                                                    e.target.nextSibling.style.display = 'flex'; // โชว์กล่องไอคอน
+                                                                }}
+                                                            />
+                                                            <div
+                                                                className="bg-light text-secondary justify-content-center align-items-center rounded"
+                                                                style={{ display: 'none', width: "100%", height: "100%", border: "1px solid #dee2e6" }}
+                                                            >
+                                                                <CardImage size={20} />
+                                                                <span style={{ fontSize: "11px", marginTop: "2px", marginLeft: "6px" }}>ไม่มีรูปภาพ</span>
+                                                            </div>
+                                                        </>
+                                                    ) : (
+                                                        <div
+                                                            className="bg-light text-secondary d-flex justify-content-center align-items-center rounded"
+                                                            style={{
+                                                                width: "100%",
+                                                                height: "100%",
+                                                                border: "1px solid #dee2e6",
+                                                            }}
+                                                        >
+                                                            <CardImage size={20} />
+                                                            <span style={{ fontSize: "11px", marginTop: "2px", marginLeft: "6px" }}>ไม่มีรูปภาพ</span>
+                                                        </div>
+                                                    )}
+                                                </div>
                                             </td>
                                             <td className="text-start">
                                                 <div className="fw-bold">{item.name_th}</div>
