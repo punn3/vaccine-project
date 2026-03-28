@@ -3,7 +3,6 @@ import { Form, Button, Container } from "react-bootstrap";
 import { PencilSquare, Trash, Plus } from "react-bootstrap-icons";
 import AddVaccine from "./AddVaccine";
 import EditVaccine from "./EditVaccine";
-import SearchBar from "./SearchBar"; // อย่าลืม import SearchBar กลับมานะครับ
 
 //  Component สำหรับวาดไอคอนลูกศร
 const SortIcon = ({ active, direction }) => {
