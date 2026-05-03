@@ -77,12 +77,16 @@ export default function AnalysisResult() {
 
                 let is_pregnant = false;
                 let gestational_weeks = null;
+                let is_breastfeeding = false; //รับค่าให้นมบุตร
 
                 if (rawData.basic.pregnant === "ตั้งครรภ์") {
                     is_pregnant = true;
                     if (rawData.basic.gestational_weeks) {
                         gestational_weeks = parseInt(rawData.basic.gestational_weeks);
                     }
+                }
+                else if (rawData.basic.pregnant === "ให้นมบุตร") {
+                    is_breastfeeding = true;
                 }
 
                 const allergiesObj = {};
@@ -118,6 +122,7 @@ export default function AnalysisResult() {
                     age: parseInt(rawData.basic.age) || 0,
                     is_pregnant: is_pregnant,
                     gestational_weeks: gestational_weeks,
+                    is_breastfeeding: is_breastfeeding,
                     is_med_personnel: rawData.basic.medical === "เป็น",
                     diseases: selectedDiseases, // ส่งตัวที่เราปั้นใหม่ไปแทน
                     allergies: allergiesObj,

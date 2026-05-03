@@ -71,6 +71,11 @@ export async function POST(request) {
                 reasons.push("ห้ามฉีดวัคซีนชนิดเชื้อเป็น (Live Attenuated) ในหญิงตั้งครรภ์");
             }
 
+            if (user.is_breastfeeding && vac.name_th === "วัคซีนไข้เลือดออก") {
+                isBlocked = true;
+                reasons.push("หญิงที่กำลังให้นมบุตร ไม่ควรรับวัคซีนไข้เลือดออก");
+            }
+
             // --- C. เช็คโรคประจำตัว / การตั้งครรภ์ ---
             const vacDiseaseRules = diseaseRules.filter(r => r.vaccine_id === vac.id);
             
